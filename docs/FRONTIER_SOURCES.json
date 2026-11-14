@@ -915,5 +915,68 @@
     "url": "https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md",
     "kind_and_usage": "Official docs: draft-model and n-gram speculative decoding implementations and tuning parameters",
     "audit": "current docs checked 2026-11-14"
+  },
+  {
+    "id": "R135",
+    "title": "Microsoft VibeVoice official implementation",
+    "url": "https://github.com/microsoft/VibeVoice",
+    "kind_and_usage": "Official code and model family: long-form ASR, speaker/timestamp structure, streaming ASR and real-time TTS variants",
+    "audit": "Official repository README checked 2026-11-14; each checkpoint and weight license must be reviewed separately"
+  },
+  {
+    "id": "R137",
+    "title": "AMA-Bench: Evaluating Long-Horizon Memory for Agentic Applications",
+    "url": "https://proceedings.mlr.press/v306/zhao26bs.html",
+    "kind_and_usage": "ICML 2026 benchmark: agent-environment trajectories, causal memory and tool-augmented retrieval",
+    "audit": "Proceedings of Machine Learning Research paper checked 2026-11-14; reported 57.22% and +11.16 points are author results, not STAR results"
+  },
+  {
+    "id": "R138",
+    "title": "MESA: Task-Adaptive Multi-Structure Evidence Selection for Long-Horizon Agent Memory",
+    "url": "https://arxiv.org/abs/2608.10108",
+    "kind_and_usage": "Preprint: query-adaptive fusion of summary, temporal, graph, vector and raw episodic memory views",
+    "audit": "arXiv abstract and reported AMA-Bench results checked 2026-11-14; reported gains require independent replication"
+  },
+  {
+    "id": "R139",
+    "title": "Learning to Remember: End-to-End Training of Memory Agents for Long-Context Reasoning",
+    "url": "https://aclanthology.org/2026.emnlp-main.1299/",
+    "kind_and_usage": "EMNLP 2026 paper: Unified Memory Agent, proactive memory-bank CRUD, Task-Stratified GRPO and Ledger-QA",
+    "audit": "ACL Anthology metadata and abstract checked 2026-11-14"
+  },
+  {
+    "id": "R140",
+    "title": "Unified Memory Agent official implementation",
+    "url": "https://github.com/ictnlp/unified-memory-agent",
+    "kind_and_usage": "Official implementation and evaluation framework for UMA and Ledger-QA",
+    "audit": "Repository README and setup/evaluation requirements checked 2026-11-14; training stack is not proposed as a desktop runtime dependency"
+  },
+  {
+    "id": "R141",
+    "title": "Continual Harness: An Efficient Self-Improving Agent on ARC-AGI-3",
+    "url": "https://continual-harness.github.io/",
+    "kind_and_usage": "Research project: reset-free refinement of prompt, memory, executable skills and subagents for unknown interactive games",
+    "audit": "Project report and evaluation methodology checked 2026-11-14; results depend on the evaluated frontier model and benchmark protocol"
+  },
+  {
+    "id": "R142",
+    "title": "Continual Harness ARC-AGI-3 official implementation",
+    "url": "https://github.com/feng-rrRay/Continual-Harness-ARC-AGI-3",
+    "kind_and_usage": "Official research code: persistent harness state, sandboxed skills, subagents, trajectory artifacts and ARC-AGI-3 evaluation",
+    "audit": "Repository README and layout checked 2026-11-14; sandbox and API costs must be reviewed before any adaptation"
+  },
+  {
+    "id": "R143",
+    "title": "SkillHorizon: Constructing Long-Horizon Agent Tasks through Skill Composition",
+    "url": "https://arxiv.org/abs/2610.14966",
+    "kind_and_usage": "Preprint: executable long-horizon tasks built from dependent reusable skills, shared state and whole-workflow evaluation",
+    "audit": "arXiv abstract and reported 1,050-task evaluation checked 2026-11-14; use as an evaluation design reference"
+  },
+  {
+    "id": "R144",
+    "title": "SkillHorizon official implementation",
+    "url": "https://github.com/KnowComp/SkillHorizon",
+    "kind_and_usage": "Official benchmark code for compositional long-horizon workflows and programmatic completion checks",
+    "audit": "Official repository identified from paper; inspect license and environment requirements before reuse"
   }
 ]
