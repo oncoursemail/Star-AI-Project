@@ -173,6 +173,7 @@ class GameControlGate:
         self._seen_actions: set[str] = set()
         self._issued_permits: dict[str, ActionPermit] = {}
         self._held_controls: set[str] = set()
+        self._held_until: float | None = None
 
     @property
     def state(self) -> GateState:
@@ -209,6 +210,7 @@ class GameControlGate:
             self._seen_actions.clear()
             self._issued_permits.clear()
             self._held_controls.clear()
+            self._held_until = None
             return GateResult(True, "armed")
 
     def observe(
@@ -299,6 +301,11 @@ class GameControlGate:
                 self._action_times.popleft()
             if len(self._action_times) >= self.config.max_actions_per_second:
                 return GateResult(False, "action_rate_limited")
+            for permit_id, issued in tuple(self._issued_permits.items()):
+                if now > issued.expires_at:
+                    self._issued_permits.pop(permit_id, None)
+            if len(self._issued_permits) >= self.config.dedupe_capacity:
+                return GateResult(False, "permit_capacity")
             assert self._target_fingerprint is not None
             assert self._session_expires_at is not None
             hold_until = min(now + action.duration_ms / 1000.0, self._session_expires_at)
@@ -306,8 +313,6 @@ class GameControlGate:
                 now + self.config.max_action_age_ms / 1000.0,
                 self._session_expires_at,
             )
-            released = tuple(sorted(self._held_controls.difference(action.controls)))
-            self._held_controls = set(action.controls)
             self._action_times.append(float(now))
             self._remember_action(action.action_id)
             permit = ActionPermit(
@@ -324,7 +329,7 @@ class GameControlGate:
                 expires_at=expires_at,
             )
             self._issued_permits[action.action_id] = permit
-            return GateResult(True, "authorized", permit=permit, release_controls=released)
+            return GateResult(True, "authorized", permit=permit)
 
     def consume(self, permit: ActionPermit, target: GameTarget, *, now: float) -> GateResult:
         """Consume an issued permit exactly once immediately before host execution."""
@@ -354,7 +359,22 @@ class GameControlGate:
                 self._issued_permits.pop(permit.action_id, None)
                 return GateResult(False, "permit_observation_stale")
             self._issued_permits.pop(permit.action_id, None)
-            return GateResult(True, "permit_consumed", permit=permit)
+            released = tuple(sorted(self._held_controls.difference(permit.controls)))
+            self._held_controls = set(permit.controls)
+            self._held_until = permit.hold_until if self._held_controls else None
+            return GateResult(True, "permit_consumed", permit=permit, release_controls=released)
+
+    def release_due(self, *, now: float) -> GateResult:
+        \"\"\"Return controls whose bounded hold duration has elapsed.\"\"\"
+        with self._lock:
+            if not _finite(now):
+                return GateResult(False, "invalid_clock")
+            if self._held_until is None or now < self._held_until:
+                return GateResult(True, "no_release_due")
+            released = tuple(sorted(self._held_controls))
+            self._held_controls.clear()
+            self._held_until = None
+            return GateResult(True, "action_duration_elapsed", release_controls=released)
 
     def stop(self, reason: str = "owner_stop") -> GateResult:
         """Revoke the session immediately and return every held control for release."""
@@ -378,6 +398,7 @@ class GameControlGate:
         self._seen_actions.clear()
         self._issued_permits.clear()
         self._held_controls.clear()
+        self._held_until = None
         return GateResult(False, reason, release_controls=released)
 
     def _remember_action(self, action_id: str) -> None:
