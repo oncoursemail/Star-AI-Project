@@ -140,6 +140,53 @@ def test_rate_limit_is_bounded_per_opaque_speaker_and_source():
         session.stop()
 
 
+
+def test_speaker_id_churn_cannot_evict_active_rate_limit_history():
+    clock_value = [10.0]
+    config = RoomHostConfig(
+        allowed_sources=frozenset({CueSource.AUDIO}),
+        rate_window_seconds=10.0,
+        max_events_per_source=10,
+        max_events_per_speaker=1,
+        max_speakers=1,
+    )
+    host, session, _events, _brain = make_host(config, clock=lambda: clock_value[0])
+    try:
+        first = host.submit(
+            make_cue("speaker-a-first", source=CueSource.AUDIO, speaker_id="speaker-a", now=10.0),
+            "First message",
+        )
+        assert first.action is RoomAction.RESPOND
+
+        churn = host.submit(
+            make_cue("speaker-b-churn", source=CueSource.AUDIO, speaker_id="speaker-b", now=10.0),
+            "New speaker",
+        )
+        assert churn.action is RoomAction.WAIT
+        assert churn.reason == "room_speaker_capacity"
+        assert host.stats.rejected_speaker_capacity == 1
+        assert len(host._speaker_times) == 1
+
+        repeat = host.submit(
+            make_cue("speaker-a-repeat", source=CueSource.AUDIO, speaker_id="speaker-a", now=10.0),
+            "Another message from the first speaker",
+        )
+        assert repeat.action is RoomAction.WAIT
+        assert repeat.reason == "room_rate_limited"
+
+        # Once the old rate window expires, its slot is reclaimed safely.
+        clock_value[0] = 21.0
+        recovered = host.submit(
+            make_cue("speaker-b-after-expiry", source=CueSource.AUDIO, speaker_id="speaker-b", now=21.0),
+            "New speaker after expiry",
+        )
+        assert recovered.reason != "room_speaker_capacity"
+        assert len(host._speaker_times) <= 1
+    finally:
+        host.close()
+        session.stop()
+
+
 def test_oversized_text_is_rejected_before_call_session():
     config = RoomHostConfig(
         allowed_sources=frozenset({CueSource.CHAT}),
