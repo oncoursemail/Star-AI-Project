@@ -807,3 +807,22 @@ synthetic PortAudio status flags and do not require a physical microphone or spe
 No audio samples, transcripts, device names, or viewer identifiers are included. Real
 hardware and OBS loopback tests remain necessary to establish actual underrun rates and
 client-heard latency.
+
+
+## 15. Speaker-rate history under ID churn (2026-11-14)
+
+The room host's per-speaker rate-limit table is bounded by `max_speakers`. It must not
+evict a speaker whose rate window is still active merely because a new opaque speaker ID
+arrives. Otherwise, a provider or malformed adapter that rotates IDs can erase active
+per-speaker history and bypass the intended per-speaker limit.
+
+The host now:
+- prunes expired speaker windows when capacity is reached;
+- reclaims only entries whose complete rate window has expired;
+- rejects a new speaker ID with `room_speaker_capacity` while all tracked slots remain active;
+- exposes a dedicated `rejected_speaker_capacity` counter;
+- preserves the existing source-wide rate limit as an independent aggregate guard.
+
+This is a bounded-ingress hardening change. Speaker IDs remain session-scoped pseudonyms,
+not real-world identities. The behavior is covered with a synthetic-clock regression test
+that proves ID churn cannot erase an active speaker's limit and that expired slots recover.
