@@ -29,7 +29,11 @@ def _finite(value: object) -> bool:
 
 @dataclass(frozen=True)
 class RoomHostConfig:
-    """Per-call source consent and conservative ingress limits."""
+    """Per-call source consent and conservative ingress limits.
+
+    ``max_speakers`` is a hard cap on tracked source/speaker rate windows. Active windows
+    are never evicted to admit a new opaque speaker ID; expired windows are reclaimed.
+    """
 
     allowed_sources: frozenset[CueSource]
     rate_window_seconds: float = 10.0
