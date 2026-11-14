@@ -310,11 +310,12 @@ class GameControlGate:
                 return GateResult(False, "permit_capacity")
             assert self._target_fingerprint is not None
             assert self._session_expires_at is not None
-            hold_until = min(now + action.duration_ms / 1000.0, self._session_expires_at)
             expires_at = min(
                 now + self.config.max_action_age_ms / 1000.0,
                 self._session_expires_at,
+                self._latest_captured_at + self.config.max_observation_age_ms / 1000.0,
             )
+            hold_until = min(now + action.duration_ms / 1000.0, expires_at)
             self._action_times.append(float(now))
             self._remember_action(action.action_id)
             permit = ActionPermit(
