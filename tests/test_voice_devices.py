@@ -1,7 +1,6 @@
 """PortAudio callback health and freshness policy without physical audio hardware."""
 import builtins
 import queue
-import sys
 import threading
 from collections import deque
 from types import SimpleNamespace
@@ -101,63 +100,59 @@ def test_callbacks_tolerate_missing_portaudio_status():
     assert output == b"\x00" * 4
     assert speaker.diagnostics()["output_underflows"] == 0
 
-def test_speaker_preloads_numpy_before_realtime_callback(monkeypatch):
-    class FakeBlock:
-        def astype(self, _dtype):
-            return self
-
-        def __mul__(self, _other):
-            return self
-
-    class FakeNumpy:
-        float32 = object()
-
-        @staticmethod
-        def frombuffer(_chunk, dtype):
-            assert dtype == "<i2"
-            return FakeBlock()
-
-        @staticmethod
-        def mean(_block):
-            return 1.0
-
-        @staticmethod
-        def sqrt(value):
-            return value ** 0.5
+def test_speaker_callback_does_not_run_rms_inline_or_import_numpy(monkeypatch):
+    entered = threading.Event()
+    release = threading.Event()
+    returned = threading.Event()
 
     class FakeStream:
+        def start(self):
+            pass
+
         def stop(self):
             pass
 
         def close(self):
             pass
 
-    class FakeSoundDevice:
-        def RawOutputStream(self, **kwargs):
-            self.callback = kwargs["callback"]
-            return FakeStream()
-
-    fake_numpy = FakeNumpy()
-    fake_sd = FakeSoundDevice()
-    monkeypatch.setitem(sys.modules, "numpy", fake_numpy)
+    fake_sd = SimpleNamespace(RawOutputStream=lambda **kwargs: FakeStream())
     monkeypatch.setattr("star.voice.devices._sounddevice", lambda: fake_sd)
-
-    speaker = SoundSpeaker(sample_rate=24000)
-    assert speaker._np is fake_numpy
-    speaker.play(b"\x01\x00" * 2, 24000)
 
     original_import = builtins.__import__
 
-    def reject_callback_import(name, *args, **kwargs):
+    def reject_numpy(name, *args, **kwargs):
         if name == "numpy":
-            raise AssertionError("NumPy must be loaded before the PortAudio callback")
+            raise AssertionError("speaker callback path must not import NumPy")
         return original_import(name, *args, **kwargs)
 
-    monkeypatch.setattr(builtins, "__import__", reject_callback_import)
-    output = bytearray(4)
-    speaker._callback(output, 2, None, None)
+    monkeypatch.setattr(builtins, "__import__", reject_numpy)
 
-    assert output == b"\x01\x00" * 2
-    assert speaker.level() > 0.0
-    speaker.close()
+    def slow_meter(_pcm):
+        entered.set()
+        release.wait(2.0)
+        return 0.25
 
+    monkeypatch.setattr("star.voice.devices._pcm_rms", slow_meter)
+    speaker = SoundSpeaker(sample_rate=24000)
+    pcm = b"\\x01\\x00" * 8
+    try:
+        speaker.play(pcm, 24000)
+
+        output = bytearray(len(pcm))
+
+        def run_callback():
+            speaker._callback(output, len(pcm) // 2, None, None)
+            returned.set()
+
+        callback_thread = threading.Thread(target=run_callback, daemon=True)
+        callback_thread.start()
+        assert entered.wait(1.0), "meter worker did not receive the output sample"
+        assert returned.wait(0.2), "PortAudio callback waited for RMS metering"
+        assert bytes(output) == pcm
+        assert speaker.level() == 1.0  # pending meter data is unknown, never assumed silent
+        callback_thread.join(0.2)
+        assert not callback_thread.is_alive()
+    finally:
+        release.set()
+        speaker.close()
+    assert not speaker._level_worker.is_alive()
