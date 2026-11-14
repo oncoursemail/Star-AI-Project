@@ -310,6 +310,7 @@ class GameControlGate:
                 return GateResult(False, "permit_capacity")
             assert self._target_fingerprint is not None
             assert self._session_expires_at is not None
+            assert self._latest_captured_at is not None
             expires_at = min(
                 now + self.config.max_action_age_ms / 1000.0,
                 self._session_expires_at,
