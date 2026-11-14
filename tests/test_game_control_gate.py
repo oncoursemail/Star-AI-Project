@@ -349,3 +349,15 @@ def test_rearm_after_stop_starts_a_clean_session():
     next_target = make_target(session_id="session-2")
     assert gate.arm(next_target, now=20.0, expires_at=30.0).accepted
     assert gate.state is GateState.ARMED
+
+
+def test_permit_expiry_never_outlives_observation_freshness():
+    gate, target = armed_gate()
+    observation = make_observation(target, captured_at=10.0)
+    assert gate.observe(observation, target, now=10.01).accepted
+    action = make_action(observation, issued_at=10.20, duration_ms=200)
+    authorized = gate.authorize(action, target, now=10.20)
+    assert authorized.accepted
+    assert authorized.permit.expires_at <= 10.25
+    assert authorized.permit.hold_until <= authorized.permit.expires_at
+    assert gate.consume(authorized.permit, target, now=10.26).reason == "permit_expired"
