@@ -20,8 +20,8 @@ def make_microphone(maxsize=1):
 
 def test_microphone_reports_driver_status_and_keeps_newest_frame_on_overload():
     mic = make_microphone(maxsize=1)
-    mic._callback(b"\\x01\\x00", 1, None, SimpleNamespace(input_overflow=True, input_underflow=False))
-    mic._callback(b"\\x02\\x00", 1, None, SimpleNamespace(input_overflow=False, input_underflow=True))
+    mic._callback(b"\x01\x00", 1, None, SimpleNamespace(input_overflow=True, input_underflow=False))
+    mic._callback(b"\x02\x00", 1, None, SimpleNamespace(input_overflow=False, input_underflow=True))
 
     assert mic.diagnostics() == {
         "input_overflows": 1,
@@ -31,16 +31,16 @@ def test_microphone_reports_driver_status_and_keeps_newest_frame_on_overload():
         "queue_capacity_frames": 1,
         "queue_capacity_seconds": FRAME_SAMPLES / SAMPLE_RATE,
     }
-    assert mic._frames.get_nowait() == b"\\x02\\x00"
+    assert mic._frames.get_nowait() == b"\x02\x00"
 
 
 def test_microphone_overload_discards_oldest_and_preserves_newest_order():
     mic = make_microphone(maxsize=2)
-    mic._callback(b"\\x01\\x00", 1, None, None)
-    mic._callback(b"\\x02\\x00", 1, None, None)
-    mic._callback(b"\\x03\\x00", 1, None, None)
+    mic._callback(b"\x01\x00", 1, None, None)
+    mic._callback(b"\x02\x00", 1, None, None)
+    mic._callback(b"\x03\x00", 1, None, None)
 
-    assert [mic._frames.get_nowait(), mic._frames.get_nowait()] == [b"\\x02\\x00", b"\\x03\\x00"]
+    assert [mic._frames.get_nowait(), mic._frames.get_nowait()] == [b"\x02\x00", b"\x03\x00"]
     assert mic.diagnostics()["queue_drops"] == 1
 
 
@@ -68,7 +68,7 @@ def test_speaker_reports_portaudio_underflow_without_recording_audio():
         SimpleNamespace(output_underflow=True, output_overflow=True),
     )
 
-    assert output == b"\\x00" * 4
+    assert output == b"\x00" * 4
     diagnostics = speaker.diagnostics()
     assert diagnostics == {
         "output_underflows": 1,
@@ -82,7 +82,7 @@ def test_speaker_reports_portaudio_underflow_without_recording_audio():
 
 def test_callbacks_tolerate_missing_portaudio_status():
     mic = make_microphone(maxsize=1)
-    mic._callback(b"\\x00\\x00", 1, None, None)
+    mic._callback(b"\x00\x00", 1, None, None)
     assert mic.diagnostics()["input_overflows"] == 0
     assert mic.diagnostics()["queue_drops"] == 0
 
@@ -96,5 +96,5 @@ def test_callbacks_tolerate_missing_portaudio_status():
     speaker._levels = deque(maxlen=64)
     output = bytearray(4)
     speaker._callback(output, 2, None, None)
-    assert output == b"\\x00" * 4
+    assert output == b"\x00" * 4
     assert speaker.diagnostics()["output_underflows"] == 0
