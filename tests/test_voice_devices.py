@@ -134,7 +134,7 @@ def test_speaker_callback_does_not_run_rms_inline_or_import_numpy(monkeypatch):
 
     monkeypatch.setattr("star.voice.devices._pcm_rms", slow_meter)
     speaker = SoundSpeaker(sample_rate=24000)
-    pcm = b"\\x01\\x00" * 8
+    pcm = b"\x01\x00" * 8
     try:
         speaker.play(pcm, 24000)
 
