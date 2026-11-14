@@ -144,7 +144,7 @@ def test_speaker_preloads_numpy_before_realtime_callback(monkeypatch):
 
     speaker = SoundSpeaker(sample_rate=24000)
     assert speaker._np is fake_numpy
-    speaker.play(b"\\x01\\x00" * 2, 24000)
+    speaker.play(b"\x01\x00" * 2, 24000)
 
     original_import = builtins.__import__
 
@@ -157,7 +157,7 @@ def test_speaker_preloads_numpy_before_realtime_callback(monkeypatch):
     output = bytearray(4)
     speaker._callback(output, 2, None, None)
 
-    assert output == b"\\x01\\x00" * 2
+    assert output == b"\x01\x00" * 2
     assert speaker.level() > 0.0
     speaker.close()
 
