@@ -168,6 +168,9 @@ class GameControlGate:
         self._latest_frame_id: str | None = None
         self._latest_sequence: int | None = None
         self._latest_captured_at: float | None = None
+        # One action authorization per observed frame prevents several stale decisions
+        # from being queued against the same visual state.
+        self._authorized_observation_sequence: int | None = None
         self._action_times: deque[float] = deque()
         self._seen_action_order: deque[str] = deque()
         self._seen_actions: set[str] = set()
@@ -205,6 +208,7 @@ class GameControlGate:
             self._latest_frame_id = None
             self._latest_sequence = None
             self._latest_captured_at = None
+            self._authorized_observation_sequence = None
             self._action_times.clear()
             self._seen_action_order.clear()
             self._seen_actions.clear()
@@ -246,6 +250,7 @@ class GameControlGate:
             self._latest_frame_id = observation.frame_id
             self._latest_sequence = observation.sequence
             self._latest_captured_at = float(observation.captured_at)
+            self._authorized_observation_sequence = None
             return GateResult(True, "observation_accepted")
 
     def authorize(self, action: GameAction, target: GameTarget, *, now: float) -> GateResult:
@@ -285,6 +290,8 @@ class GameControlGate:
                 return GateResult(False, "future_action")
             if action_age_ms > self.config.max_action_age_ms:
                 return GateResult(False, "stale_action")
+            if self._authorized_observation_sequence == self._latest_sequence:
+                return GateResult(False, "observation_action_budget_exhausted")
             if action.duration_ms > self.config.max_action_duration_ms:
                 return GateResult(False, "action_duration_exceeded")
             if len(action.controls) > self.config.max_controls_per_action:
@@ -333,6 +340,7 @@ class GameControlGate:
                 expires_at=expires_at,
             )
             self._issued_permits[action.action_id] = permit
+            self._authorized_observation_sequence = self._latest_sequence
             return GateResult(True, "authorized", permit=permit)
 
     def consume(self, permit: ActionPermit, target: GameTarget, *, now: float) -> GateResult:
@@ -397,6 +405,7 @@ class GameControlGate:
         self._latest_frame_id = None
         self._latest_sequence = None
         self._latest_captured_at = None
+        self._authorized_observation_sequence = None
         self._action_times.clear()
         self._seen_action_order.clear()
         self._seen_actions.clear()
