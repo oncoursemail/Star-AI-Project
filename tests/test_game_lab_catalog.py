@@ -23,6 +23,9 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert sources["steelseries"].status == "pilot_in_pr"
     assert sources["obs"].status == "pilot_in_pr"
     assert "No general" in sources["outplayed"].warning
+    assert "not a blanket synthetic-input" in sources["microsoft-gameinput"].warning
+    assert "never an anti-cheat bypass" in sources["windows-sendinput"].warning
+    assert sources["gameworld"].status == "research_only"
 
 
 def test_search_category_and_bounded_results():
