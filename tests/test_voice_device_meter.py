@@ -60,8 +60,8 @@ def wait_for_meter(speaker, timeout: float = 1.0) -> bool:
 def test_pcm_rms_uses_native_pcm16_and_handles_empty_or_malformed_data():
     half_scale = struct.pack("=h", 16384) * 8
     assert devices._pcm_rms(half_scale) == pytest.approx(0.5)
-    assert devices._pcm_rms(b"\\x00\\x00" * 8) == 0.0
-    assert devices._pcm_rms(b"\\x01") == 0.0
+    assert devices._pcm_rms(b"\x00\x00" * 8) == 0.0
+    assert devices._pcm_rms(b"\x01") == 0.0
     assert devices._pcm_rms(b"") == 0.0
 
 
