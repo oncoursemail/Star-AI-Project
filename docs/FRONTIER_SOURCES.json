@@ -810,5 +810,110 @@
     "url": "https://create.roblox.com/docs/studio/mcp",
     "kind_and_usage": "Official integration contract: local Studio MCP server, stdio transport, script and DataModel inspection/editing and playtesting",
     "audit": "current Creator Hub documentation checked 2026-11-14; use least-privilege, explicit per-Studio routing"
+  },
+  {
+    "id": "R117",
+    "title": "Moonshine Voice official streaming speech toolkit and API",
+    "url": "https://github.com/moonshine-ai/moonshine-v2",
+    "kind_and_usage": "Official implementation: on-device streaming ASR, event callbacks, multi-stream sessions, optional speaker attribution and command recognition",
+    "audit": "README/API, Python streaming flow, event guarantees and platform support checked 2026-11-14"
+  },
+  {
+    "id": "R118",
+    "title": "Moonshine v2: Ergodic Streaming Encoder ASR for Latency-Critical Speech Applications",
+    "url": "https://arxiv.org/abs/2602.12241",
+    "kind_and_usage": "Research paper: bounded-latency sliding-window encoder for on-device streaming ASR",
+    "audit": "paper abstract and architecture motivation checked 2026-11-14"
+  },
+  {
+    "id": "R119",
+    "title": "Moonshine current streaming model matrix and license table",
+    "url": "https://github.com/moonshine-ai/moonshine/blob/main/docs/models/available-models.md",
+    "kind_and_usage": "Official model table: English Tiny/Small/Medium streaming sizes, WER methodology and language-specific license boundaries",
+    "audit": "current model matrix and license notes checked 2026-11-14"
+  },
+  {
+    "id": "R120",
+    "title": "VoXtream2.5 official full-stream TTS implementation",
+    "url": "https://github.com/herimor/voxtream",
+    "kind_and_usage": "Official code and benchmark: streaming text-to-audio, dynamic speaking rate, CPU GGUF path, VRAM and checkpoint notes",
+    "audit": "current README, Python API, model versions, hardware claims and data provenance checked 2026-11-14"
+  },
+  {
+    "id": "R121",
+    "title": "VoXtream2 project page",
+    "url": "https://herimor.github.io/voxtream2/",
+    "kind_and_usage": "Research project: full-stream TTS and dynamic speaking-rate control",
+    "audit": "project page checked 2026-11-14"
+  },
+  {
+    "id": "R122",
+    "title": "VoXtream2: Full-stream TTS with dynamic speaking rate control",
+    "url": "https://arxiv.org/abs/2603.13518",
+    "kind_and_usage": "Research paper: zero-shot full-stream speech synthesis and dynamic pace control",
+    "audit": "paper record checked 2026-11-14"
+  },
+  {
+    "id": "R123",
+    "title": "sherpa-onnx online transducer model catalog",
+    "url": "https://k2-fsa.github.io/sherpa/onnx/pretrained_models/online-transducer/index.html",
+    "kind_and_usage": "Official model catalog: local streaming Zipformer/transducer ASR options and real-time microphone examples",
+    "audit": "current online transducer catalog checked 2026-11-14"
+  },
+  {
+    "id": "R124",
+    "title": "Full-Duplex-Bench v3",
+    "url": "https://www.full-duplex.ai/benchmarks/fdb-v3",
+    "kind_and_usage": "Benchmark: real-time speech, disfluencies, chained tool calls, latency and turn-taking",
+    "audit": "benchmark scope, scenario count and metrics checked 2026-11-14"
+  },
+  {
+    "id": "R125",
+    "title": "Full-Duplex-Bench official code and data pipeline",
+    "url": "https://github.com/DanielLin94144/Full-Duplex-Bench",
+    "kind_and_usage": "Official implementation: full-duplex evaluation versions and v3 streaming/tool-use harness",
+    "audit": "repository README and v3 release notes checked 2026-11-14"
+  },
+  {
+    "id": "R126",
+    "title": "GameWorld multimodal game-agent benchmark",
+    "url": "https://gameworld-project.github.io/",
+    "kind_and_usage": "Benchmark project: 34 browser games, 170 tasks, state-verifiable success/progress and real-time track",
+    "audit": "project benchmark scope, evaluation method and real-time track checked 2026-11-14"
+  },
+  {
+    "id": "R127",
+    "title": "GameWorld: Towards Standardized and Verifiable Evaluation of Multimodal Game Agents",
+    "url": "https://arxiv.org/abs/2604.07429",
+    "kind_and_usage": "Research paper: standardized multimodal game-agent evaluation with state-based outcomes",
+    "audit": "paper abstract and benchmark design checked 2026-11-14"
+  },
+  {
+    "id": "R128",
+    "title": "vLLM Automatic Prefix Caching documentation",
+    "url": "https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/",
+    "kind_and_usage": "Official docs: shared-prefix KV reuse and the prefill-only benefit/limitations",
+    "audit": "current docs checked 2026-11-14"
+  },
+  {
+    "id": "R129",
+    "title": "SGLang session-aware radix cache",
+    "url": "https://github.com/sgl-project/sglang/blob/main/docs/docs/advanced_features/session_radix_cache.mdx",
+    "kind_and_usage": "Official docs: soft protection of active-session KV cache and explicit session lifecycle",
+    "audit": "current docs checked 2026-11-14"
+  },
+  {
+    "id": "R130",
+    "title": "SGLang radix cache eviction policies",
+    "url": "https://github.com/sgl-project/sglang/blob/main/docs/docs/advanced_features/radix_eviction_policy.mdx",
+    "kind_and_usage": "Official docs: LRU/LFU/SLRU/priority/TLRU eviction trade-offs under KV pressure",
+    "audit": "current docs checked 2026-11-14"
+  },
+  {
+    "id": "R131",
+    "title": "llama.cpp speculative decoding documentation",
+    "url": "https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md",
+    "kind_and_usage": "Official docs: draft-model and n-gram speculative decoding implementations and tuning parameters",
+    "audit": "current docs checked 2026-11-14"
   }
 ]
