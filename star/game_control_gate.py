@@ -278,6 +278,8 @@ class GameControlGate:
                 observation_age_ms > self.config.max_observation_age_ms
             ):
                 return GateResult(False, "stale_observation")
+            if action.issued_at < self._latest_captured_at - self.config.max_future_skew_ms / 1000.0:
+                return GateResult(False, "action_predates_observation")
             action_age_ms = (now - action.issued_at) * 1000.0
             if action_age_ms < -self.config.max_future_skew_ms:
                 return GateResult(False, "future_action")
@@ -348,7 +350,7 @@ class GameControlGate:
             issued = self._issued_permits.get(permit.action_id)
             if issued is None or issued != permit:
                 return GateResult(False, "permit_missing_or_replayed")
-            if now > permit.expires_at or now >= permit.hold_until:
+            if now >= permit.expires_at or now >= permit.hold_until:
                 self._issued_permits.pop(permit.action_id, None)
                 return GateResult(False, "permit_expired")
             if (permit.session_id != self._session_id
@@ -365,7 +367,7 @@ class GameControlGate:
             return GateResult(True, "permit_consumed", permit=permit, release_controls=released)
 
     def release_due(self, *, now: float) -> GateResult:
-        \"\"\"Return controls whose bounded hold duration has elapsed.\"\"\"
+        """Return controls whose bounded hold duration has elapsed."""
         with self._lock:
             if not _finite(now):
                 return GateResult(False, "invalid_clock")
