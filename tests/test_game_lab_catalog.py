@@ -13,7 +13,9 @@ def test_sources_are_https_unique_and_research_only():
     assert "xrevive" in ids and "ps3recomp" in ids and "xboxrecomp" in ids
     assert {"gameworld", "gym-anything-rt", "keel", "continual-arc",
             "windows-dxgi", "windows-sendinput", "microsoft-gameinput",
-            "javis", "realtime-venus"}.issubset(ids)
+            "javis", "realtime-venus", "hithink-turn", "joi-bench-task",
+            "model-interruption-bench", "subternary", "gamedevbench",
+            "robloxstudio-mcp"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -26,6 +28,9 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert "not a blanket synthetic-input" in sources["microsoft-gameinput"].warning
     assert "never an anti-cheat bypass" in sources["windows-sendinput"].warning
     assert sources["gameworld"].status == "research_only"
+    assert sources["hithink-turn"].status == "research_only"
+    assert sources["subternary"].status == "research_only"
+    assert "read-only mode first" in sources["robloxstudio-mcp"].warning
 
 
 def test_search_category_and_bounded_results():
@@ -36,9 +41,9 @@ def test_search_category_and_bounded_results():
     assert not catalog("THIS_DOES_NOT_EXIST")["sources"]
     assert catalog("MiXeD")["checked_on"] == "2026-11-14"
     assert catalog("GameWorld")["total"] == 1
-    assert catalog(category="benchmarks")["total"] >= 3
+    assert catalog(category="benchmarks")["total"] >= 6
     assert catalog(category="input")["total"] == 2
-    assert len(catalog()["sources"]) <= 40
+    assert len(catalog()["sources"]) <= 50
 
 
 @pytest.mark.parametrize("kwargs",[
