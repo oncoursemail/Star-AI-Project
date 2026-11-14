@@ -171,6 +171,7 @@ class GameControlGate:
         self._action_times: deque[float] = deque()
         self._seen_action_order: deque[str] = deque()
         self._seen_actions: set[str] = set()
+        self._issued_permits: dict[str, ActionPermit] = {}
         self._held_controls: set[str] = set()
 
     @property
@@ -206,6 +207,7 @@ class GameControlGate:
             self._action_times.clear()
             self._seen_action_order.clear()
             self._seen_actions.clear()
+            self._issued_permits.clear()
             self._held_controls.clear()
             return GateResult(True, "armed")
 
@@ -321,7 +323,38 @@ class GameControlGate:
                 hold_until=hold_until,
                 expires_at=expires_at,
             )
+            self._issued_permits[action.action_id] = permit
             return GateResult(True, "authorized", permit=permit, release_controls=released)
+
+    def consume(self, permit: ActionPermit, target: GameTarget, *, now: float) -> GateResult:
+        """Consume an issued permit exactly once immediately before host execution."""
+        with self._lock:
+            if self._state is not GateState.ARMED:
+                return GateResult(False, "not_armed")
+            if not _finite(now):
+                return GateResult(False, "invalid_clock")
+            if self._session_expires_at is not None and now >= self._session_expires_at:
+                return self._stop_locked("session_expired")
+            problem = self._active_target_problem(target)
+            if problem is not None:
+                return self._stop_locked(problem)
+            if not isinstance(permit, ActionPermit):
+                return GateResult(False, "invalid_permit")
+            issued = self._issued_permits.get(permit.action_id)
+            if issued is None or issued != permit:
+                return GateResult(False, "permit_missing_or_replayed")
+            if now > permit.expires_at or now >= permit.hold_until:
+                self._issued_permits.pop(permit.action_id, None)
+                return GateResult(False, "permit_expired")
+            if (permit.session_id != self._session_id
+                    or permit.target_fingerprint != self._target_fingerprint
+                    or permit.capture_epoch != self._capture_epoch
+                    or permit.frame_id != self._latest_frame_id
+                    or permit.observation_sequence != self._latest_sequence):
+                self._issued_permits.pop(permit.action_id, None)
+                return GateResult(False, "permit_observation_stale")
+            self._issued_permits.pop(permit.action_id, None)
+            return GateResult(True, "permit_consumed", permit=permit)
 
     def stop(self, reason: str = "owner_stop") -> GateResult:
         """Revoke the session immediately and return every held control for release."""
@@ -343,6 +376,7 @@ class GameControlGate:
         self._action_times.clear()
         self._seen_action_order.clear()
         self._seen_actions.clear()
+        self._issued_permits.clear()
         self._held_controls.clear()
         return GateResult(False, reason, release_controls=released)
 
