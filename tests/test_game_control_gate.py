@@ -175,15 +175,47 @@ def test_action_cannot_predate_the_observation():
 
 
 def test_action_age_and_duration_are_bounded():
+    gate, target = armed_gate(config=make_config(max_action_age_ms=100))
+    observation = make_observation(target)
+    assert gate.observe(observation, target, now=10.01).accepted
+
+    # The action is after the observation but too old at authorization time.
+    stale = make_action(observation, action_id="stale", issued_at=10.01)
+    assert gate.authorize(stale, target, now=10.20).reason == "stale_action"
+
+    too_long = make_action(observation, action_id="long", issued_at=10.20, duration_ms=201)
+    assert gate.authorize(too_long, target, now=10.21).reason == "action_duration_exceeded"
+
+
+def test_only_one_distinct_action_can_be_authorized_per_observation():
     gate, target = armed_gate()
     observation = make_observation(target)
     assert gate.observe(observation, target, now=10.01).accepted
 
-    stale = make_action(observation, action_id="stale", issued_at=9.0)
-    assert gate.authorize(stale, target, now=10.02).reason == "stale_action"
+    first = gate.authorize(
+        make_action(observation, action_id="first"), target, now=10.02
+    )
+    assert first.accepted and first.permit is not None
 
-    too_long = make_action(observation, action_id="long", duration_ms=201)
-    assert gate.authorize(too_long, target, now=10.03).reason == "action_duration_exceeded"
+    second = gate.authorize(
+        make_action(observation, action_id="second"), target, now=10.03
+    )
+    assert second.reason == "observation_action_budget_exhausted"
+
+    assert gate.consume(first.permit, target, now=10.04).accepted
+    third = gate.authorize(
+        make_action(observation, action_id="third"), target, now=10.05
+    )
+    assert third.reason == "observation_action_budget_exhausted"
+
+    next_observation = make_observation(
+        target, sequence=2, captured_at=10.06
+    )
+    assert gate.observe(next_observation, target, now=10.07).accepted
+    next_action = gate.authorize(
+        make_action(next_observation, action_id="next-frame"), target, now=10.08
+    )
+    assert next_action.accepted
 
 
 def test_unapproved_controls_and_mouse_deltas_are_rejected():
