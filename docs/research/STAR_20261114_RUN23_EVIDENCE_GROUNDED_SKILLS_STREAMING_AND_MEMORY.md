@@ -388,17 +388,14 @@ A capability is not “implemented” because a package is installed or a prompt
 
 ## 10. Source register additions
 
-New catalog entries R132–R144:
-- X2Streaming-ASR implementation and paper.
-- Microsoft VibeVoice-ASR-Streaming report and implementation.
-- Microsoft VibeASR.cpp CPU runtime.
-- AMA-Bench.
-- MESA.
-- UMA paper and implementation.
-- Continual Harness project and implementation.
-- SkillHorizon paper and implementation.
+New catalog entries registered in this pass: R135 and R137–R144:
+- Microsoft VibeVoice implementation (R135).
+- AMA-Bench (R137) and MESA (R138).
+- UMA paper and implementation (R139–R140).
+- Continual Harness project and implementation (R141–R142).
+- SkillHorizon paper and implementation (R143–R144).
 
-Existing sources reused rather than duplicated: Moonshine (R117–R119), sherpa-onnx (R123), Full-Duplex-Bench v3 (R124–R125), GameWorld (R126–R127), vLLM/SGLang/llama.cpp (R128–R131), LiViBench (R60–R61), and Roblox OpenGameEval (R110–R111).
+Existing ASR sources reused rather than duplicated: VibeVoice-ASR-Streaming report/model card and VibeASR.cpp (R49–R51), X2Streaming-ASR paper/implementation/model card (R62–R64), Moonshine (R117–R119), and sherpa-onnx (R123). Other existing sources reused: Full-Duplex-Bench v3 (R124–R125), GameWorld (R126–R127), vLLM/SGLang/llama.cpp (R128–R131), LiViBench (R60–R61), and Roblox OpenGameEval (R110–R111).
 
 ## Final engineering conclusion
 
