@@ -248,7 +248,7 @@ class SoundSpeaker:
         # Always fill the complete output buffer, including underrun silence.
         out[:len(chunk)] = chunk
         if len(chunk) < wanted:
-            out[len(chunk):] = b"\\x00" * (wanted - len(chunk))
+            out[len(chunk):] = b"\x00" * (wanted - len(chunk))
 
         if chunk:
             # Metering is best-effort and bounded. A full queue drops old meter
