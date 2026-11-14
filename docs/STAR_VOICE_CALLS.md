@@ -826,3 +826,15 @@ The host now:
 This is a bounded-ingress hardening change. Speaker IDs remain session-scoped pseudonyms,
 not real-world identities. The behavior is covered with a synthetic-clock regression test
 that proves ID churn cannot erase an active speaker's limit and that expired slots recover.
+
+## 16. Asynchronous speaker level metering (2026-11-14)
+
+The physical `SoundSpeaker` keeps PCM delivery separate from the output-level meter used by the echo/floor gate.
+
+The PortAudio callback copies the queued PCM into the output buffer and fills any underrun remainder with silence. It then submits a bounded, best-effort meter sample to a worker. The worker computes PCM16 RMS and updates a short level history. NumPy conversion and RMS reduction do not run inside the PortAudio callback.
+
+The meter queue is intentionally lossy; speaker PCM is not. If meter work is pending, dropped, or fails, `level()` returns a conservative non-silent value for the echo window rather than treating unknown telemetry as silence. This may briefly delay a new response, but it must not cause STAR to talk over audio that may still be playing.
+
+The worker is stopped during `SoundSpeaker.close()` and drains the bounded queue before exiting. Tests use a fake PortAudio stream and synthetic PCM; they do not open physical devices.
+
+This reduces callback work but does not make the Python callback hard real-time safe: the existing PCM buffer lock and bytes copy remain. Measure callback duration and actual PortAudio underflows on Windows before claiming a latency or stability improvement.
