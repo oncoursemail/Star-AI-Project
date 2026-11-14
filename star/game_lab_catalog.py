@@ -93,13 +93,49 @@ SOURCES = (
     Source("unity-test","Unity Test Framework",
            "https://docs.unity.com/en-us/engine/6000.7/manual/programming-environment/test-framework-introduction/reference-command-line",
            "engines","Batchmode edit/play tests with NUnit XML results"),
+    Source("gameworld", "GameWorld multimodal game-agent benchmark",
+           "https://gameworld-project.github.io/", "benchmarks",
+           "34 browser games / 170 tasks across five genres; computer-use and multimodal agents with state-verifiable outcomes",
+           warning="Browser sandbox benchmark; its privileged verifier is not evidence of screen-only desktop gameplay."),
+    Source("gym-anything-rt", "Gym-Anything-RT real-time visual game benchmark",
+           "https://github.com/gym-anything/gym-anything-rt", "benchmarks",
+           "100 real-time minigames with matched slowed/paused counterparts; screenshot plus mouse/keyboard interaction",
+           warning="Report live, slowed and paused scores separately; paused performance is not real-time skill."),
+    Source("keel", "KEEL continual skill and lesson evolution",
+           "https://github.com/microsoft/KEEL-TTCL26", "learning",
+           "Verifier-grounded reusable skills and corrective lessons; claims can be supported, contradicted, replaced or retired",
+           warning="Research implementation; import evidence-lifecycle ideas, not unreviewed agent code or data."),
+    Source("continual-arc", "Continual-ARC continual-learning benchmark",
+           "https://github.com/unifyai/continual-arc", "benchmarks",
+           "Separates seen-task retention from held-out generalization after a stream of experience",
+           warning="ARC-domain methodology; adapt the reset/holdout design to game tasks; scores are not directly comparable."),
+    Source("windows-dxgi", "Windows Desktop Duplication API",
+           "https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/desktop-dup-api", "capture",
+           "GPU-resident desktop frames with dirty/move metadata, including visible fullscreen DirectX applications",
+           warning="Capture only an owner-approved game region; handle access loss and protected content without bypassing protection."),
+    Source("windows-sendinput", "Win32 SendInput",
+           "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput", "input",
+           "Serial keyboard/mouse event injection for explicitly permitted foreground-app automation",
+           warning="UIPI and application restrictions apply; not guaranteed in games and never an anti-cheat bypass."),
+    Source("microsoft-gameinput", "Microsoft GameInput",
+           "https://aka.ms/gameinput", "input",
+           "Unified timestamped reading of physical keyboard, mouse, gamepad and other device input; useful for manual-override telemetry",
+           warning="Device-input API, not a blanket synthetic-input or game-automation permission."),
+    Source("javis", "JAVIS joint audio-visual streaming research",
+           "https://arxiv.org/abs/2610.22499", "vtuber",
+           "Shared speech/face representation for synchronized streaming speech and facial motion",
+           warning="Paper-specific research result; not a drop-in Live2D or VTube Studio integration."),
+    Source("realtime-venus", "Realtime-Venus full-duplex interaction research",
+           "https://realtime-venus.github.io/", "vtuber",
+           "Live perception/speech loop with asynchronous delegated work returning to the same conversation",
+           warning="Research architecture; benchmark and hardware-test any model/runtime adoption before changing STAR defaults."),
     Source("nuclear","Nuclear Music Player","https://nuclearplayer.com/",
            "music","Open-source desktop music player with an optional MCP server",
            warning="AGPL licensing review before embedding sources."),
 )
 
 
-def catalog(query: str = "", category: str = "", limit: int = 28) -> dict:
+def catalog(query: str = "", category: str = "", limit: int = 40) -> dict:
     if not isinstance(query, str) or not isinstance(category, str):
         raise ValueError("Search and category must be text.")
     if len(query) > 120 or len(category) > 24:
@@ -114,7 +150,7 @@ def catalog(query: str = "", category: str = "", limit: int = 28) -> dict:
     selected = [s for s in SOURCES if (not category or s.category == category)
                 and (not search or search in (
                     s.name + " " + s.scope + " " + s.category + " " + s.id).casefold())]
-    return {"checked_on": "2026-10-15", "categories": categories,
+    return {"checked_on": "2026-11-14", "categories": categories,
             "total": len(selected), "sources": [asdict(s) for s in selected[:limit]],
             "truncated": len(selected) > limit,
             "note": "Research index only. No third-party software was installed or authorized."}
