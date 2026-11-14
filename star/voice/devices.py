@@ -16,6 +16,9 @@ from .pcm import FRAME_SAMPLES, SAMPLE_RATE
 
 log = logging.getLogger(__name__)
 
+# Sixteen 32 ms frames cap stale microphone backlog at roughly half a second.
+MICROPHONE_QUEUE_FRAMES = 16
+
 
 def _sounddevice():
     try:
@@ -58,7 +61,7 @@ class Microphone:
 
     def __init__(self, device=None) -> None:
         sd = _sounddevice()
-        self._frames: queue.Queue = queue.Queue(maxsize=300)       # about 10 s; older audio is dropped beyond that
+        self._frames: queue.Queue = queue.Queue(maxsize=MICROPHONE_QUEUE_FRAMES)
         self._closed = threading.Event()
         self.dropped = 0
         self._stats_lock = threading.Lock()
@@ -75,9 +78,27 @@ class Microphone:
                 self._input_overflows += 1
             if getattr(status, "input_underflow", False):
                 self._input_underflows += 1
+        frame = bytes(data)
         try:
-            self._frames.put_nowait(bytes(data))
+            self._frames.put_nowait(frame)
+            return
         except queue.Full:
+            # This is a live conversation, not an archival recorder. Preserve freshness:
+            # evict the oldest stale frame and enqueue the newest audio instead of letting
+            # the consumer fall seconds behind the person speaking.
+            pass
+        try:
+            self._frames.get_nowait()
+        except queue.Empty:
+            # The consumer may have freed a slot between Full and get_nowait.
+            pass
+        else:
+            with self._stats_lock:
+                self.dropped += 1
+        try:
+            self._frames.put_nowait(frame)
+        except queue.Full:
+            # Defensive fallback for an unexpected competing producer.
             with self._stats_lock:
                 self.dropped += 1
 
@@ -89,6 +110,8 @@ class Microphone:
                 "input_underflows": self._input_underflows,
                 "queue_drops": self.dropped,
                 "queued_frames": self._frames.qsize(),
+                "queue_capacity_frames": self._frames.maxsize,
+                "queue_capacity_seconds": self._frames.maxsize * FRAME_SAMPLES / SAMPLE_RATE,
             }
 
     def __enter__(self) -> "Microphone":

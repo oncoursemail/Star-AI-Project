@@ -103,9 +103,9 @@ class _Call:
         self.room_only = room_only
         self.room_host: RoomStreamHost | None = None
         self.stop = threading.Event()
-        self.session = None
-        self.microphone = None
-        self.speaker = None
+        self.session: Any = None
+        self.microphone: Any = None
+        self.speaker: Any = None
         self.thread: threading.Thread | None = None
 
 
@@ -133,7 +133,7 @@ class VoiceBridge:
         self._engines = None
         self._engines_key: tuple | None = None
         self._speech: _SpeechJob | None = None
-        self._tts = None                         # read-aloud engine when no call has loaded one yet
+        self._tts: Any = None                         # read-aloud engine when no call has loaded one yet
         self._tts_key: tuple | None = None
 
     # -- helpers ------------------------------------------------------------------------------
@@ -490,7 +490,7 @@ class VoiceBridge:
         self._start_speech(request_id, settings, parts, done_type="speak_done")
         return {"speaking": True, "sentences": len(parts), "characters": len(text), "voiceId": settings.voice_id}
 
-    def _speech_tts(self, settings: VoiceSettings):
+    def _speech_tts(self, settings: VoiceSettings) -> Any:
         """The loaded call engine if there is one, else a read-aloud engine kept for the next reply."""
         if self._engines is not None:
             return self._engines.tts

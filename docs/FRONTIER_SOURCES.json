@@ -733,5 +733,82 @@
     "url": "https://github.com/A-EVO-Lab/a-evolve",
     "kind_and_usage": "Official implementation: benchmark adapters, evolution algorithms, experiment records and skill/harness mutation",
     "audit": "README and evolution workflow checked 2026-11-14; STAR adoption limited to isolated candidate experiments and sealed holdouts"
+  },
+  {
+    "id": "R106",
+    "title": "Voice-Light: A Full-Duplex Cascaded Voice Agent with Causal Turn-Taking and Speculative Generation",
+    "url": "https://arxiv.org/abs/2609.20995",
+    "kind_and_usage": "Research paper: reversible playback, private speculative generation, causal turn-taking, acknowledged-audio history and locked turn-policy evaluation",
+    "audit": "paper methodology and results checked 2026-11-14; learned completion head's low locked recall retained as a caution"
+  },
+  {
+    "id": "R107",
+    "title": "Voice-Light official implementation",
+    "url": "https://github.com/BertilBraun/Voice-Light",
+    "kind_and_usage": "Research implementation: streaming ASR, typed tool orchestration, playback acknowledgements, evaluation pipeline and deployment records",
+    "audit": "official repository README and limitations checked 2026-11-14; no code or model artifacts copied"
+  },
+  {
+    "id": "R108",
+    "title": "FD-VAD: Semantic Endpoint Detection for Streaming Full-Duplex Speech",
+    "url": "https://arxiv.org/abs/2609.35791",
+    "kind_and_usage": "Research paper: causal audio-only Continue/Stop prediction, confidence-gated endpoint commitment and boundary-focused negatives",
+    "audit": "abstract and methodology checked 2026-11-14; optional research candidate, not a production replacement"
+  },
+  {
+    "id": "R109",
+    "title": "HiThink Turn: An Intent-Aware Turn-Taking Control Module for Full-Duplex Dialogue",
+    "url": "https://arxiv.org/abs/2609.34096",
+    "kind_and_usage": "Research paper: separates response intent from semantic completion and conditions on assistant playback state",
+    "audit": "abstract and methodology checked 2026-11-14; reported benchmark gains not assumed to transfer to STAR"
+  },
+  {
+    "id": "R110",
+    "title": "OpenGameEval: Benchmarking Agentic Programming and Exploration in a Stateful Game Engine",
+    "url": "https://arxiv.org/abs/2610.02563",
+    "kind_and_usage": "Research paper: reproducible Roblox Studio tasks, separate observation/edit actions, executable scene and play-session checks",
+    "audit": "paper and official repository results checked 2026-11-14; 84 core tasks and inspect-first analysis recorded"
+  },
+  {
+    "id": "R111",
+    "title": "Roblox OpenGameEval official repository",
+    "url": "https://github.com/Roblox/open-game-eval",
+    "kind_and_usage": "Official evaluation framework: stateful Studio sessions, task manifests, executable checks and leaderboard",
+    "audit": "official README checked 2026-11-14; credentials and remote evaluation API not enabled in STAR"
+  },
+  {
+    "id": "R112",
+    "title": "Roblox Studio MCP multi-agent improvements and connected AI clients",
+    "url": "https://devforum.roblox.com/t/studio-mcp-multi-agent-improvements-and-connected-ai-clients/4820583",
+    "kind_and_usage": "Official Roblox developer announcement: explicit studio_id routing for multi-Studio and multi-client agent calls",
+    "audit": "official developer-forum announcement checked 2026-11-14; use explicit target IDs, not mutable active-Studio assumptions"
+  },
+  {
+    "id": "R113",
+    "title": "NVIDIA TensorRT-LLM KV-cache compression documentation",
+    "url": "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/kv-cache-compression.md",
+    "kind_and_usage": "Official implementation documentation: KV quantization, sparse attention, page lifecycle and storage-tier compression trade-offs",
+    "audit": "current documentation checked 2026-11-14; concepts are backend-specific and not treated as llama.cpp flags"
+  },
+  {
+    "id": "R114",
+    "title": "SGLang Unified Radix Cache for hybrid prefix reuse",
+    "url": "https://www.sglang.io/blog/unified-radix-cache",
+    "kind_and_usage": "Official serving-engine engineering article: session-aware prefix reuse for hybrid attention state",
+    "audit": "article checked 2026-11-14; vendor-reported cluster results treated as non-transferable to a single 8 GB GPU"
+  },
+  {
+    "id": "R115",
+    "title": "llama.cpp backend feature matrix",
+    "url": "https://github.com/ggml-org/llama.cpp/wiki/Feature-matrix",
+    "kind_and_usage": "Upstream compatibility reference: quantization, KV-cache and Flash Attention support by CPU/CUDA/ROCm/SYCL/Vulkan/Metal backend",
+    "audit": "wiki revision dated 2026-11-08 checked 2026-11-14; support matrix is not a speed guarantee"
+  },
+  {
+    "id": "R116",
+    "title": "Roblox Studio MCP official documentation",
+    "url": "https://create.roblox.com/docs/studio/mcp",
+    "kind_and_usage": "Official integration contract: local Studio MCP server, stdio transport, script and DataModel inspection/editing and playtesting",
+    "audit": "current Creator Hub documentation checked 2026-11-14; use least-privilege, explicit per-Studio routing"
   }
 ]

@@ -38,6 +38,12 @@ microphone (16 kHz, 32 ms frames)
   accumulated so far. This can repeat work as the utterance grows. Preview text is provisional and must not trigger
   tools, become durable memory, or be treated as the final transcript. A future incremental ASR provider should
   expose explicit partial, committed, final, and correction events while preserving utterance IDs and cancellation.
+
+- **Microphone freshness under overload.** Input is queued in a bounded 16-frame buffer (about 512 ms at the
+  current 32 ms frame size). If the consumer falls behind, the adapter discards the oldest queued frame and keeps
+  the newest input, incrementing `queue_drops`. This intentionally favors current conversation over stale audio;
+  it is not lossless recording. Queue capacity and drops are exposed in aggregate diagnostics. A separate recorder
+  is required for any archival use.
 - **Interruption (barge-in).** If you speak for about 0.3 s while Star is talking, playback stops within one audio
   block, the request to the server is closed, and queued sentences are dropped. Only the words that were actually
   played are kept in the conversation history, so Star knows what you did and did not hear.
