@@ -142,6 +142,10 @@ class SoundSpeaker:
 
     def __init__(self, sample_rate: int = 24000, device=None) -> None:
         sd = _sounddevice()
+        # Import NumPy before opening the real-time PortAudio stream. Importing a large
+        # module from the first audio callback can miss the device deadline and underrun.
+        import numpy as np
+        self._np = np
         self.sample_rate = sample_rate
         self._lock = threading.Lock()
         self._buffer = bytearray()
@@ -166,7 +170,7 @@ class SoundSpeaker:
         if len(chunk) < wanted:
             out[len(chunk):] = b"\x00" * (wanted - len(chunk))
         if chunk:
-            import numpy as np
+            np = self._np
             block = np.frombuffer(chunk, dtype="<i2").astype(np.float32)
             self._levels.append((time.monotonic(), float(np.sqrt(np.mean(block * block))) / 32768.0))
 
