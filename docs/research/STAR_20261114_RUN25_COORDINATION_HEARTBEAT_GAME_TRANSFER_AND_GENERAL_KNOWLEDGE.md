@@ -251,6 +251,26 @@ Retrieval should be query-adaptive:
 
 Do not confuse a plausible synthesis with verified knowledge. A source's existence is not proof that it supports the adjacent claim.
 
+### 4.1 Programmable retrieval: learn how to search, not only what to retrieve
+
+Meta's October 20, 2026 Retrieval Program Learning (RPL) research treats retrieval as a small program composed from search primitives, local state, and control flow rather than a fixed retrieve-then-answer pipeline. It uses grammar-constrained program mutation and execution verification to explore better search strategies. The authors report improvements on open-domain QA and corpus-level reasoning, including a 4B RPL-trained model outperforming their tested 8B baselines; those are paper-specific results, not expected STAR results.
+
+**STAR decision**
+
+Build a declarative, allowlisted retrieval plan—not arbitrary generated Python:
+
+- `SEARCH(query, source_scope, freshness_window)`
+- `FILTER(source_type, date, trust, license)`
+- `EXTRACT(claim_schema)`
+- `FOLLOW(entity_or_reference)`
+- `COMPARE(claim_set)`
+- `VERIFY(independent_source_count)`
+- `STOP(answerability, budget, diminishing_returns)`
+
+The plan executor should enforce maximum search calls, time, tokens, domains, and document size. Intermediate results remain in a bounded local state store; only selected evidence enters the final model context. Every primitive emits provenance and an execution trace. A search program may be proposed or mutated only in a sandbox, then evaluated against held-out questions with answer accuracy, evidence coverage, retrieval turns, context tokens, latency, and cost. Never promote a search strategy because the same model says it looks good.
+
+This is a strong fit for STAR's general-knowledge workbench: a compact model can learn better retrieval procedures without needing every source or every intermediate document in its context.
+
 ### Useful general-knowledge features
 
 - research plans with explicit subquestions and stopping conditions;
