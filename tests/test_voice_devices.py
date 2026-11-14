@@ -1,5 +1,7 @@
 """PortAudio callback health and freshness policy without physical audio hardware."""
+import builtins
 import queue
+import sys
 import threading
 from collections import deque
 from types import SimpleNamespace
@@ -98,3 +100,64 @@ def test_callbacks_tolerate_missing_portaudio_status():
     speaker._callback(output, 2, None, None)
     assert output == b"\x00" * 4
     assert speaker.diagnostics()["output_underflows"] == 0
+
+def test_speaker_preloads_numpy_before_realtime_callback(monkeypatch):
+    class FakeBlock:
+        def astype(self, _dtype):
+            return self
+
+        def __mul__(self, _other):
+            return self
+
+    class FakeNumpy:
+        float32 = object()
+
+        @staticmethod
+        def frombuffer(_chunk, dtype):
+            assert dtype == "<i2"
+            return FakeBlock()
+
+        @staticmethod
+        def mean(_block):
+            return 1.0
+
+        @staticmethod
+        def sqrt(value):
+            return value ** 0.5
+
+    class FakeStream:
+        def stop(self):
+            pass
+
+        def close(self):
+            pass
+
+    class FakeSoundDevice:
+        def RawOutputStream(self, **kwargs):
+            self.callback = kwargs["callback"]
+            return FakeStream()
+
+    fake_numpy = FakeNumpy()
+    fake_sd = FakeSoundDevice()
+    monkeypatch.setitem(sys.modules, "numpy", fake_numpy)
+    monkeypatch.setattr("star.voice.devices._sounddevice", lambda: fake_sd)
+
+    speaker = SoundSpeaker(sample_rate=24000)
+    assert speaker._np is fake_numpy
+    speaker.play(b"\\x01\\x00" * 2, 24000)
+
+    original_import = builtins.__import__
+
+    def reject_callback_import(name, *args, **kwargs):
+        if name == "numpy":
+            raise AssertionError("NumPy must be loaded before the PortAudio callback")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", reject_callback_import)
+    output = bytearray(4)
+    speaker._callback(output, 2, None, None)
+
+    assert output == b"\\x01\\x00" * 2
+    assert speaker.level() > 0.0
+    speaker.close()
+
