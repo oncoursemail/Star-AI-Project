@@ -1,7 +1,8 @@
 """Real microphone and loudspeaker through the optional `sounddevice` package (PortAudio).
 
-Not exercised by the automated tests: they use the virtual devices in filecall.py. The speaker here
-follows the same Speaker interface as the virtual one, so the call logic above it is identical.
+Physical device streams are not opened in automated tests; callback accounting is tested with synthetic
+PortAudio status flags. The speaker follows the same interface as the virtual device in filecall.py, so the
+call logic above it is identical.
 """
 from __future__ import annotations
 
@@ -14,6 +15,9 @@ import time
 from .pcm import FRAME_SAMPLES, SAMPLE_RATE
 
 log = logging.getLogger(__name__)
+
+# Sixteen 32 ms frames cap stale microphone backlog at roughly half a second.
+MICROPHONE_QUEUE_FRAMES = 16
 
 
 def _sounddevice():
@@ -57,17 +61,58 @@ class Microphone:
 
     def __init__(self, device=None) -> None:
         sd = _sounddevice()
-        self._frames: queue.Queue = queue.Queue(maxsize=300)       # about 10 s; older audio is dropped beyond that
+        self._frames: queue.Queue = queue.Queue(maxsize=MICROPHONE_QUEUE_FRAMES)
         self._closed = threading.Event()
         self.dropped = 0
+        self._stats_lock = threading.Lock()
+        self._input_overflows = 0
+        self._input_underflows = 0
         self._stream = sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=FRAME_SAMPLES, channels=1, dtype="int16",
                                          device=_device(device), callback=self._callback)
 
-    def _callback(self, data, _frames, _time, _status) -> None:
+    def _callback(self, data, _frames, _time, status) -> None:
+        # PortAudio reports device-level loss separately from our bounded Python queue.
+        # Count both, but never log or retain microphone samples in diagnostics.
+        with self._stats_lock:
+            if getattr(status, "input_overflow", False):
+                self._input_overflows += 1
+            if getattr(status, "input_underflow", False):
+                self._input_underflows += 1
+        frame = bytes(data)
         try:
-            self._frames.put_nowait(bytes(data))
+            self._frames.put_nowait(frame)
+            return
         except queue.Full:
-            self.dropped += 1
+            # This is a live conversation, not an archival recorder. Preserve freshness:
+            # evict the oldest stale frame and enqueue the newest audio instead of letting
+            # the consumer fall seconds behind the person speaking.
+            pass
+        try:
+            self._frames.get_nowait()
+        except queue.Empty:
+            # The consumer may have freed a slot between Full and get_nowait.
+            pass
+        else:
+            with self._stats_lock:
+                self.dropped += 1
+        try:
+            self._frames.put_nowait(frame)
+        except queue.Full:
+            # Defensive fallback for an unexpected competing producer.
+            with self._stats_lock:
+                self.dropped += 1
+
+    def diagnostics(self) -> dict:
+        """Aggregate device health only; no audio, transcript, or device identity is returned."""
+        with self._stats_lock:
+            return {
+                "input_overflows": self._input_overflows,
+                "input_underflows": self._input_underflows,
+                "queue_drops": self.dropped,
+                "queued_frames": self._frames.qsize(),
+                "queue_capacity_frames": self._frames.maxsize,
+                "queue_capacity_seconds": self._frames.maxsize * FRAME_SAMPLES / SAMPLE_RATE,
+            }
 
     def __enter__(self) -> "Microphone":
         self._stream.start()
@@ -101,13 +146,19 @@ class SoundSpeaker:
         self._lock = threading.Lock()
         self._buffer = bytearray()
         self._played = 0                    # samples played since reset()
+        self._output_underflows = 0
+        self._output_overflows = 0
         self._levels: collections.deque = collections.deque(maxlen=64)     # (time, rms) of recent output blocks
         self._stream = sd.RawOutputStream(samplerate=sample_rate, channels=1, dtype="int16", device=_device(device),
                                           callback=self._callback)
 
-    def _callback(self, out, frames, _time, _status) -> None:
+    def _callback(self, out, frames, _time, status) -> None:
         wanted = frames * 2
         with self._lock:
+            if getattr(status, "output_underflow", False):
+                self._output_underflows += 1
+            if getattr(status, "output_overflow", False):
+                self._output_overflows += 1
             chunk = bytes(self._buffer[:wanted])
             del self._buffer[:wanted]
             self._played += len(chunk) // 2
@@ -132,6 +183,17 @@ class SoundSpeaker:
             self._stream.close()
         except Exception:
             pass
+
+    def diagnostics(self) -> dict:
+        """Aggregate PortAudio health and queue depth without exposing audio samples."""
+        with self._lock:
+            return {
+                "output_underflows": self._output_underflows,
+                "output_overflows": self._output_overflows,
+                "queued_seconds": len(self._buffer) / 2 / self.sample_rate,
+                "played_seconds": self._played / self.sample_rate,
+                "sample_rate": self.sample_rate,
+            }
 
     # -- Speaker interface --------------------------------------------------------------------
     def play(self, pcm: bytes, sample_rate: int) -> None:
