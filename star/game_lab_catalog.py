@@ -129,13 +129,37 @@ SOURCES = (
            "https://realtime-venus.github.io/", "vtuber",
            "Live perception/speech loop with asynchronous delegated work returning to the same conversation",
            warning="Research architecture; benchmark and hardware-test any model/runtime adoption before changing STAR defaults."),
+    Source("hithink-turn", "HiThink Turn intent-aware full-duplex turn control",
+           "https://arxiv.org/abs/2609.34096", "voice",
+           "Streaming turn-state prediction separates response intent from semantic completion and conditions decisions on playback state",
+           warning="Paper-reported 240 ms chunk results are not STAR latency; evaluate false interruption, missed interruption, and stop/resume timing."),
+    Source("joi-bench-task", "Joi-Bench-Task voice-agent task coordination benchmark",
+           "https://arxiv.org/abs/2611.12118", "benchmarks",
+           "Interactive interventions test what is running, completed, communicated, and still owed after request changes or interruptions",
+           warning="Use as an evaluation design; benchmark results do not establish STAR performance."),
+    Source("model-interruption-bench", "Model Interruption Bench",
+           "https://aclanthology.org/2026.emnlp-main.2349/", "benchmarks",
+           "Evaluates whether a full-duplex agent can interrupt at the right moment with a correct content correction",
+           warning="Math-correction benchmark; adapt only the timing and false-positive/false-negative methodology to streaming conversation."),
+    Source("subternary", "SubTernary CPU speculative decoding research",
+           "https://arxiv.org/abs/2610.28671", "inference",
+           "Unified graph execution and transactional KV isolation for CPU speculative decoding",
+           warning="Preprint results are hardware/runtime-specific; require reproducible code, pinned models, and STAR CPU benchmarks before adoption."),
+    Source("gamedevbench", "GameDevBench game-development agent benchmark",
+           "https://github.com/waynchi/gamedevbench", "benchmarks",
+           "333 Godot tasks across gameplay, UI, 2D/3D graphics and animation; visual feedback is a first-class evaluation variable",
+           warning="Godot benchmark; use as a methodology and do not transfer scores to Roblox or STAR."),
+    Source("robloxstudio-mcp", "Roblox Studio MCP community integration",
+           "https://github.com/Chrrxs/robloxstudio-mcp", "engines",
+           "Studio inspection, runtime Luau evaluation, multiplayer playtests, logs, screenshots, memory and profiler capture",
+           warning="Powerful third-party bridge; review license, plugin source, network boundary, tool schemas and credentials. Prefer inspector/read-only mode first; never grant broad Open Cloud scopes by default."),
     Source("nuclear","Nuclear Music Player","https://nuclearplayer.com/",
            "music","Open-source desktop music player with an optional MCP server",
            warning="AGPL licensing review before embedding sources."),
 )
 
 
-def catalog(query: str = "", category: str = "", limit: int = 40) -> dict:
+def catalog(query: str = "", category: str = "", limit: int = 50) -> dict:
     if not isinstance(query, str) or not isinstance(category, str):
         raise ValueError("Search and category must be text.")
     if len(query) > 120 or len(category) > 24:
