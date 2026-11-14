@@ -120,6 +120,7 @@ def test_fresh_observation_authorizes_single_use_permit_and_timed_release():
     assert isinstance(authorized.permit, ActionPermit)
     assert gate.held_controls == ()
 
+    assert authorized.permit is not None
     consumed = gate.consume(authorized.permit, target, now=10.04)
     assert consumed.accepted
     assert consumed.reason == "permit_consumed"
@@ -242,6 +243,7 @@ def test_focus_loss_and_manual_override_stop_and_release_controls():
         observation = make_observation(target)
         assert gate.observe(observation, target, now=10.01).accepted
         permit = gate.authorize(make_action(observation), target, now=10.02).permit
+        assert permit is not None
         assert gate.consume(permit, target, now=10.03).accepted
 
         stopped = gate.authorize(
@@ -270,6 +272,7 @@ def test_capture_epoch_change_stops_and_releases_controls():
     first = make_observation(target, sequence=1, epoch="epoch-1")
     assert gate.observe(first, target, now=10.01).accepted
     permit = gate.authorize(make_action(first), target, now=10.02).permit
+    assert permit is not None
     assert gate.consume(permit, target, now=10.03).accepted
 
     second = make_observation(target, sequence=2, epoch="epoch-2", captured_at=10.04)
@@ -284,6 +287,7 @@ def test_new_frame_invalidates_an_unconsumed_permit():
     first = make_observation(target, sequence=1)
     assert gate.observe(first, target, now=10.01).accepted
     permit = gate.authorize(make_action(first), target, now=10.02).permit
+    assert permit is not None
 
     second = make_observation(target, sequence=2, captured_at=10.03)
     assert gate.observe(second, target, now=10.04).accepted
@@ -295,6 +299,7 @@ def test_session_expiry_stops_and_returns_held_controls():
     observation = make_observation(target)
     assert gate.observe(observation, target, now=10.01).accepted
     permit = gate.authorize(make_action(observation), target, now=10.02).permit
+    assert permit is not None
     assert gate.consume(permit, target, now=10.03).accepted
 
     result = gate.observe(make_observation(target, sequence=2, captured_at=10.5),
@@ -358,6 +363,7 @@ def test_permit_expiry_never_outlives_observation_freshness():
     action = make_action(observation, issued_at=10.20, duration_ms=200)
     authorized = gate.authorize(action, target, now=10.20)
     assert authorized.accepted
+    assert authorized.permit is not None
     assert authorized.permit.expires_at <= 10.25
     assert authorized.permit.hold_until <= authorized.permit.expires_at
     assert gate.consume(authorized.permit, target, now=10.26).reason == "permit_expired"
