@@ -314,6 +314,7 @@ def test_owner_stop_returns_held_controls_and_clears_state():
     observation = make_observation(target)
     assert gate.observe(observation, target, now=10.01).accepted
     permit = gate.authorize(make_action(observation), target, now=10.02).permit
+    assert permit is not None
     assert gate.consume(permit, target, now=10.03).accepted
 
     stopped = gate.stop()
