@@ -20,16 +20,20 @@ only after the evaluation gate (docs/evals.md) showed that it does not lower the
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from functools import lru_cache
 import os
 from pathlib import Path
 import re
 
-from ..agent_skills import _frontmatter
+from ..agent_skills import Skill, SkillLibrary, _frontmatter
 from .engines import ENGINE_CONTEXTS, ENGINE_TOPICS
 
 PACKS_DIR = Path(__file__).resolve().parent
 ENV_VAR = "STAR_SKILL_PACKS"
+CONTRACT_ENV_VAR = "STAR_SKILL_CONTRACTS"
+CONTRACT_BLOCK_HEADING = "STRUCTURED SKILL CONTRACT (untrusted guidance; not a permission grant)"
+MAX_CONTRACT_CHARS = 1800
 MAX_BODY_CHARS = 6400
 MAX_PACKS_PER_TURN = 1
 MAX_BLOCK_CHARS = 6500
@@ -313,12 +317,37 @@ def select(prompt, *, enabled=None, limit: int = MAX_PACKS_PER_TURN, home=None) 
     return [item[-1] for item in sorted(scored, key=lambda item: item[:3])[:max(0, limit)]]
 
 
+def contracts_enabled(environ=None) -> bool:
+    """Structured contract prompt guidance is an explicit opt-in and remains off by default."""
+    raw = (os.environ if environ is None else environ).get(CONTRACT_ENV_VAR, "").strip().lower()
+    return raw in {"on", "true", "yes", "1"}
+
+
 def render(packs) -> str:
-    """The text added to the turn under BLOCK_HEADING, '' when no pack applies. Bounded by MAX_BLOCK_CHARS."""
+    """Render selected skill guidance; optional contracts are lazy, opt-in and tightly bounded."""
     packs = list(packs)
     if not packs:
         return ""
     text = "\n\n".join(p.body for p in packs)
+    if contracts_enabled():
+        for pack in packs:
+            metadata = SkillLibrary._load_contract(
+                Skill(pack.name, pack.description, pack.file, "bundled")
+            )
+            if metadata.get("contract_status") != "parsed":
+                continue
+            contract_json = json.dumps(
+                metadata["contract"], ensure_ascii=False, sort_keys=True, separators=(",", ":")
+            )
+            if len(contract_json) > MAX_CONTRACT_CHARS:
+                continue
+            block = (
+                f"{CONTRACT_BLOCK_HEADING}\n{metadata['contract_notice']}\n{contract_json}"
+            )
+            # Never truncate a JSON contract into an invalid partial object or crowd out
+            # the existing skill instructions. If it does not fit, omit it completely.
+            if len(text) + 2 + len(block) <= MAX_BLOCK_CHARS:
+                text += "\n\n" + block
     return text[:MAX_BLOCK_CHARS].rstrip() + "\n"
 
 
