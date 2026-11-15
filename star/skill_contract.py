@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import re
-from typing import Any, Mapping
+from typing import Any, Literal, Mapping, overload
 from urllib.parse import urlsplit
 
 SCHEMA_VERSION = 1
@@ -71,6 +71,14 @@ def _identifier(value: Any, label: str) -> str:
     if not _IDENTIFIER.fullmatch(text):
         raise ValueError(f"{label} must be a bounded identifier")
     return text
+
+
+@overload
+def _digest(value: Any, label: str, *, optional: Literal[False] = False) -> str: ...
+
+
+@overload
+def _digest(value: Any, label: str, *, optional: Literal[True]) -> str | None: ...
 
 
 def _digest(value: Any, label: str, *, optional: bool = False) -> str | None:
