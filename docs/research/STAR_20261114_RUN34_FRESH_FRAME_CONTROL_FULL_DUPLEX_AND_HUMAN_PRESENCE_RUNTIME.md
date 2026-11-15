@@ -409,6 +409,6 @@ No public broadcast, model replacement, game automation, or permanent memory pro
 - No Twitch/YouTube credentials are created or used.
 - No real game, Roblox Studio, microphone, speaker, RTX 4060, or public stream is tested here.
 - Paper and benchmark numbers are source-reported and are not STAR measurements.
-- The 16-record observation history is a bounded default, not a universal tuning result; tune per game using measured latency and safety tests.
+- The 64-record observation history is a bounded default, not a universal tuning result; tune per game using measured latency and safety tests.
 - PRs #1180, #1181, and #1182 remain draft/unmerged until their exact-head CI, dependency review, and owner acceptance are complete.
 - Production main remains unchanged.
