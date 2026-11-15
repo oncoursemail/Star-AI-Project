@@ -1,0 +1,159 @@
+# STAR benchmark-run manifest template.
+# Copy into a run-specific artifact directory and fill every required field.
+# Never put API keys, passwords, OAuth tokens, personal data, or raw viewer messages here.
+schema_version: 1
+
+run:
+  id: "replace-with-unique-run-id"
+  started_at_utc: "YYYY-MM-DDTHH:MM:SSZ"
+  ended_at_utc: null
+  purpose: "baseline | ablation | holdout | regression | hardware_acceptance"
+  owner_approval_reference: null
+  operator: "STAR evaluation harness"
+  notes: ""
+
+repository:
+  name: "oncoursemail/Star-AI-Project"
+  branch: "replace-with-exact-branch"
+  commit_sha: "replace-with-full-commit-sha"
+  working_tree_clean: true
+  dirty_diff_sha256: null
+
+benchmark:
+  id: "replace-with-benchmark-id"
+  upstream_url: "https://example.invalid"
+  release_tag: "replace-with-pinned-release"
+  task_class_revision: "replace-with-tag-or-commit"
+  task_asset_revision: "replace-with-tag-or-commit"
+  evaluator_revision: "replace-with-tag-or-commit"
+  provider_image_digest: "sha256:replace-with-image-digest"
+  website_fixture_revision: null
+  task_count_expected: 0
+  task_count_executed: 0
+  task_split:
+    practice_seed_set: "private-practice-set-id"
+    validation_seed_set: "private-validation-set-id"
+    sealed_holdout_id: "private-holdout-id"
+  excluded_tasks:
+    - task_id: ""
+      reason: ""
+
+agent:
+  orchestration_revision: "replace-with-commit"
+  model_provider: "local | remote | hybrid"
+  model_id: "replace-with-exact-model-id"
+  model_weights_revision: "replace-with-hash-or-release"
+  tokenizer_revision: "replace-with-hash-or-release"
+  quantization: "none | q4 | q5 | q8 | other"
+  prompt_template_sha256: "replace-with-hash"
+  skill_registry_revision: "replace-with-commit-or-snapshot"
+  tool_adapter_revisions:
+    - name: "replace-with-adapter"
+      revision: "replace-with-commit"
+      permission_profile: "read_only | sandbox_write | owner_approved"
+  verifier_revision: "replace-with-commit"
+
+environment:
+  operating_system: "Windows | Linux | macOS | Android"
+  os_build: "replace-with-build"
+  runtime_version: "replace-with-runtime"
+  vm_or_container_image: "replace-with-image-digest"
+  display_resolution: "1920x1080"
+  dpi_scale: 100
+  cpu_model: "replace-with-model"
+  cpu_cores_available: 0
+  ram_gib: 0
+  gpu_model: "replace-with-model-or-none"
+  gpu_vram_gib: 0
+  driver_version: null
+  network_mode: "offline | controlled_fixture | internet"
+  locale: "en-US"
+  timezone: "UTC"
+
+interaction:
+  observation_mode: "screenshot | screenshot_and_accessibility | structured_state"
+  capture_region: "owner-approved application/game region only"
+  capture_rate_fps: 0
+  action_rate_limit_per_second: 0
+  max_steps_per_task: 0
+  task_timeout_seconds: 0
+  action_timeout_ms: 0
+  manual_override_tested: false
+  emergency_stop_tested: false
+
+resource_budget:
+  max_wall_clock_seconds: 0
+  max_model_calls: 0
+  max_input_tokens: 0
+  max_output_tokens: 0
+  max_cpu_percent: 0
+  max_ram_mib: 0
+  max_gpu_vram_mib: 0
+  max_background_workers: 0
+  foreground_deadline_ms: 0
+  background_pause_thresholds_revision: "replace-with-config-hash"
+
+privacy_and_safety:
+  data_class: "synthetic | owner_test | public_benchmark"
+  personal_files_mounted: false
+  viewer_identity_data_enabled: false
+  raw_audio_retained: false
+  raw_video_retained: false
+  secrets_in_environment_only: true
+  untrusted_content_is_data_only: true
+  game_automation_allowlist_revision: null
+  owner_stop_available: true
+  external_side_effects_enabled: false
+  retention_policy_revision: "replace-with-policy-revision"
+
+metrics:
+  task_success_rate: null
+  partial_progress_rate: null
+  verifier_agreement_rate: null
+  false_success_rate: null
+  recovery_success_rate: null
+  queue_wait_ms_p50: null
+  queue_wait_ms_p95: null
+  first_token_ms_p50: null
+  first_token_ms_p95: null
+  inter_token_ms_p95: null
+  first_audio_ms_p95: null
+  audible_response_ms_p95: null
+  interruption_stop_ms_p95: null
+  capture_to_action_ms_p95: null
+  game_frame_time_ms_p95: null
+  game_frame_time_ms_p99: null
+  obs_render_lag_frames: null
+  obs_encoder_lag_frames: null
+  cpu_percent_p95: null
+  ram_mib_peak: null
+  gpu_vram_mib_peak: null
+  cost_per_verified_completion: null
+
+results:
+  outcome: "not_run | passed | failed | partial | blocked"
+  verified_successes: 0
+  verified_failures: 0
+  abstentions: 0
+  verifier_disagreements: 0
+  failure_categories: {}
+  artifacts_directory: "replace-with-private-artifact-path"
+  artifact_hashes:
+    trajectory_bundle_sha256: null
+    metrics_sha256: null
+    screenshots_sha256: null
+  promotion_eligible: false
+  promotion_decision_reference: null
+  reviewer_notes: ""
+
+reproducibility_checks:
+  all_release_components_pinned: false
+  clean_environment_verified: false
+  practice_and_holdout_disjoint: false
+  task_seeds_recorded: false
+  verifier_independent_of_agent_claim: false
+  no_secrets_or_personal_data_in_artifacts: false
+  safety_controls_tested: false
+  paired_baseline_available: false
+  target_hardware_match_confirmed: false
+  limitations_documented: false
