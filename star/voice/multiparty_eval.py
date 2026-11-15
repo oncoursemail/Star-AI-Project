@@ -91,10 +91,13 @@ class RoomReplayCase:
     expected_response: bool
     expected_stop: bool = False
     expected_interrupt: bool = False
+    matched_pair_id: str | None = None
 
     def __post_init__(self) -> None:
         _identifier(self.case_id, "case_id")
         _digest(self.scenario_sha256, "scenario_sha256")
+        if self.matched_pair_id is not None:
+            _identifier(self.matched_pair_id, "matched_pair_id")
         if type(self.split) is not str or self.split not in {"development", "holdout"}:
             raise ValueError("split must be development or holdout")
         if type(self.cue_category) is not str or self.cue_category not in _CATEGORIES:
@@ -220,6 +223,22 @@ def roster_digest(cases: Sequence[RoomReplayCase]) -> str:
         raise TypeError("all cases must be RoomReplayCase")
     if len({case.case_id for case in cases}) != len(cases):
         raise ValueError("case IDs must be unique")
+    scenario_splits: dict[str, str] = {}
+    pair_groups: dict[str, list[RoomReplayCase]] = {}
+    for case in cases:
+        previous_split = scenario_splits.setdefault(case.scenario_sha256, case.split)
+        if previous_split != case.split:
+            raise ValueError("scenario hashes must be disjoint across development and holdout")
+        if case.matched_pair_id is not None:
+            pair_groups.setdefault(case.matched_pair_id, []).append(case)
+    for pair_id, pair in pair_groups.items():
+        if (
+            len(pair) != 2
+            or {case.cue_category for case in pair} != {"explicit_direct", "implicit_direct"}
+            or len({case.split for case in pair}) != 1
+            or len({case.scenario_sha256 for case in pair}) != 2
+        ):
+            raise ValueError(f"matched pair {pair_id} must contain one explicit and one implicit case in the same split")
     rows = sorted(
         (
             case.case_id,
@@ -230,6 +249,7 @@ def roster_digest(cases: Sequence[RoomReplayCase]) -> str:
             case.expected_response,
             case.expected_stop,
             case.expected_interrupt,
+            case.matched_pair_id,
         )
         for case in cases
     )
