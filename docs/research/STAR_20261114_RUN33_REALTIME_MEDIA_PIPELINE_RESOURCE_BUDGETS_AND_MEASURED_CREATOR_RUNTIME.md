@@ -1,7 +1,7 @@
 # STAR Run 33 — Realtime Media Pipeline, Resource Budgets, and Measured Creator Runtime
 
 **Research date:** 2026-11-14  
-**Status:** architecture and implementation plan; one adjacent playback-clock integration is being added separately to draft PR #1181.  
+**Status:** architecture and implementation plan; a companion playback-clock integration has been committed to draft PR #1181 and is awaiting its exact-head CI run.  
 **Purpose:** turn STAR's existing voice, room, scheduler, game-control, Roblox, memory, and creator prototypes into one measurable live runtime without claiming unmerged or untested capabilities are shipped.
 
 ---
@@ -26,7 +26,7 @@ The current public architecture is a local-first Windows desktop application wit
 Relevant existing foundations inspected:
 
 - PR #1180: cumulative research and integration blueprints.
-- PR #1181: freshness-first microphone buffering and asynchronous speaker-level metering.
+- PR #1181: freshness-first microphone buffering, asynchronous speaker-level metering, and per-reply PortAudio DAC-time PlaybackSnapshot.
 - PR #1182: fail-closed game-control policy gate and one-action-per-observation budget.
 - PR #1140: bounded CPU/RAM/VRAM workload admission policy.
 - PR #1142: bridge between the stream-pressure governor and workload admission.
