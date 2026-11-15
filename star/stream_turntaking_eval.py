@@ -126,6 +126,11 @@ class TurnPolicyResult:
     p50_observed_latency_ms: float
     p95_observed_latency_ms: float
 
+    @property
+    def censored_turn_count(self) -> int:
+        """Turns represented only by HOLD spans when censored turns are enabled."""
+        return max(0, self.turn_count - self.final_turn_count)
+
 
 @dataclass(frozen=True)
 class TurnTakingSweep:
@@ -141,7 +146,11 @@ def _nearest_rank(values: list[float], probability: float) -> float:
     return ordered[rank - 1]
 
 
-def _validate_spans(spans: Sequence[SilenceSpan]) -> tuple[SilenceSpan, ...]:
+def _validate_spans(
+    spans: Sequence[SilenceSpan], *, allow_censored_turns: bool = False,
+) -> tuple[SilenceSpan, ...]:
+    if type(allow_censored_turns) is not bool:
+        raise ValueError("allow_censored_turns must be boolean")
     if not isinstance(spans, (tuple, list)) or not 1 <= len(spans) <= _MAX_SPANS:
         raise ValueError("spans must contain 1..20000 observations")
     rows = tuple(spans)
@@ -172,8 +181,10 @@ def _validate_spans(spans: Sequence[SilenceSpan]) -> tuple[SilenceSpan, ...]:
             turns[span.turn_id] = (env, count + 1)
     if hold_count == 0 or final_count == 0:
         raise ValueError("evaluation requires both hold pauses and final turns")
-    if any(finals != 1 for _, finals in turns.values()):
-        raise ValueError("each turn must contain exactly one END_OF_TURN span")
+    if any(finals > 1 or (not allow_censored_turns and finals != 1)
+           for _, finals in turns.values()):
+        requirement = "at most one" if allow_censored_turns else "exactly one"
+        raise ValueError(f"each turn must contain {requirement} END_OF_TURN span")
     return rows
 
 
@@ -215,15 +226,18 @@ def evaluate_turn_policy(
     policy: TurnPolicy,
     *,
     score_source: ScoreSource = ScoreSource.MODEL,
+    allow_censored_turns: bool = False,
 ) -> TurnPolicyResult:
     """Evaluate one endpointing policy on the same labeled causal pause set.
 
     Missed final turns are counted separately and assigned the observed horizon
     as a right-censored latency, so a system cannot look fast by failing to
     answer. False cutoffs are the fraction of HOLD spans that trigger an action
-    before the human resumes.
+    before the human resumes. With allow_censored_turns enabled, turns containing
+    only HOLD spans contribute to that denominator but not to final-turn misses
+    or endpointing latency; at least one complete turn is still required.
     """
-    rows = _validate_spans(spans)
+    rows = _validate_spans(spans, allow_censored_turns=allow_censored_turns)
     if not isinstance(policy, TurnPolicy):
         raise TypeError("policy must be TurnPolicy")
     if not isinstance(score_source, ScoreSource):
@@ -324,14 +338,18 @@ def sweep_turn_policies(
     action_delays_ms: Sequence[int],
     timeouts_ms: Sequence[int],
     include_silence_baseline: bool = True,
+    allow_censored_turns: bool = False,
 ) -> TurnTakingSweep:
     """Sweep a bounded policy grid and include a silence-only baseline.
 
     The same spans and labels are used for every policy. Thresholds are not
     inferred from the test set; callers should predeclare the grid and keep a
-    separate held-out set for final acceptance.
+    separate held-out set for final acceptance. When allow_censored_turns is true,
+    HOLD-only turns contribute to false-cutoff measurement but are not counted as
+    missed final turns or assigned invented endpointing latency. At least one
+    complete turn remains required.
     """
-    rows = _validate_spans(spans)
+    rows = _validate_spans(spans, allow_censored_turns=allow_censored_turns)
     if type(include_silence_baseline) is not bool:
         raise ValueError("include_silence_baseline must be boolean")
     if not isinstance(thresholds, (tuple, list)) or not thresholds:
@@ -350,13 +368,16 @@ def sweep_turn_policies(
         for delay in action_delays_ms:
             for timeout in timeouts_ms:
                 policy = TurnPolicy(threshold, delay, timeout)
-                results.append(evaluate_turn_policy(rows, policy))
+                results.append(evaluate_turn_policy(
+                    rows, policy, allow_censored_turns=allow_censored_turns
+                ))
     if include_silence_baseline:
         for delay in action_delays_ms:
             for timeout in timeouts_ms:
                 policy = TurnPolicy(0.0, delay, timeout)
                 results.append(evaluate_turn_policy(
-                    rows, policy, score_source=ScoreSource.SILENCE_ONLY
+                    rows, policy, score_source=ScoreSource.SILENCE_ONLY,
+                    allow_censored_turns=allow_censored_turns,
                 ))
     ordered = tuple(sorted(results, key=lambda item: (
         item.score_source.value,
