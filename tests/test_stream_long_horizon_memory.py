@@ -69,6 +69,13 @@ class StreamLongHorizonMemoryTests(unittest.TestCase):
             "session_one", now_ms=START + 2000, audience_can_hear=False,
         ))
 
+    def test_retrieval_requires_separate_broadcast_approval(self):
+        event = make_event("evt_1", 1, START + 1000)
+        self.memory.ingest(event, sign(event), now_ms=START + 1000)
+        self.assertIsNone(self.memory.retrieve(
+            "session_one", now_ms=START + 2000, audience_can_hear=True,
+        ))
+
     def test_all_five_memory_horizons(self):
         now = START + 3_700_000
         ages = (59 * 60_000, 29 * 60_000, 14 * 60_000, 4 * 60_000, 30_000)
@@ -223,7 +230,8 @@ class StreamLongHorizonMemoryTests(unittest.TestCase):
         event = make_event("evt_1", 1, START + 1000)
         self.memory.ingest(event, sign(event), now_ms=START + 1000)
         with self.assertRaises(ValueError):
-            self.memory.retrieve("session_one", now_ms=START + 500, audience_can_hear=True)
+            self.memory.retrieve("session_one", now_ms=START + 500,
+                                 broadcast_approved=True, audience_can_hear=True)
 
     def test_packet_is_bounded_and_does_not_authorize_speech(self):
         event = make_event("evt_1", 1, START + 1000)
