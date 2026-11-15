@@ -17,7 +17,8 @@ def test_sources_are_https_unique_and_research_only():
             "model-interruption-bench", "subternary", "gamedevbench",
             "robloxstudio-mcp", "mp-bench", "mem2actbench", "memagent",
             "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam", "sima2", "vjepa2", "osworld-v2", "androidworld", "openhands-index",
-            "skillret", "polyskill", "skilllearnbench", "skillhorizon", "skill2bench"}.issubset(ids)
+            "skillret", "polyskill", "skilllearnbench", "skillhorizon", "skill2bench",
+            "agentspec", "asymspec", "omniagent", "tact", "turboquant", "express-streamer"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -54,6 +55,14 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert sources["skilllearnbench"].status == "research_only"
     assert sources["skillhorizon"].status == "research_only"
     assert sources["skill2bench"].status == "research_only"
+    assert all(sources[key].status == "research_only" for key in
+               ("agentspec", "asymspec", "omniagent", "tact", "turboquant", "express-streamer"))
+    assert "never execute side effects" in sources["agentspec"].warning
+    assert "critical evidence" in sources["asymspec"].warning
+    assert "8 GB GPU" in sources["omniagent"].warning
+    assert "not STAR results" in sources["tact"].warning
+    assert "H100-specific" in sources["turboquant"].warning
+    assert "UX hypothesis" in sources["express-streamer"].warning
     assert "Pin the dataset revision" in sources["skillret"].warning
     assert "web-agent-specific" in sources["polyskill"].warning
     assert "self-feedback drift" in sources["skilllearnbench"].warning
@@ -77,10 +86,12 @@ def test_search_category_and_bounded_results():
     assert catalog(limit=2)["truncated"]
     assert len(catalog(limit=2)["sources"]) == 2
     assert not catalog("THIS_DOES_NOT_EXIST")["sources"]
-    assert catalog("MiXeD")["checked_on"] == "2026-11-14"
+    assert catalog("MiXeD")["checked_on"] == "2026-11-15"
     assert catalog("GameWorld")["total"] == 1
     assert catalog(category="benchmarks")["total"] >= 6
     assert catalog(category="input")["total"] == 2
+    assert catalog(category="inference")["total"] >= 4
+    assert catalog(category="vtuber")["total"] >= 1
     default_catalog = catalog()
     assert len(default_catalog["sources"]) <= 70
     assert default_catalog["total"] == len(default_catalog["sources"])
