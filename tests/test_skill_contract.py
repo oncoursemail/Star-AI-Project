@@ -361,6 +361,7 @@ def test_contract_json_rejects_duplicate_keys_at_every_level():
 
 
 def test_contract_json_rejects_nonstandard_numeric_constants():
-    raw = json.dumps(valid_contract()).replace('"max_tokens": 100', '"max_tokens": NaN')
+    raw = json.dumps(valid_contract()).replace('"max_tokens": 2000', '"max_tokens": NaN')
+    assert '"max_tokens": NaN' in raw, "fixture must contain the max_tokens field"
     with unittest.TestCase().assertRaisesRegex(ValueError, "non-standard JSON constant"):
         parse_skill_contract(raw)
