@@ -22,6 +22,7 @@ from typing import Callable
 from .stream_director import StreamSignal
 from .stream_episode import EpisodePacket
 from .stream_knowledge import KnowledgePacket
+from .stream_long_horizon_memory import ContinuityPacket
 from .stream_hardware_telemetry import LiveHostSample, RealtimeTelemetryHost
 from .stream_qos import AdaptiveQoS, InferenceJob, QoSDecision
 from .stream_stage import StagePlan, StarStage
@@ -244,6 +245,7 @@ class StreamBrainGovernor:
         turn: TurnAdvice | None = None,
         knowledge: KnowledgePacket | None = None,
         episode: EpisodePacket | None = None,
+        continuity: ContinuityPacket | None = None,
     ) -> StagePlan | None:
         """Propose contextual speech only with fresh trusted hardware data.
 
@@ -255,6 +257,8 @@ class StreamBrainGovernor:
             raise TypeError("expected reviewed KnowledgePacket")
         if episode is not None and not isinstance(episode, EpisodePacket):
             raise TypeError("expected verified EpisodePacket")
+        if continuity is not None and not isinstance(continuity, ContinuityPacket):
+            raise TypeError("expected host-attested ContinuityPacket")
         with self._lock:
             if not self._enabled:
                 return None
@@ -268,6 +272,7 @@ class StreamBrainGovernor:
                 viewer_speaking=viewer_speaking,
                 gameplay_critical=gameplay_critical,
                 turn=turn, knowledge=knowledge, episode=episode,
+                continuity=continuity,
             )
             if plan is not None:
                 self._counts["speech_prepared"] += 1
