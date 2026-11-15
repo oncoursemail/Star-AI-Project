@@ -138,7 +138,10 @@ class FakeSpeaker:
 
     def played_seconds(self) -> float:
         with self.lock:
-            return self.queued - max(0.0, self.queue_end - time.monotonic())
+            # Floating-point subtraction can produce a tiny negative at the queue boundary.
+            # Playback time is a monotonic non-negative quantity, so clamp the fake just
+            # as a real sample counter would.
+            return max(0.0, self.queued - max(0.0, self.queue_end - time.monotonic()))
 
     def level(self) -> float:
         return 0.1 if self.pending_seconds() > 0 else 0.0
