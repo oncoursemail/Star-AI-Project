@@ -131,6 +131,7 @@ class OBSHostSample:
     """One bounded sample from OBS plus the two independent interval windows."""
 
     captured_ms: int
+    stats_captured_ms: int
     sampled_ms: int
     sampling_skew_ms: int
     obs_epoch: str
@@ -188,7 +189,7 @@ class OBSHostSample:
         drop_observation = (
             None if dropped is None else MetricObservation(
                 value=dropped,
-                captured_ms=self.captured_ms,
+                captured_ms=self.stats_captured_ms,
                 clock_epoch=clock_epoch,
             )
         )
@@ -429,7 +430,8 @@ class OBSWebSocketHost:
                 render_time = stats_snapshot.average_frame_render_time_ms
                 render_budget = 1_000.0 / target_fps
                 sample = OBSHostSample(
-                    captured_ms=captured,
+                    captured_ms=stream_end_at,
+                    stats_captured_ms=stats_at,
                     sampled_ms=sampled,
                     sampling_skew_ms=skew,
                     obs_epoch=obs_epoch,
