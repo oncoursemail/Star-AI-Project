@@ -296,7 +296,7 @@ No paper-reported speedup is a STAR result until measured on STAR's actual hardw
 2. Add a pure, deterministic active-perception candidate selector with media-unit and freshness limits.
 3. Add tests for stale, future, expired, duplicate, over-budget, wrong-session, and tie-break cases.
 4. Connect only trusted observation adapters; keep the selector separate from capture and game input.
-5. Extend the benchmark manifest with perception decisions, selected evidence, media units, and event-to-action timing.
+5. Extend the benchmark manifest with perception-policy revision, request kinds, media-unit caps, stale/duplicate rejection, intent-conditioned turn quality, asynchronous result delivery, KV-cache, and decode measurements. The companion manifest template now includes optional fields for these metrics.
 6. Add an incremental ASR interface with partial/committed/final/correction events and cancellation, preserving utterance IDs.
 7. Add intent-conditioned turn-taking replay tests based on TACT-style labels.
 8. Add generation-aware asynchronous task completion and delivery reconciliation over the existing ledger.
