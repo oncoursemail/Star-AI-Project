@@ -49,6 +49,9 @@ The current leaderboard reports:
 
 The debug suite is a separate capability slice: diagnosing and repairing injected bugs is not equivalent to greenfield code generation.
 
+The current expanded leaderboard is useful as an external calibration point, not as a STAR result or a local-model target. Its displayed top entry for the expanded set reports Pass@1 50.34%, Pass@5 62.07%, Cons@5 51.09%, All@5 39.52%, and 1.40% average tool-error rate. Its separate debug table reports different values and must not be blended into the greenfield suite. These figures are tied to the upstream suite/model configuration and are not transferable to STAR's hardware without a matched run.
+
+
 ### 1.2 The result contract is more useful than a screenshot-only score
 
 The official README documents result rows by mode, including **[EDIT]** and **[PLAY]**, and per-mode **passes**, **fails**, **checks**, warnings, errors and interruptions. The benchmark considers an evaluation successful only when all checks pass.
@@ -300,6 +303,8 @@ Research references:
 - Duplex-MPE: https://arxiv.org/abs/2609.31948
 - EoT-Bench v1.1: https://github.com/livekit/eot-bench
 - Full-Duplex-Bench v3: https://arxiv.org/abs/2604.04847
+
+MP-Bench evaluates voice agents as active participants in multiparty conversation; its authors report that the tested real-time agents reached at most 22% on multiparty comprehension and remained near chance on multiparty turn-taking. Duplex-MPE adds 2,000 three-/four-human scenarios and explicitly scores when the assistant should answer, stay silent, or stop after a human resolves a request. EoT-Bench v1.1 was updated on 2026-11-13 and exposes 7,342 human-to-agent turns across 14 languages, with a policy sweep that makes false-cutoff rate and endpointing delay visible as a Pareto trade-off. These are benchmark findings, not STAR performance claims.
 
 A believable AI streamer is not one that speaks constantly. It is one that follows the conversation, recognizes when she is addressed, reacts appropriately, remembers relevant context, and is comfortable remaining silent. Keep AI identity transparent; do not invent human autobiography.
 
