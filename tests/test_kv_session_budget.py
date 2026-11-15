@@ -35,8 +35,8 @@ def test_admit_when_measured_headroom_is_sufficient():
 
 def test_defer_when_capacity_is_full_and_no_lower_priority_session_exists():
     result = plan_admission(
-        snapshot(session("voice-1", "speech", 3500),
-                 session("voice-2", "interactive", 3500)),
+        snapshot(session("voice-1", "speech", 4500),
+                 session("voice-2", "speech", 4500), capacity=10000, reserve=1000),
         request(mib=1024), now_ms=1100,
     )
     assert result.action == "defer"
@@ -45,7 +45,7 @@ def test_defer_when_capacity_is_full_and_no_lower_priority_session_exists():
 
 def test_speech_can_propose_suspending_background_training():
     result = plan_admission(
-        snapshot(session("training", "training", 2500)),
+        snapshot(session("training", "training", 5000)),
         request(mib=2500), now_ms=1100,
     )
     assert result.action == "suspend_then_admit"
@@ -56,7 +56,7 @@ def test_speech_can_propose_suspending_background_training():
 
 def test_equal_priority_is_never_preempted():
     result = plan_admission(
-        snapshot(session("old-speech", "speech", 3000)),
+        snapshot(session("old-speech", "speech", 5000)),
         request(name="new-speech", workload="speech", mib=3000),
         now_ms=1100,
     )
@@ -66,7 +66,7 @@ def test_equal_priority_is_never_preempted():
 
 def test_higher_priority_is_never_preempted():
     result = plan_admission(
-        snapshot(session("speech", "speech", 3000)),
+        snapshot(session("speech", "speech", 5000)),
         request(workload="training", mib=3000), now_ms=1100,
     )
     assert result.action == "defer"
@@ -74,7 +74,7 @@ def test_higher_priority_is_never_preempted():
 
 def test_non_suspendable_background_session_is_protected():
     result = plan_admission(
-        snapshot(session("training", "training", 3000, suspendable=False)),
+        snapshot(session("training", "training", 5000, suspendable=False)),
         request(mib=3000), now_ms=1100,
     )
     assert result.action == "defer"
@@ -87,7 +87,7 @@ def test_lower_priority_oldest_session_is_selected_first():
             session("research-new", "research", 1200, active=900),
             session("training", "training", 1200, active=200),
         ),
-        request(mib=4000), now_ms=1100,
+        request(mib=5500), now_ms=1100,
     )
     assert result.action == "suspend_then_admit"
     assert result.suspend_session_ids[0] == "training"
@@ -100,7 +100,7 @@ def test_minimal_victim_set_is_returned():
             session("train-large", "training", 3000),
             session("train-small", "training", 700),
         ),
-        request(mib=3000), now_ms=1100,
+        request(mib=4000), now_ms=1100,
     )
     assert result.action == "suspend_then_admit"
     assert result.suspend_session_ids == ("train-large",)
@@ -108,8 +108,8 @@ def test_minimal_victim_set_is_returned():
 
 def test_snapshot_reserve_is_never_consumed():
     result = plan_admission(
-        snapshot(capacity=4096, reserve=1024,
-                 sessions=(session("current", "interactive", 2500),)),
+        snapshot(session("current", "interactive", 2500),
+                 capacity=4096, reserve=1024),
         request(workload="interactive", mib=600), now_ms=1100,
     )
     assert result.action == "defer"
