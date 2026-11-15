@@ -6,7 +6,7 @@ or authorize speech. A pass is a replay-evaluation result, never an automatic pr
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 import hashlib
 import hmac
 import json
@@ -337,7 +337,7 @@ def _summarize(
     latencies = [
         outcome.response_latency_ms
         for _, outcome in rows
-        if outcome.audible_response_started and outcome.response_latency_ms is not None
+        if outcome.audible_response_started and isinstance(outcome.response_latency_ms, int)
     ]
 
     category_counts = {
