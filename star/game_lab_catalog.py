@@ -353,7 +353,7 @@ SOURCES = (
     Source("weavebench", "WeaveBench hybrid GUI and CLI workflow benchmark",
            "https://arxiv.org/abs/2606.09426", "benchmarks",
            "114 long-horizon tasks across eight domains requiring interleaved GUI observation/action, CLI/code edits and artifact/log verification with trajectory-aware judging",
-           warning="Paper reports that outcome-only grading can overestimate agent performance. Use synthetic fixtures, inspect action traces and deliverable provenance, and keep real user files/accounts out of benchmark runs."),
+           warning="Trajectory-aware judging is essential: outcome-only grading can overestimate agent performance. Use synthetic fixtures, inspect action traces and deliverable provenance, and keep real user files/accounts out of benchmark runs."),
 )
 
 
