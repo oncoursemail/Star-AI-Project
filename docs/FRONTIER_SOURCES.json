@@ -1076,5 +1076,47 @@
     "url": "https://arxiv.org/abs/2608.05139",
     "kind_and_usage": "Paper: 558 skills across nine domains, directional skill-switch difficulty, and skill-sequence evaluation/training research",
     "audit": "Paper and official Gen-Verse implementation checked 2026-11-14; reported RL gains are specific to Qwen3 training experiments; use transition evaluation methodology, not local RL training"
+  },
+  {
+    "id": "R159",
+    "title": "AgentSpec: Speculative Decoding for Batch Inference of LLM Agents",
+    "url": "https://aclanthology.org/2026.emnlp-main.585/",
+    "kind_and_usage": "EMNLP 2026 paper: structure-isolated drafting and redundancy-aware dynamic token budgets for batched agent workloads in vLLM",
+    "audit": "ACL Anthology and arXiv abstract checked 2026-11-15; backend-specific research, not a llama.cpp/Vulkan or local RTX 4060 speed claim"
+  },
+  {
+    "id": "R160",
+    "title": "AsymSpec: Context-Asymmetric Speculative Decoding for Agentic LLMs",
+    "url": "https://arxiv.org/abs/2608.26004",
+    "kind_and_usage": "Preprint: full-context lightweight drafter with compressed-context verifier and divergence-aware acceptance",
+    "audit": "arXiv abstract checked 2026-11-15; reported throughput/compute gains are paper-specific and require paired quality/latency replication"
+  },
+  {
+    "id": "R161",
+    "title": "OmniAgent: Native Active Perception as Reasoning for Omni-Modal Understanding",
+    "url": "https://arxiv.org/abs/2606.19341",
+    "kind_and_usage": "ICML 2026 paper: on-demand frame/audio/clip requests, iterative observation-thought-action and persistent textual evidence memory",
+    "audit": "arXiv paper and official HarryHsing/OmniAgent repository checked 2026-11-15; 7B model not proposed for local 8 GB mixed-load deployment"
+  },
+  {
+    "id": "R162",
+    "title": "TACT: Intent-Conditioned Evaluation of Turn-Taking in Full-Duplex Spoken Dialogue Models",
+    "url": "https://arxiv.org/abs/2609.27372",
+    "kind_and_usage": "Preprint benchmark: 9,728 episodes / 73.2 hours with speaker-intent-conditioned turn timing",
+    "audit": "arXiv abstract checked 2026-11-15; dyadic benchmark methodology, not a STAR score or cross-platform identity system"
+  },
+  {
+    "id": "R163",
+    "title": "TurboQuant: Online Vector Quantization with Near-Optimal Distortion",
+    "url": "https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/",
+    "kind_and_usage": "Official Google Research article on KV-cache compression, PolarQuant, and Quantized Johnson–Lindenstrauss residual correction",
+    "audit": "Google Research article checked 2026-11-15; H100 attention-logit speedup is not an RTX 4060 or end-to-end token-generation result"
+  },
+  {
+    "id": "R164",
+    "title": "EXPRESS: Toward Intelligent Virtual Streamers through Responsiveness and Response Naturalness",
+    "url": "https://doi.org/10.1177/10949968261471154",
+    "kind_and_usage": "2026 experimental study of the interaction between responsiveness and response naturalness in virtual livestreaming",
+    "audit": "Publisher abstract checked 2026-11-15; e-commerce livestream context, treated as a product-design hypothesis rather than direct Twitch/game-stream evidence"
   }
 ]
