@@ -221,15 +221,15 @@ def test_reset_serializes_with_inflight_playback_callback(monkeypatch):
 
     monkeypatch.setattr(speaker._playback, "record_callback", blocked_record)
 
+    output = bytearray(len(pcm))
+
     def emit_audio():
-        output = bytearray(len(pcm))
         speaker._callback(
             output,
             len(pcm) // 2,
             SimpleNamespace(currentTime=2.0, outputBufferDacTime=2.025),
             SimpleNamespace(output_underflow=False, output_overflow=False),
         )
-        assert bytes(output) == pcm
 
     callback_thread = threading.Thread(target=emit_audio, daemon=True)
     callback_thread.start()
@@ -249,6 +249,7 @@ def test_reset_serializes_with_inflight_playback_callback(monkeypatch):
     reset_thread.join(1.0)
     assert not callback_thread.is_alive()
     assert not reset_thread.is_alive()
+    assert bytes(output) == pcm
     assert reset_done.is_set()
     snapshot = speaker.playback_snapshot()
     assert snapshot.first_playback_at is None
