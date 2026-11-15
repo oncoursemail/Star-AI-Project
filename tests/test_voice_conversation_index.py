@@ -159,3 +159,12 @@ def test_unhashable_source_and_intent_are_rejected_without_raising():
     index = ConversationContextIndex("s1")
     assert index.ingest(event("source", source=[]), now=10.0).reason == "invalid_source"
     assert index.ingest(event("intent", intent={}), now=10.0).reason == "invalid_intent"
+
+
+def test_same_reference_string_from_different_sources_is_not_linked():
+    index = ConversationContextIndex("s1")
+    assert index.ingest(event("chat", sequence=1, speaker="same", source="chat"), now=10.0).accepted
+    assert index.ingest(
+        event("audio", sequence=2, observed_at=10.1, speaker="same", source="audio"), now=10.1
+    ).accepted
+    assert index.stats.participants == 2
