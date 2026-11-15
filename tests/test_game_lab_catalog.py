@@ -17,7 +17,7 @@ def test_sources_are_https_unique_and_research_only():
             "model-interruption-bench", "subternary", "gamedevbench",
             "robloxstudio-mcp", "mp-bench", "mem2actbench", "memagent",
             "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam", "sima2", "vjepa2", "osworld-v2", "androidworld", "openhands-index",
-            "skillret", "polyskill", "skilllearnbench"}.issubset(ids)
+            "skillret", "polyskill", "skilllearnbench", "skillhorizon", "skill2bench"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -52,9 +52,13 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert sources["skillret"].status == "research_only"
     assert sources["polyskill"].status == "research_only"
     assert sources["skilllearnbench"].status == "research_only"
+    assert sources["skillhorizon"].status == "research_only"
+    assert sources["skill2bench"].status == "research_only"
     assert "Pin the dataset revision" in sources["skillret"].warning
     assert "web-agent-specific" in sources["polyskill"].warning
     assert "self-feedback drift" in sources["skilllearnbench"].warning
+    assert "not a game benchmark" in sources["skillhorizon"].warning
+    assert "local 8 GB GPU" in sources["skill2bench"].warning
     assert "not a STAR speedup" in sources["streamarena"].warning
     assert "no implementation installed" in sources["eventmemagent"].warning
     assert "Do not online-train" in sources["onlinewm"].warning
@@ -78,7 +82,7 @@ def test_search_category_and_bounded_results():
     assert catalog(category="benchmarks")["total"] >= 6
     assert catalog(category="input")["total"] == 2
     default_catalog = catalog()
-    assert len(default_catalog["sources"]) <= 60
+    assert len(default_catalog["sources"]) <= 70
     assert default_catalog["total"] == len(default_catalog["sources"])
     assert not default_catalog["truncated"]
 
