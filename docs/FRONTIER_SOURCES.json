@@ -1146,5 +1146,54 @@
     "url": "https://docs.nvidia.com/aiperf/reference/ai-perf-metrics-reference",
     "kind_and_usage": "Official metric definitions for TTFT, ITL/TPOT, end-to-end request latency and percentile-based streaming inference reporting",
     "audit": "NVIDIA AIPerf documentation checked 2026-11-15; tool definitions differ, so align empty-chunk handling and token timing semantics; no AIPerf run performed"
+  },
+  {
+    "id": "R169",
+    "title": "SentinelBench: A Benchmark for Long-Running Monitoring Agents",
+    "url": "https://arxiv.org/abs/2606.05342",
+    "kind_and_usage": "Paper and MIT-licensed official environment: 100 tasks across 10 time-evolving synthetic applications; evaluates completion, reaction time and resource use for passive, active and no-op monitoring",
+    "audit": "Microsoft Research article, arXiv v2 and microsoft/sentinel_environments README checked 2026-11-15; use as a wait/notice/act and false-positive benchmark, not as a production scheduler or real account integration"
+  },
+  {
+    "id": "R170",
+    "title": "GameWorld: Towards Standardized and Verifiable Evaluation of Multimodal Game Agents",
+    "url": "https://gameworld-project.github.io/",
+    "kind_and_usage": "Benchmark: 34 browser games / 170 tasks across five genres with serialized-state success and normalized-progress verification; includes a separate real-time variant",
+    "audit": "Official project page checked 2026-11-15; keep paused and real-time results separate, and do not equate browser benchmark results with Windows/Roblox gameplay acceptance"
+  },
+  {
+    "id": "R171",
+    "title": "Full-Duplex-Bench v3: Benchmarking Tool Use for Full-Duplex Voice Agents Under Real-World Disfluency",
+    "url": "https://arxiv.org/abs/2604.04847",
+    "kind_and_usage": "100 human-recorded spoken requests, 79 scenarios, 12 speakers and chained mock-API calls; evaluates Pass@1, tool-call F1, latency and turn-taking",
+    "audit": "arXiv paper and official benchmark catalogue checked 2026-11-15; published model results are benchmark-specific, not STAR results; retain task, latency and turn-taking dimensions separately"
+  },
+  {
+    "id": "R172",
+    "title": "InteractionBench: Timing, Task Accuracy, Paralinguistic Control and Grounding for Realtime Voice",
+    "url": "https://avera-labs.github.io/InteractionBench/",
+    "kind_and_usage": "13 scenarios, 221 items and seven evaluated systems; separates conversational timing, spoken-task accuracy, whisper/volume control and long-conversation grounding",
+    "audit": "Official project page checked 2026-11-15; use a pinned protocol and report each dimension independently; no STAR score or Twitch-specific validation claimed"
+  },
+  {
+    "id": "R173",
+    "title": "llama.cpp official server runtime and speculative decoding documentation",
+    "url": "https://github.com/ggml-org/llama.cpp/tree/master/tools/server",
+    "kind_and_usage": "Official llama-server reference for continuous batching, parallel slots, prompt caching, cache reuse, metrics, model routing and supported speculative-decoding methods",
+    "audit": "Official server README and speculative decoding documentation checked 2026-11-15; pin exact llama.cpp build and feature support; do not transfer CUDA/H100 or other-backend gains to STAR's Vulkan/8 GB target"
+  },
+  {
+    "id": "R174",
+    "title": "VTube Studio Public Plugin API",
+    "url": "https://github.com/DenchiSoft/VTubeStudio",
+    "kind_and_usage": "Authenticated local WebSocket API for Live2D parameter injection, hotkeys, model/item events and plugin integrations",
+    "audit": "Official API README checked 2026-11-15; user must enable Plugin API access and approve authentication; injected parameters must be refreshed at least once per second; preserve local-only access and playback-clock ownership"
+  },
+  {
+    "id": "R175",
+    "title": "Roblox Studio is Going Agentic: Plan, Build and Test Workflows",
+    "url": "https://about.roblox.com/newsroom/2026/04/roblox-studio-going-agentic",
+    "kind_and_usage": "Official Roblox 2026 direction for editable task manifests, parallel planning/building, procedural generation and playtesting agents that verify against the original plan",
+    "audit": "Roblox newsroom article published 2026-04-15; beta feature availability is platform-controlled and does not imply STAR integration; use official Studio MCP and StudioTestService only with owner opt-in"
   }
 ]
