@@ -16,7 +16,7 @@ def test_sources_are_https_unique_and_research_only():
             "javis", "realtime-venus", "hithink-turn", "joi-bench-task",
             "model-interruption-bench", "subternary", "gamedevbench",
             "robloxstudio-mcp", "mp-bench", "mem2actbench", "memagent",
-            "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam"}.issubset(ids)
+            "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam", "sima2", "vjepa2", "osworld-v2", "androidworld", "openhands-index"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -43,10 +43,20 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert sources["eventmemagent"].status == "research_only"
     assert sources["onlinewm"].status == "research_only"
     assert sources["ma-wam"].status == "research_only"
+    assert sources["sima2"].status == "research_only"
+    assert sources["vjepa2"].status == "research_only"
+    assert sources["osworld-v2"].status == "research_only"
+    assert sources["androidworld"].status == "research_only"
+    assert sources["openhands-index"].status == "research_only"
     assert "not a STAR speedup" in sources["streamarena"].warning
     assert "no implementation installed" in sources["eventmemagent"].warning
     assert "Do not online-train" in sources["onlinewm"].warning
     assert "Offline MARL results only" in sources["ma-wam"].warning
+    assert "not a generally downloadable local model" in sources["sima2"].warning
+    assert "not a desktop/game action controller" in sources["vjepa2"].warning
+    assert "pinned osworld-v2.1" in sources["osworld-v2"].warning
+    assert "production phone-control permission" in sources["androidworld"].warning
+    assert "not STAR scores" in sources["openhands-index"].warning
     assert "read-only mode first" in sources["robloxstudio-mcp"].warning
 
 
