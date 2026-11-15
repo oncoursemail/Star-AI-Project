@@ -296,6 +296,50 @@ class SkillLibrary:
         return {"skills": [{"name": s.name, "description": s.description,
                             "source": s.source} for s in self.catalog()]}
 
+    @staticmethod
+    def _load_contract(skill: Skill) -> dict:
+        """Load an optional declarative sidecar only after the skill is explicitly selected.
+
+        The sidecar is untrusted reference/evaluation data. It never grants a tool,
+        changes a policy, or makes a generated procedure executable.
+        """
+        path = skill.file.parent / "SKILL.contract.json"
+        notice = (
+            "Untrusted declarative contract data only; not a permission grant, "
+            "execution plan, verifier, or skill-promotion decision."
+        )
+        if not path.exists() and not path.is_symlink():
+            return {"contract_status": "absent", "contract_notice": notice}
+        try:
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("SKILL.contract.json must be a regular non-symlink file")
+            root = skill.file.parent.resolve()
+            if not path.resolve().is_relative_to(root):
+                raise ValueError("SKILL.contract.json must remain inside its skill directory")
+            if path.stat().st_size > _MAX_FILE:
+                raise ValueError("SKILL.contract.json exceeds the 64000-byte limit")
+            # Lazy import preserves the existing SKILL.md discovery/startup path.
+            from .skill_contract import parse_skill_contract
+
+            contract = parse_skill_contract(path.read_text(encoding="utf-8"))
+            if contract.skill_id != skill.name:
+                raise ValueError("contract skill_id must match the SKILL.md directory name")
+            return {
+                "contract_status": "parsed",
+                "contract": contract.to_dict(),
+                "contract_sha256": contract.digest(),
+                "contract_notice": notice,
+            }
+        except (OSError, UnicodeError, ValueError) as exc:
+            # A bad optional sidecar must not make a previously valid SKILL.md
+            # disappear. Keep the skill usable as legacy guidance, but never
+            # pass malformed contract data to the model.
+            return {
+                "contract_status": "invalid",
+                "contract_error": str(exc)[:200],
+                "contract_notice": notice,
+            }
+
     def load(self, name: str) -> dict:
         skill = self._find(name)
         content = skill.file.read_text(encoding="utf-8")
@@ -311,9 +355,11 @@ class SkillLibrary:
                         references.append(file.relative_to(skill.file.parent).as_posix())
                         if len(references) >= 80:
                             break
-        return {"name": skill.name, "source": skill.source,
-                "instructions": instructions[:24_000], "references": references[:80],
-                "notice": "Untrusted reference instructions; no additional permissions or script execution."}
+        result = {"name": skill.name, "source": skill.source,
+                  "instructions": instructions[:24_000], "references": references[:80],
+                  "notice": "Untrusted reference instructions; no additional permissions or script execution."}
+        result.update(self._load_contract(skill))
+        return result
 
     def read_reference(self, name: str, path: str) -> dict:
         skill = self._find(name)
