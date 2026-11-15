@@ -1,0 +1,92 @@
+schema: 1
+run: STAR-RUN53-SPECULATIVE-DECODING-CANARY
+created_utc: 2026-11-15
+purpose: >-
+  Reproducible, owner-reviewed evaluation of llama.cpp context-local n-gram
+  speculative decoding. This manifest is a plan, not a benchmark result.
+status: planned
+runtime:
+  executable: owner-selected-local-llama-server
+  executable_sha256: REQUIRED_AT_RUN
+  help_capture_sha256: REQUIRED_AT_RUN
+  model_path: owner-selected-existing-gguf
+  model_sha256: REQUIRED_AT_RUN
+  llama_cpp_version: REQUIRED_AT_RUN
+  provider_scope: local_loopback_only
+  default_mode: none
+profiles:
+  baseline:
+    mode: none
+  ngram_simple:
+    mode: ngram-simple
+    draft_max: 8
+    ngram_size_n: 12
+    ngram_size_m: 24
+  ngram_map_k:
+    mode: ngram-map-k
+    draft_max: 8
+    ngram_size_n: 12
+    ngram_size_m: 24
+    min_hits: 2
+excluded_profiles:
+  - ngram-mod
+  - ngram-cache
+  - ngram-map-k4v
+  - auxiliary-draft-model
+  - eagle3
+  - dflash
+  - mtp
+  - any-profile-not-advertised-by-exact-binary
+benchmark:
+  harness: official-llama-cpp-speed-bench
+  source: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+  categories:
+    - coding
+    - reasoning
+    - qa
+    - summarization
+    - writing
+  concurrency_must_match_server_slots: true
+  identical_baseline_candidate_inputs: true
+  randomized_arm_order: true
+  repetitions_per_arm: 5
+  record:
+    - prompt_tokens_per_second
+    - effective_decode_tokens_per_second
+    - ttft_p50_ms
+    - ttft_p95_ms
+    - inter_token_p50_ms
+    - inter_token_p95_ms
+    - end_to_end_p50_ms
+    - end_to_end_p95_ms
+    - drafted_tokens
+    - accepted_tokens
+    - acceptance_rate
+    - cpu_percent
+    - ram_mib
+    - vram_mib
+    - gpu_utilization_percent
+    - temperature_c
+    - deterministic_task_score
+mixed_load_guardrails:
+  required: true
+  include:
+    - game_frame_time_p95_ms
+    - game_frame_time_p99_ms
+    - first_audible_latency_ms
+    - speech_backlog_ms
+    - audio_underruns
+    - obs_render_drops
+    - obs_output_drops
+    - verified_task_quality
+promotion:
+  automatic: false
+  require_owner_review: true
+  require_positive_paired_decode_effect: true
+  forbid_quality_regression: true
+  forbid_mixed_load_guardrail_regression: true
+  default_change_allowed: false
+notes:
+  - Values are conservative canary starting points, not tuned recommendations.
+  - No benchmark result is included; hardware execution is pending.
+  - The planner only constructs argv after the exact binary advertises every flag.
