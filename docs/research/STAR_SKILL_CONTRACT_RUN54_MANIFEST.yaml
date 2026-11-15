@@ -57,6 +57,10 @@ research_sources:
 files:
   - star/skill_contract.py
   - tests/test_skill_contract.py
+  - tests/test_skill_contract_examples.py
   - docs/skills/CONTRACT_FORMAT_V1.md
   - docs/research/STAR_20261115_RUN54_VERSIONED_SKILL_CONTRACTS_BEHAVIOR_COVERAGE_AND_VERIFIED_TRANSFER.md
   - examples/skills/roblox-open-door.contract.json
+  - examples/skills/game-observe-before-act.contract.json
+  - examples/skills/streaming-natural-turntaking.contract.json
+  - examples/skills/research-source-grounding.contract.json
