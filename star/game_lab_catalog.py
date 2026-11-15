@@ -304,7 +304,7 @@ SOURCES = (
     Source("llama-server-docs", "llama.cpp official server and inference controls",
            "https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md", "inference",
            "Official llama-server documentation for continuous batching, parallel slots, prompt caching, cache reuse, metrics, speculative decoding and router-mode model management including memory-margin-based LRU unloading",
-           warning="Flags and backend support are revision-specific. Router --models-memory-margin unloads idle LRU models, never a serving model, and its estimates omit multimodal projector memory; pin the exact llama.cpp commit and test model swaps, queueing, quality, latency and memory on the target 8 GB GPU."),
+           warning="Flags and backend support are revision-specific. Router --models-memory-margin unloads idle LRU models, never a serving model, and its estimates omit multimodal projector memory; Pin the exact llama.cpp commit and test model swaps, queueing, quality, latency and memory on the target 8 GB GPU."),
     Source("vtubestudio-api", "VTube Studio public plugin API",
            "https://github.com/DenchiSoft/VTubeStudio", "vtuber",
            "Authenticated local WebSocket API for Live2D parameter injection, hotkeys, model/item events and plugin integrations",
