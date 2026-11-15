@@ -53,6 +53,8 @@ research_sources:
   - https://arxiv.org/abs/2602.07755
   - https://arxiv.org/abs/2305.16291
   - https://arxiv.org/abs/2610.02563
+  - https://arxiv.org/abs/2609.13076
+  - https://github.com/livekit/eot-bench
   - https://github.com/agentskills/agentskills
 files:
   - star/skill_contract.py
