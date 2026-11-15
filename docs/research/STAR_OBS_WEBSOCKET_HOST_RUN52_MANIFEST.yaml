@@ -1,0 +1,100 @@
+schema_version: 1
+run_id: STAR-2026-11-15-RUN52
+purpose: owner-approved local OBS telemetry collection for STAR's stream host sampler
+repository: oncoursemail/Star-AI-Project
+branch: feat/obs-local-readonly-host-20261115-run52
+base_branch: fix/stream-host-sampling-coherence-20261112-auto11
+transport:
+  protocol: obs-websocket-v5
+  client_package: obsws-python
+  dependency_already_declared: requirements-desktop.txt
+  endpoint:
+    host: 127.0.0.1
+    port: 4455
+    caller_selectable: false
+  owner_confirmation_required: true
+  password_storage: memory_only
+  requests_allowlist:
+    - GetVersion
+    - GetStreamStatus_start_and_end_bracket
+    - GetStats
+    - GetVideoSettings
+    - GetStreamStatus_end_state_confirmation
+  write_requests: []
+  media_capture: false
+  stream_control: false
+  scene_control: false
+sampling:
+  default_min_poll_interval_ms: 500
+  allowed_min_poll_interval_ms: [250, 5000]
+  default_max_sample_skew_ms: 500
+  state_bracket_required: true
+  allowed_max_sample_skew_ms: [50, 2000]
+  default_snapshot_max_age_ms: 1500
+  allowed_snapshot_max_age_ms: [100, 10000]
+  execution_lane: background_host_worker
+  forbidden_lanes:
+    - game_frame_callback
+    - render_callback
+    - audio_callback
+metrics:
+  get_stats:
+    - activeFps
+    - averageFrameRenderTime
+    - renderSkippedFrames
+    - renderTotalFrames
+    - outputSkippedFrames
+    - outputTotalFrames
+    - cpuUsage_optional
+    - memoryUsage_optional
+  get_stream_status:
+    - outputActive
+    - outputReconnecting
+    - outputCongestion_nullable_ratio_0_to_1
+    - outputBytes
+    - outputSkippedFrames
+    - outputTotalFrames
+    - outputDuration_diagnostic_only
+    - outputTimecode_diagnostic_only
+  get_video_settings:
+    - fpsNumerator
+    - fpsDenominator
+  derived:
+    - render_skip_percent
+    - output_thread_skip_percent
+    - worst_measured_obs_drop_percent_for_stream_host_sampler
+    - output_bytes_per_second_from_host_monotonic_clock
+    - render_time_utilization_against_rational_target_fps
+  kept_separate:
+    - output_congestion
+    - output_reconnecting
+    - get_stream_status_output_frame_counters
+    - get_stats_render_thread_counters
+    - get_stats_output_thread_counters
+epochs:
+  obs_epoch: new_random_epoch_per_connection_or_GetStats_counter_rollback
+  stream_epoch: new_epoch_on_active_or_reconnecting_state_transition_or_stream_counter_rollback
+  counter_reset: discard_interval_and_rebaseline
+  invalid_or_incoherent_sample: clear_interval_windows
+host_sampler_bridge:
+  outputs:
+    - streaming_MetricObservation
+    - obs_dropped_pct_MetricObservation_or_null
+  missing_drop_rate_behavior: fail_closed_while_streaming
+  clock_epoch: supplied_by_trusted_windows_host
+security:
+  remote_hosts_allowed: false
+  raw_rpc_errors_returned: false
+  scene_or_source_names_collected: false
+  audio_or_video_collected: false
+  credentials_logged_or_persisted: false
+  automatic_obs_settings_changes: false
+validation:
+  local_isolated_tests: 32
+  local_compile: passed
+  full_repository_ci: pending_exact_head
+  windows_obs_connection_test: not_performed
+  live_stream_test: not_performed
+  hardware_mixed_load_test: not_performed
+  production_main_modified: false
+  draft_pr_only: true
