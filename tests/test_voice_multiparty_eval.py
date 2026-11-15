@@ -25,6 +25,8 @@ def _case(
     expected_response: bool | None = None,
     expected_stop: bool = False,
     expected_interrupt: bool = False,
+    scenario_sha256: str = SCENARIO,
+    matched_pair_id: str | None = None,
 ) -> RoomReplayCase:
     if expected_response is None:
         expected_response = category in {"explicit_direct", "implicit_direct", "urgent_barge_in"}
@@ -35,13 +37,14 @@ def _case(
         expected_interrupt = True
     return RoomReplayCase(
         case_id=case_id,
-        scenario_sha256=SCENARIO,
+        scenario_sha256=scenario_sha256,
         split=split,
         cue_category=category,
         participant_count=3,
         expected_response=expected_response,
         expected_stop=expected_stop,
         expected_interrupt=expected_interrupt,
+        matched_pair_id=matched_pair_id,
     )
 
 
@@ -112,7 +115,7 @@ def test_sealed_multiparty_replay_passes_all_holdout_gates():
 
 def test_development_cases_are_reported_but_do_not_drive_holdout_gates():
     cases, signed, limits = _passing_fixture()
-    dev_case = _case("dev-side", "side_conversation", split="development")
+    dev_case = _case("dev-side", "side_conversation", split="development", scenario_sha256="c" * 64)
     dev_outcome = _outcome("dev-side", RoomAction.RESPOND, response=True, latency=200, correct=False, appropriate=False)
     all_cases = cases + (dev_case,)
     all_signed = signed + (sign_room_replay_outcome(dev_outcome, validation_key=KEY),)
@@ -316,3 +319,18 @@ def test_false_stop_on_unrelated_cue_fails():
     )
     assert result["status"] == "FAIL"
     assert "false_stop_rate" in result["failed_gates"]
+
+
+def test_explicit_implicit_matched_pairs_are_sealed_and_split_disjoint():
+    pair = (
+        _case("explicit", "explicit_direct", scenario_sha256="d" * 64, matched_pair_id="request-1"),
+        _case("implicit", "implicit_direct", scenario_sha256="e" * 64, matched_pair_id="request-1"),
+    )
+    assert len(roster_digest(pair)) == 64
+    with pytest.raises(ValueError, match="matched pair"):
+        roster_digest(pair[:1])
+    with pytest.raises(ValueError, match="disjoint"):
+        roster_digest((
+            _case("holdout", "explicit_direct", scenario_sha256="f" * 64),
+            _case("development", "side_conversation", split="development", scenario_sha256="f" * 64),
+        ))
