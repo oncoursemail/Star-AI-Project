@@ -53,6 +53,32 @@ checks the selected server at start and sends the start of the open chat once, w
 message does not pay for it; it writes nothing and any real request cancels it.
 `scripts/measure_first_token.py` measures the effect against a live server.
 
+### Cross-conversation prompt-cache isolation
+
+`star/local_runtime.py` now starts both single-model and router servers with
+`--no-cache-idle-slots --cache-ram 0`. This disables llama.cpp's shared RAM
+prompt/KV cache and idle-slot snapshots while leaving ordinary same-slot
+`cache_prompt` prefix reuse enabled. The choice is a conservative isolation
+default, not a performance optimization: cross-slot prompt reuse is sacrificed
+until the upstream cache path passes STAR's canary tests.
+
+Reason: llama.cpp issue
+[#27148](https://github.com/ggml-org/llama.cpp/issues/27148) documents
+cross-conversation prompt contamination reports, including sequential and
+concurrent reproductions on multiple backends. The issue's reporters found that
+the two flags together were needed for configurations with non-unified KV;
+with unified KV, one flag was sufficient in their tested setups. A separate
+[issue #30961](https://github.com/ggml-org/llama.cpp/issues/30961) documents
+failed RAM-cache restores that force full prompt re-prefill. Neither report is
+a formal upstream security advisory or proof that every llama.cpp build is
+affected. STAR disables the shared cache until a pinned build is tested.
+
+Do not use `cached_tokens` alone as a correctness signal: the contamination
+reports include corrupted responses whose reported cached-token count was zero.
+Before considering re-enabling cross-slot caching, run isolated and concurrent
+canaries with unique per-request markers, inspect full outputs for foreign
+markers, and measure both correctness and prefill/TTFT cost.
+
 ## Paths worth preserving
 
 | Path | Role |
