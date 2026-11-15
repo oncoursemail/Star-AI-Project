@@ -360,3 +360,39 @@ def test_debugging_strict_luau_pack_is_opt_in_bounded_and_source_backed(monkeypa
     _, actual_off, off_events = run_turn(monkeypatch, tmp_path, prompt)
     assert "Twelve paired diagnostics" not in actual_off
     assert not any(event["event"] == "skill_packs" for event in off_events)
+
+
+def test_structured_skill_contract_guidance_is_off_by_default_and_opt_in(monkeypatch, tmp_path):
+    name = "eng-verify-before-done"
+    pack = next(p for p in skill_packs.available() if p.name == name)
+
+    monkeypatch.delenv(skill_packs.CONTRACT_ENV_VAR, raising=False)
+    assert skill_packs.contracts_enabled() is False
+    plain = skill_packs.render([pack])
+    assert skill_packs.CONTRACT_BLOCK_HEADING not in plain
+    assert plain == pack.body + "\\n"
+
+    # The structured contract is read only for the already-selected pack and only
+    # when explicitly enabled; it never enters the system message.
+    monkeypatch.setenv(skill_packs.CONTRACT_ENV_VAR, "on")
+    structured = skill_packs.render([pack])
+    assert structured.startswith(pack.body)
+    assert skill_packs.CONTRACT_BLOCK_HEADING in structured
+    assert "claim-only-after-evidence" in structured
+    assert "not a permission grant" in structured
+    assert len(structured) <= skill_packs.MAX_BLOCK_CHARS
+
+    other = next(p for p in skill_packs.available() if p.name == "roblox-secure-remotes")
+    assert skill_packs.CONTRACT_BLOCK_HEADING not in skill_packs.render([other])
+
+    library = SkillLibrary(workspace=None, home=tmp_path, bundled=skill_packs.PACKS_DIR)
+    loaded = library.load(name)
+    assert loaded["contract_status"] == "parsed"
+    assert loaded["contract"]["skill_id"] == name
+
+
+def test_structured_skill_contract_environment_switch_is_strict():
+    for value, expected in (("", False), ("off", False), ("false", False), ("0", False),
+                            ("on", True), ("true", True), ("yes", True), ("1", True),
+                            ("maybe", False)):
+        assert skill_packs.contracts_enabled({skill_packs.CONTRACT_ENV_VAR: value}) is expected
