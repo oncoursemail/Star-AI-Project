@@ -111,6 +111,8 @@ class StreamContextHost:
             if self._enabled:
                 raise RuntimeError("disable before enabling a new context session")
             if self._continuity_memory is not None:
+                assert self._continuity_session_id is not None
+                assert self._continuity_clock_ms is not None
                 self._continuity_memory.start_session(
                     self._continuity_session_id,
                     now_ms=self._continuity_clock_ms(),
@@ -127,6 +129,7 @@ class StreamContextHost:
         with self._lock:
             self._enabled = False
             if self._continuity_started and self._continuity_memory is not None:
+                assert self._continuity_session_id is not None
                 self._continuity_memory.stop_session(self._continuity_session_id)
                 self._continuity_started = False
 
@@ -146,9 +149,10 @@ class StreamContextHost:
 
         The question must be supplied after upstream moderation and is used
         solely as a database lookup term. It is not placed in this packet.
-        StarStage injects returned facts ONLY for viewer questions, and episode
-        evidence ONLY for game/viewer intents. Inference jobs still require a
-        separate governor speech lease and an actual audio device acknowledgement.
+        StarStage injects reviewed facts, practice evidence, and continuity only
+        for their explicitly allowed intent kinds. Historical recall is opt-in
+        per request and requires a host-confirmed audience-hearing flag. Inference
+        jobs still require a separate governor speech lease and audio acknowledgement.
         """
         if moderated_question is not None and (
                 type(moderated_question) is not str
@@ -201,6 +205,9 @@ class StreamContextHost:
                         broadcast_approved=True, limit=3,
                     )
                 if continuity_lookback_ms is not None:
+                    assert self._continuity_memory is not None
+                    assert self._continuity_session_id is not None
+                    assert self._continuity_clock_ms is not None
                     continuity_packet = self._continuity_memory.retrieve(
                         self._continuity_session_id,
                         now_ms=self._continuity_clock_ms(),
