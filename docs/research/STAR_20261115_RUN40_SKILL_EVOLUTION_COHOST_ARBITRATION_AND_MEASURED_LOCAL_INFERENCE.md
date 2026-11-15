@@ -335,13 +335,15 @@ Use recorded and synthetic replay scenarios first. Do not connect public chat or
 
 ### Implemented in the companion code PR
 
+Companion implementation: https://github.com/oncoursemail/Star-AI-Project/pull/1185
+
 - New metadata-only ConversationContextIndex.
 - Bounded per-session event history.
 - Reply-chain, topic, and recent-event context.
 - Strict sequence, freshness, session, capacity, and dedupe checks.
 - Explicit missing-parent reporting.
 - Session-close erasure.
-- 12 focused offline regression tests.
+- 13 focused offline regression tests.
 
 ### Research and catalog updates
 
