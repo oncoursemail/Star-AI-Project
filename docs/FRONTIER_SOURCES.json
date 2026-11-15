@@ -1216,5 +1216,40 @@
     "url": "https://agentif.github.io/",
     "kind_and_usage": "Agentic instruction-following benchmark covering 50 real-world applications, long instructions and multiple simultaneous constraints; updated evaluation setting in 2026-10",
     "audit": "Official benchmark site checked 2026-11-15; the updated reasoning/non-reasoning configuration and judge version must be pinned because scores across settings are not comparable. Use local synthetic acceptance manifests and independent verifiers; no STAR score claimed."
+  },
+  {
+    "id": "R179",
+    "title": "LiveKit EoT-Bench: Causal End-of-Turn Benchmark and Multilingual Short-Turn Cohorts",
+    "url": "https://github.com/livekit/eot-bench",
+    "kind_and_usage": "Public multilingual voice-agent benchmark with causal HOLD/EOT silence spans, policy threshold/action-delay/timeout sweeps, a silence-only baseline, accented-English and short-turn cohorts",
+    "audit": "Official repository and benchmark guide checked 2026-11-15. The short_turns cohort includes right-censored rows with no observed EOT; preserve their HOLD evidence without fabricating final labels. Endpointing delay is conversational dead air, not model inference latency. Pin dataset/harness revisions; STAR's metadata adapter does not require raw audio."
+  },
+  {
+    "id": "R180",
+    "title": "SkillCAT: Contrastive Assessment and Topology-Aware Skill Self-Evolution",
+    "url": "https://arxiv.org/abs/2606.13317",
+    "kind_and_usage": "Training-free skill evolution combining same-task success/failure trajectory comparison, source-task replay of candidate patches, and task-specific sub-skill topology for selective retrieval",
+    "audit": "Paper checked 2026-11-15. The reported up-to-40.40% gain is benchmark-specific and is not a STAR result. Adapt paired evidence and topology on the existing skill pipeline with independent verifiers and sealed holdouts; do not auto-promote."
+  },
+  {
+    "id": "R181",
+    "title": "MemSkill: Learning and Evolving Memory Skills for Self-Evolving Agents",
+    "url": "https://github.com/ViktorAxelsen/MemSkill",
+    "kind_and_usage": "NeurIPS 2026 meta-memory research: learn what information to extract, how to construct/retrieve memories, and what to preserve or forget from hard-case feedback",
+    "audit": "Official repository and README checked 2026-11-15. Memory skills are policies for remembering, not the memories themselves. Keep STAR's governed memory content, provenance, retention and rollback authority; no direct model-driven persistent-memory deletion."
+  },
+  {
+    "id": "R182",
+    "title": "WindowsWorld: Process-Centric Cross-Application GUI Agent Benchmark",
+    "url": "https://aclanthology.org/2026.findings-acl.750/",
+    "kind_and_usage": "181 professional desktop workflow tasks across 17 applications, with multi-step sub-goals and conditional judgment across multiple apps",
+    "audit": "ACL Anthology paper checked 2026-11-15. Published sub-21% multi-app success is benchmark-specific, not STAR performance. Use disposable VMs and synthetic accounts; never treat the benchmark as permission to automate the owner's desktop."
+  },
+  {
+    "id": "R183",
+    "title": "WeaveBench: Long-Horizon Hybrid GUI/CLI Computer-Use Benchmark",
+    "url": "https://arxiv.org/abs/2606.09426",
+    "kind_and_usage": "114 long-horizon tasks across eight domains requiring interleaved GUI actions, CLI/code operations and trajectory-aware artifact/log verification",
+    "audit": "Paper checked 2026-11-15. Its reported best 41.2% pass rate is not a STAR score; outcome-only grading can overestimate performance. Use synthetic fixtures and inspect action traces, deliverables and artifact provenance."
   }
 ]
