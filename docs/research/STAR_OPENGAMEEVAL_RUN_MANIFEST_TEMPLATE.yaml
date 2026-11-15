@@ -1,0 +1,93 @@
+# Credential-free STAR/OpenGameEval run template.
+# Replace all REQUIRED_* placeholders locally. Never commit credentials.
+schema_version: 1
+
+benchmark:
+  name: Roblox/OpenGameEval
+  repository: https://github.com/Roblox/open-game-eval
+  paper: https://arxiv.org/abs/2610.02563
+  upstream_commit: REQUIRED_40_HEX_COMMIT
+  suite_id: expanded-87
+  split: validation
+  task_ids: []
+  attempts_per_task: 5
+  replication_attempts: 16
+
+agent:
+  provider: REQUIRED_PROVIDER
+  model_id: REQUIRED_MODEL_ID
+  model_revision: REQUIRED_MODEL_REVISION
+  prompt_revision: REQUIRED_PROMPT_SHA256
+  tool_schema_revision: REQUIRED_TOOL_SCHEMA_SHA256
+  star_commit: REQUIRED_STAR_COMMIT
+
+environment:
+  roblox_studio_version: REQUIRED_STUDIO_VERSION
+  eval_plugin_sha256: REQUIRED_PLUGIN_SHA256
+  place_file_sha256: REQUIRED_PLACE_SHA256
+  operating_system_build: REQUIRED_WINDOWS_BUILD
+  reset_procedure_revision: REQUIRED_RESET_REVISION
+
+execution:
+  mode: external_api
+  max_concurrent: 1
+  timeout_seconds: 600
+  use_reference_mode: false
+  require_owner_authorization: true
+  max_provider_cost_usd: REQUIRED_COST_CEILING
+  retry_failed_jobs: false
+
+credentials:
+  open_game_eval_api_key_env: OPEN_GAME_EVAL_API_KEY
+  model_api_key_env: REQUIRED_PROVIDER_KEY_ENV
+  values_stored_here: false
+
+scoring:
+  required_modes:
+    - EDIT
+    - PLAY
+  k_values:
+    - 1
+    - 5
+  report:
+    - pass_at_k
+    - consistency_at_k
+    - all_at_k
+    - edit_pass_rate
+    - play_pass_rate
+    - tool_error_rate
+    - expected_tool_call_recall
+    - pre_edit_inspection_coverage
+    - edits_before_observation
+    - warnings_per_attempt
+    - interruptions_per_attempt
+    - completed_job_rate
+
+holdout:
+  task_annotations_hidden_from_agent: true
+  no_training_on_holdout: true
+  evaluate_separately: true
+  minimum_attempts_for_k: true
+  promotion_requires_independent_review: true
+
+privacy:
+  use_disposable_synthetic_projects: true
+  include_real_player_data: false
+  include_private_user_projects: false
+  store_raw_audio: false
+  store_transcripts: false
+  store_viewer_identifiers: false
+  store_api_credentials: false
+  artifact_retention_days: 14
+
+resource_measurements:
+  cpu_percent_p50_p95: true
+  ram_mb_p50_p95: true
+  vram_mb_p50_p95: true
+  inference_queue_ms_p50_p95: true
+  first_content_ms_p50_p95: true
+  first_audible_ms_p50_p95: true
+  inter_token_ms_p50_p95: true
+  game_fps_p50_p95: true
+  obs_dropped_frames: true
+  audio_underruns: true
