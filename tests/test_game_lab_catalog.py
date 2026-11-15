@@ -70,7 +70,10 @@ def test_search_category_and_bounded_results():
     assert catalog("GameWorld")["total"] == 1
     assert catalog(category="benchmarks")["total"] >= 6
     assert catalog(category="input")["total"] == 2
-    assert len(catalog()["sources"]) <= 50
+    default_catalog = catalog()
+    assert len(default_catalog["sources"]) <= 60
+    assert default_catalog["total"] == len(default_catalog["sources"])
+    assert not default_catalog["truncated"]
 
 
 @pytest.mark.parametrize("kwargs",[
