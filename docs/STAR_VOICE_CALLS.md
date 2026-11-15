@@ -851,8 +851,10 @@ its existing queue-depth and PortAudio status diagnostics.
 - The snapshot records the first callback that emitted non-empty queued PCM, the count
   of callbacks that emitted audio, and output-underflow flags observed on callbacks
   that actually emitted audio.
-- SoundSpeaker.reset() starts a new playback-evidence window. playback_snapshot()
-  exposes the immutable snapshot; aggregate diagnostics include the same counters.
+- SoundSpeaker.reset() starts a new playback-evidence window. Callback accounting,
+  reset, and snapshots serialize under the speaker lock so one reply's evidence cannot
+  leak into the next. playback_snapshot() exposes the immutable snapshot; aggregate
+  diagnostics include the same counters.
 - The existing 16-frame freshness-first microphone queue and bounded asynchronous
   speaker-level worker remain intact. Playback telemetry does not change PCM bytes,
   queue policy, model routing, or audio-device selection.
