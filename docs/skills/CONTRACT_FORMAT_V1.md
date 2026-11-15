@@ -48,11 +48,14 @@ Receipts are bound to the exact skill ID, semantic version, canonical contract S
 
 The current module validates receipts and computes constraint-coverage summaries. It does not store receipts, execute skills, or promote them.
 
-## Example
+## Domain examples
 
-See examples/skills/roblox-open-door.contract.json.
+All checked-in examples are parsed by tests/test_skill_contract_examples.py:
 
-The example deliberately separates observing the target, requesting a named capability-labelled tool, and independently verifying the resulting state.
+- examples/skills/roblox-open-door.contract.json — observe, request a bounded Studio interaction, independently verify.
+- examples/skills/game-observe-before-act.contract.json — fresh game-state observation, bounded input and verified state change.
+- examples/skills/streaming-natural-turntaking.contract.json — human floor control, stop-on-resolution, truthful AI identity and proportionate commentary.
+- examples/skills/research-source-grounding.contract.json — claim-level evidence, freshness, contradiction handling and calibrated abstention.
 
 ## Trust and execution rules
 
