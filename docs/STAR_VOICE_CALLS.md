@@ -838,3 +838,31 @@ The meter queue is intentionally lossy; speaker PCM is not. If meter work is pen
 The worker is stopped during `SoundSpeaker.close()` and drains the bounded queue before exiting. Tests use a fake PortAudio stream and synthetic PCM; they do not open physical devices.
 
 This reduces callback work but does not make the Python callback hard real-time safe: the existing PCM buffer lock and bytes copy remain. Measure callback duration and actual PortAudio underflows on Windows before claiming a latency or stability improvement.
+
+
+## 17. DAC-time playback evidence (2026-11-14)
+
+The physical SoundSpeaker now exposes a bounded, per-reply PlaybackSnapshot alongside
+its existing queue-depth and PortAudio status diagnostics.
+
+- The output callback maps outputBufferDacTime to the host monotonic clock using
+  currentTime; missing, invalid, reversed, or implausibly distant driver timestamps
+  fall back to callback-invocation time.
+- The snapshot records the first callback that emitted non-empty queued PCM, the count
+  of callbacks that emitted audio, and output-underflow flags observed on callbacks
+  that actually emitted audio.
+- SoundSpeaker.reset() starts a new playback-evidence window. playback_snapshot()
+  exposes the immutable snapshot; aggregate diagnostics include the same counters.
+- The existing 16-frame freshness-first microphone queue and bounded asynchronous
+  speaker-level worker remain intact. Playback telemetry does not change PCM bytes,
+  queue policy, model routing, or audio-device selection.
+
+This is PortAudio DAC-time evidence, not proof of acoustic arrival at a local
+speaker, OBS capture, encoder output, or remote viewer playback. The callback still
+uses the existing PCM buffer lock and a small telemetry lock; this is a soft-real-time
+measurement improvement, not a hard-real-time guarantee. Measure callback p95/p99,
+device underflows, OBS render/encode lag, and loopback-audible latency on the actual
+Windows host before tuning lip-sync or claiming a streaming latency improvement.
+
+Hardware-free tests use synthetic callback time information. No microphone, speaker,
+OBS, VTube Studio, or live-stream device is opened by these tests.
