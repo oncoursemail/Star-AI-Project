@@ -15,7 +15,8 @@ def test_sources_are_https_unique_and_research_only():
             "windows-dxgi", "windows-sendinput", "microsoft-gameinput",
             "javis", "realtime-venus", "hithink-turn", "joi-bench-task",
             "model-interruption-bench", "subternary", "gamedevbench",
-            "robloxstudio-mcp"}.issubset(ids)
+            "robloxstudio-mcp", "mp-bench", "mem2actbench", "memagent",
+            "harness-memory", "vllm-disagg-prefill"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -30,6 +31,14 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert sources["gameworld"].status == "research_only"
     assert sources["hithink-turn"].status == "research_only"
     assert sources["subternary"].status == "research_only"
+    assert sources["mp-bench"].status == "research_only"
+    assert sources["mem2actbench"].status == "research_only"
+    assert sources["memagent"].status == "research_only"
+    assert sources["harness-memory"].status == "research_only"
+    assert sources["vllm-disagg-prefill"].status == "research_only"
+    assert "not a STAR score" in sources["mp-bench"].warning
+    assert "existing task ledger" in sources["memagent"].warning
+    assert "local 8 GB GPU" in sources["vllm-disagg-prefill"].warning
     assert "read-only mode first" in sources["robloxstudio-mcp"].warning
 
 
