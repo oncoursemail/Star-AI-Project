@@ -498,6 +498,12 @@ def evaluate_memory_action_grounding(
             None, None, None, 0, 0, 0, None,
             base_warnings + ("Every case requires exactly one receipt from each arm.",),
         )
+    for case in manifest.cases:
+        first_receipt = paired[(case.case_id, case.first_arm)]
+        second_arm = "memory_on" if case.first_arm == "memory_off" else "memory_off"
+        second_receipt = paired[(case.case_id, second_arm)]
+        if first_receipt.observed_unix_ms >= second_receipt.observed_unix_ms:
+            raise PermissionError("receipt timestamps contradict the preregistered arm order")
 
     session_pairs: dict[str, list[tuple[bool, bool]]] = {}
     session_dependent_deltas: dict[str, list[float]] = {}
