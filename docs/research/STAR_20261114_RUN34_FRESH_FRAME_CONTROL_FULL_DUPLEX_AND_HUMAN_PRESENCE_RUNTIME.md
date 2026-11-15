@@ -291,6 +291,16 @@ Build reusable test templates for:
 
 The benchmark's public task data is for evaluation. Do not train on held-out answer artifacts or report benchmark completion without following the benchmark's current license and evaluation rules.
 
+### Additional Roblox Studio testing capabilities
+
+The current Roblox testing documentation also describes three capabilities that should be part of STAR's Creator Brain harness:
+
+- **StudioDeviceSimulatorService:** programmatically select device presets and vary resolution, DPI, orientation, and scaling. Use it for mobile/tablet UI acceptance rather than relying on one desktop viewport.
+- **VirtualInput:** Studio-only synthetic mouse, keyboard, and pointer events that are processed like hardware input. Use this for deterministic in-Studio UI and gameplay tests; it is not a general OS-level input API and does not authorize automation in published games.
+- **Party Simulator:** test party-related APIs, server-authority prediction/rollback, and UnreliableRemoteEvent loss/reordering inside Studio without publishing or coordinating multiple devices.
+
+Combine these with StudioTestService's server-plus-client sessions (up to eight simulated clients) to create repeatable test matrices: device preset × player count × network/party scenario. Keep test fixtures disposable and capture screenshots plus server/client assertions for every run.
+
 ---
 
 ## 8. General knowledge and broader creator abilities
@@ -395,6 +405,7 @@ No public broadcast, model replacement, game automation, or permanent memory pro
 10. OBS WebSocket — https://github.com/obsproject/obs-websocket
 11. Roblox StudioTestService — https://create.roblox.com/docs/reference/engine/classes/StudioTestService
 12. Roblox built-in Studio MCP announcement — https://devforum.roblox.com/t/assistant-updates-studio-built-in-mcp-server-and-playtest-automation/4474643
+13. Roblox Studio testing modes (StudioDeviceSimulatorService, VirtualInput, Party Simulator) — https://create.roblox.com/docs/studio/testing-modes
 13. GameDevBench official repository — https://github.com/waynchi/gamedevbench
 14. GameDevBench ICML 2026 paper — https://proceedings.mlr.press/v306/chi26a.html
 15. OpenTelemetry GenAI metrics (Development status) — https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-metrics.md
