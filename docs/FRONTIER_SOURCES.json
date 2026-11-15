@@ -978,5 +978,33 @@
     "url": "https://github.com/KnowComp/SkillHorizon",
     "kind_and_usage": "Official benchmark code for compositional long-horizon workflows and programmatic completion checks",
     "audit": "Official repository identified from paper; inspect license and environment requirements before reuse"
+  },
+  {
+    "id": "R145",
+    "title": "StreamArena: Long-Horizon Agentic Streaming Video Understanding",
+    "url": "https://arxiv.org/abs/2608.05703",
+    "kind_and_usage": "Preprint: hour-scale multimodal stream evaluation and two-tier event memory architecture",
+    "audit": "paper inspected; benchmark and reported system results summarized; no dataset imported"
+  },
+  {
+    "id": "R146",
+    "title": "EventMemAgent: Hierarchical Event-Centric Memory for Online Video Understanding",
+    "url": "https://arxiv.org/abs/2602.15329",
+    "kind_and_usage": "Preprint: event segmentation, bounded short-term visual memory, event-centric long-term evidence, active retrieval",
+    "audit": "paper inspected; code/license availability not assumed; research-only"
+  },
+  {
+    "id": "R147",
+    "title": "OnlineWM: Causality-Aware Active Online Learning for Effective World Modeling",
+    "url": "https://arxiv.org/abs/2609.23753",
+    "kind_and_usage": "Preprint: active simulator queries and counterfactual action-effect learning",
+    "audit": "arXiv v1 inspected; no model training or dependency adoption"
+  },
+  {
+    "id": "R148",
+    "title": "MA-WAM: Multi-Agent World-Action Model for Test-Time Planning",
+    "url": "https://arxiv.org/abs/2609.31281",
+    "kind_and_usage": "Preprint: joint-action scoring for offline cooperative multi-agent reinforcement learning",
+    "audit": "arXiv v1 inspected; offline MARL scope preserved; no real-time game transfer claim"
   }
 ]
