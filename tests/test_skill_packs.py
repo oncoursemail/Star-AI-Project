@@ -372,6 +372,12 @@ def test_structured_skill_contract_guidance_is_off_by_default_and_opt_in(monkeyp
     assert skill_packs.CONTRACT_BLOCK_HEADING not in plain
     assert plain == pack.body + "\n"
 
+    # Check the exact sidecar load result before rendering so an invalid/absent
+    # contract reports its diagnostic instead of looking like a silent render omission.
+    library = SkillLibrary(workspace=None, home=tmp_path, bundled=skill_packs.PACKS_DIR)
+    loaded = library.load(name)
+    assert loaded["contract_status"] == "parsed", loaded
+
     # The structured contract is read only for the already-selected pack and only
     # when explicitly enabled; it never enters the system message.
     monkeypatch.setenv(skill_packs.CONTRACT_ENV_VAR, "on")
@@ -385,9 +391,6 @@ def test_structured_skill_contract_guidance_is_off_by_default_and_opt_in(monkeyp
     other = next(p for p in skill_packs.available() if p.name == "roblox-secure-remotes")
     assert skill_packs.CONTRACT_BLOCK_HEADING not in skill_packs.render([other])
 
-    library = SkillLibrary(workspace=None, home=tmp_path, bundled=skill_packs.PACKS_DIR)
-    loaded = library.load(name)
-    assert loaded["contract_status"] == "parsed"
     assert loaded["contract"]["skill_id"] == name
 
 
