@@ -63,6 +63,8 @@ research_sources:
   - https://arxiv.org/abs/2609.23465
   - https://docs.livekit.io/agents/logic/turns/tuning/
   - https://github.com/ggml-org/llama.cpp/issues/30961
+  - https://github.com/DenchiSoft/VTubeStudio
+  - https://github.com/DenchiSoft/VTubeStudio/wiki/Plugins
 files:
   - star/skill_contract.py
   - star/agent_skills.py
