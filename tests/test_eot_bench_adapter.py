@@ -1,5 +1,3 @@
-import math
-
 import pytest
 
 from star.eot_bench_adapter import (
