@@ -75,7 +75,7 @@ The evaluator:
 - stores no prompts, transcripts, memory values, raw arguments, viewer IDs, or account identifiers;
 - accepts only host-HMAC-signed receipts;
 - binds receipts to the exact manifest, case, session, arm, run, evidence digest, and timestamp;
-- rejects replayed evidence, duplicate case/arm receipts, stale/future timestamps, unapproved memory IDs, memory-off activity, and budget overruns;
+- rejects replayed evidence, duplicate case/arm receipts, stale/future timestamps, timestamps that contradict randomized arm order, unapproved memory IDs, memory-off activity, and budget overruns;
 - treats infrastructure errors as campaign contamination, not model failure;
 - keeps the holdout answer manifest outside model/tool context.
 
