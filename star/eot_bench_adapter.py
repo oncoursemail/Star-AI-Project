@@ -112,6 +112,14 @@ def _number(value: object, *, name: str) -> float:
     return result
 
 
+def _cohort(value: object) -> str:
+    if value is None:
+        return "general"
+    if isinstance(value, Real) and not isinstance(value, bool) and math.isnan(float(value)):
+        return "general"
+    return _text(value, name="cohort", maximum=64).lower()
+
+
 def _score(value: object) -> float | None:
     if value is None:
         return None
@@ -170,10 +178,7 @@ def adapt_eot_bench_predictions(
     for row in spans_input:
         row_id = _text(row.get("id"), name="span id")
         language = _text(row.get("language"), name="language", maximum=32).lower()
-        cohort_value = row.get("cohort")
-        cohort = "general" if cohort_value is None else _text(
-            cohort_value, name="cohort", maximum=64
-        ).lower()
+        cohort = _cohort(row.get("cohort"))
         span_index = _index(row.get("span_index"))
         label = _text(row.get("label"), name="span label", maximum=16).lower()
         if label not in {"hold", "eot"}:
