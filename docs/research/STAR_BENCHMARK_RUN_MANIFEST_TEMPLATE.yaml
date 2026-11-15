@@ -131,6 +131,23 @@ interaction:
   cross_platform_identity_linking: false
   raw_conversation_content_retained: false
 
+# Run 41: task-aware fast/deep/background model routing; record exact revisions.
+model_routing:
+  policy_revision: null
+  task_classifier_revision: null
+  fast_model_id: null
+  deep_model_id: null
+  background_model_id: null
+  escalation_policy_revision: null
+  escalation_reason_codes: []
+  max_escalations_per_task: 0
+  fast_path_fraction: null
+  deep_path_fraction: null
+  background_path_fraction: null
+  escalation_rate: null
+  verified_quality_delta: null
+  queue_wait_ms_p95: null
+
 # Run 41: event-driven monitoring. Keep conditions and source IDs content-free.
 monitoring:
   enabled: false
