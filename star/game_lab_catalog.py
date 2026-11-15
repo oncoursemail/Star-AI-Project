@@ -271,15 +271,32 @@ SOURCES = (
            "https://doi.org/10.1177/10949968261471154", "vtuber",
            "2026 experimental study of how response naturalness interacts with responsiveness in virtual livestreaming",
            warning="E-commerce livestream findings are not direct Twitch/game-stream evidence. Treat as a UX hypothesis: responsiveness without natural conversational fit is not a quality win."),
+
+    Source("memento-skills", "Memento-Skills agent-designed skill evolution",
+           "https://github.com/Memento-Teams/Memento-Skills", "learning",
+           "Read-Execute-Reflect-Write skill memory, task-aware routing, guarded skill repair, evaluation, atomic promotion, audit and rollback",
+           warning="Paper benchmark gains are not STAR scores. Adapt the candidate/evaluation lifecycle only; retain STAR's protected holdouts, independent verifier and owner promotion review. Review Apache-2.0 and third-party notices before copying code."),
+    Source("lumi-nox", "Lumi_Nox multi-character VTuber orchestration",
+           "https://github.com/MIO-456/Lumi_Nox", "vtuber",
+           "Open-core two-character stage reference with event bus, state machine, speaker scheduler, single speech-output arbiter, history mirroring and game adapters",
+           warning="The upstream public host does not automatically wire separate realtime ASR, memory, game modules, OBS or production broadcast. Its daily-stream statement is project-authored, not independent STAR acceptance; do not copy platform-specific identity or paid-message rules."),
+    Source("llama-speed-bench", "llama.cpp SPEED-Bench server benchmark",
+           "https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench", "inference",
+           "Official llama-server client for prompt/decode throughput, request latency and speculative-draft acceptance across matched workload categories",
+           warning="Match client concurrency to server parallel slots and keep benchmark split, category, output length and sample limit identical. No STAR speedup exists until measured on the target hardware."),
+    Source("nvidia-aiperf", "NVIDIA AIPerf LLM inference metrics reference",
+           "https://docs.nvidia.com/aiperf/reference/ai-perf-metrics-reference", "inference",
+           "Reference definitions for TTFT, ITL/TPOT, end-to-end latency and percentile reporting for streaming inference",
+           warning="Metric definitions and empty-chunk handling differ between tools. Align timestamps, token semantics and streaming behavior before comparing; this is not a STAR benchmark result."),
 )
 
 
-def catalog(query: str = "", category: str = "", limit: int = 70) -> dict:
+def catalog(query: str = "", category: str = "", limit: int = 80) -> dict:
     if not isinstance(query, str) or not isinstance(category, str):
         raise ValueError("Search and category must be text.")
     if len(query) > 120 or len(category) > 24:
         raise ValueError("Narrow the search text or category.")
-    if type(limit) is not int or not 1 <= limit <= 70:
+    if type(limit) is not int or not 1 <= limit <= 80:
         raise ValueError("Results limit must be between 1 and 70.")
     category = category.strip().lower()
     categories = sorted({s.category for s in SOURCES})
