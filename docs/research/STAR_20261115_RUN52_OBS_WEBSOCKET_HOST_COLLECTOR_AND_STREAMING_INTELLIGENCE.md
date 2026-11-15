@@ -145,8 +145,10 @@ No OBS write request is present in this module. Disconnecting STAR drops its cli
 
 OBSHostSample.host_observations(clock_epoch=...) returns:
 
-- streaming: an explicit Boolean MetricObservation;
-- obs_dropped_pct: the worst of the measured GetStats render-thread and output-thread skip percentages, but only when both interval statuses are ok, both rates are valid, and output is active and not reconnecting.
+- streaming: an explicit Boolean MetricObservation stamped at the final GetStreamStatus read;
+- obs_dropped_pct: the worst of the measured GetStats render-thread and output-thread skip percentages, stamped at the GetStats read, but only when both interval statuses are ok, both rates are valid, and output is active and not reconnecting.
+
+The host sampler receives the two source timestamps separately and can enforce its existing maximum-skew rule. The collector also records the complete four-request sampling skew for diagnostics.
 
 If either denominator is missing, the output is reconnecting, or the sample is only a baseline, the drop observation is None. The existing StreamHostSampler then rejects an active-stream sample rather than assuming zero drops.
 
