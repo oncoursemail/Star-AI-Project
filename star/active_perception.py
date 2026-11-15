@@ -105,7 +105,7 @@ class ActivePerceptionPolicy:
     """
 
     def __init__(self, config: PerceptionPolicyConfig | None = None) -> None:
-        self.config = config or PerceptionPolicyConfig()
+        self.config = config if config is not None else PerceptionPolicyConfig()
         if not isinstance(self.config, PerceptionPolicyConfig):
             raise TypeError("config must be a PerceptionPolicyConfig")
 
@@ -116,7 +116,7 @@ class ActivePerceptionPolicy:
         session_id: str,
         now: float,
     ) -> PerceptionSelection:
-        if not _TOKEN.fullmatch(session_id) if isinstance(session_id, str) else True:
+        if not isinstance(session_id, str) or _TOKEN.fullmatch(session_id) is None:
             raise ValueError("session_id must be a bounded token")
         if not _finite(now):
             raise ValueError("now must be a finite monotonic timestamp")
@@ -212,15 +212,15 @@ class ActivePerceptionPolicy:
         now: float,
         future_skew: float,
     ) -> str | None:
-        if not _TOKEN.fullmatch(candidate.candidate_id):
+        if not isinstance(candidate.candidate_id, str) or _TOKEN.fullmatch(candidate.candidate_id) is None:
             return "invalid_candidate_id"
-        if not _TOKEN.fullmatch(candidate.session_id):
+        if not isinstance(candidate.session_id, str) or _TOKEN.fullmatch(candidate.session_id) is None:
             return "invalid_candidate_session"
         if candidate.session_id != session_id:
             return "wrong_session"
-        if not _TOKEN.fullmatch(candidate.dedupe_key):
+        if not isinstance(candidate.dedupe_key, str) or _TOKEN.fullmatch(candidate.dedupe_key) is None:
             return "invalid_dedupe_key"
-        if candidate.kind not in _KINDS:
+        if not isinstance(candidate.kind, str) or candidate.kind not in _KINDS:
             return "invalid_kind"
         if not isinstance(candidate.reason_code, str) or not _REASON.fullmatch(
             candidate.reason_code
