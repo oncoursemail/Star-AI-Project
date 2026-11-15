@@ -375,3 +375,72 @@ def test_frontier_rejects_empty_or_invalid_inputs():
         pareto_frontier([])
     with pytest.raises(TypeError):
         pareto_frontier([object()])
+
+
+def test_censored_turns_contribute_hold_evidence_without_inventing_final_turns():
+    rows = dataset(2)
+    rows.append(SilenceSpan(
+        "censored-hold", "censored-turn", "private-rehearsal-v1",
+        PauseKind.HOLD, 500,
+        (EndOfTurnScore(250, 0.9),),
+    ))
+    policy = TurnPolicy(threshold=0.8, action_delay_ms=200, timeout_ms=1000)
+
+    with pytest.raises(ValueError, match="exactly one"):
+        evaluate_turn_policy(rows, policy)
+
+    result = evaluate_turn_policy(rows, policy, allow_censored_turns=True)
+
+    assert result.turn_count == 3
+    assert result.censored_turn_count == 1
+    assert result.hold_pause_count == 3
+    assert result.false_cutoffs == 3
+    assert result.final_turn_count == 2
+    assert result.detected_final_turns == 2
+    assert result.missed_final_turns == 0
+
+
+def test_censored_turns_do_not_allow_an_all_hold_only_evaluation():
+    hold = SilenceSpan(
+        "censored-hold", "censored-turn", "private-rehearsal-v1",
+        PauseKind.HOLD, 500,
+        (EndOfTurnScore(250, 0.9),),
+    )
+    with pytest.raises(ValueError, match="both hold pauses and final turns"):
+        evaluate_turn_policy(
+            [hold],
+            TurnPolicy(threshold=0.8, action_delay_ms=200, timeout_ms=1000),
+            allow_censored_turns=True,
+        )
+
+
+def test_censored_mode_still_rejects_multiple_final_spans_per_turn():
+    hold, final = make_turn(1)
+    duplicate_final = SilenceSpan(
+        "final-2", "turn-1", "private-rehearsal-v1",
+        PauseKind.END_OF_TURN, 1200, (),
+    )
+    with pytest.raises(ValueError, match="at most one"):
+        evaluate_turn_policy(
+            [hold, final, duplicate_final],
+            TurnPolicy(threshold=0.8, action_delay_ms=200, timeout_ms=1000),
+            allow_censored_turns=True,
+        )
+
+
+def test_sweep_can_include_censored_turns_in_hold_cutoff_denominator():
+    rows = dataset(2)
+    rows.append(SilenceSpan(
+        "censored-hold", "censored-turn", "private-rehearsal-v1",
+        PauseKind.HOLD, 500,
+        (EndOfTurnScore(250, 0.9),),
+    ))
+    result = sweep_turn_policies(
+        rows,
+        thresholds=(0.5, 0.9),
+        action_delays_ms=(200,),
+        timeouts_ms=(800,),
+        allow_censored_turns=True,
+    )
+    assert len(result.evaluations) == 4
+    assert all(item.censored_turn_count == 1 for item in result.evaluations)
