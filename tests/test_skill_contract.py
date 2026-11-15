@@ -358,3 +358,9 @@ def test_contract_json_rejects_duplicate_keys_at_every_level():
     duplicate_nested = raw.replace('"kind": "owner_consent"', '"kind": "owner_consent","kind":"state_exists"')
     with unittest.TestCase().assertRaisesRegex(ValueError, "duplicate JSON object key"):
         parse_skill_contract(duplicate_nested)
+
+
+def test_contract_json_rejects_nonstandard_numeric_constants():
+    raw = json.dumps(valid_contract()).replace('"max_tokens": 100', '"max_tokens": NaN')
+    with unittest.TestCase().assertRaisesRegex(ValueError, "non-standard JSON constant"):
+        parse_skill_contract(raw)
