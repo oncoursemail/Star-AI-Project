@@ -519,7 +519,6 @@ def evaluate_memory_action_grounding(
     argument_correct_count = 0
     retrieval_times: list[int] = []
     elapsed_overheads: list[int] = []
-    session_deltas: dict[str, list[float]] = {}
 
     for case in manifest.cases:
         off = paired[(case.case_id, "memory_off")]
