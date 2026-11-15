@@ -16,7 +16,8 @@ def test_sources_are_https_unique_and_research_only():
             "javis", "realtime-venus", "hithink-turn", "joi-bench-task",
             "model-interruption-bench", "subternary", "gamedevbench",
             "robloxstudio-mcp", "mp-bench", "mem2actbench", "memagent",
-            "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam", "sima2", "vjepa2", "osworld-v2", "androidworld", "openhands-index"}.issubset(ids)
+            "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam", "sima2", "vjepa2", "osworld-v2", "androidworld", "openhands-index",
+            "skillret", "polyskill", "skilllearnbench"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -48,6 +49,12 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert sources["osworld-v2"].status == "research_only"
     assert sources["androidworld"].status == "research_only"
     assert sources["openhands-index"].status == "research_only"
+    assert sources["skillret"].status == "research_only"
+    assert sources["polyskill"].status == "research_only"
+    assert sources["skilllearnbench"].status == "research_only"
+    assert "Pin the dataset revision" in sources["skillret"].warning
+    assert "web-agent-specific" in sources["polyskill"].warning
+    assert "self-feedback drift" in sources["skilllearnbench"].warning
     assert "not a STAR speedup" in sources["streamarena"].warning
     assert "no implementation installed" in sources["eventmemagent"].warning
     assert "Do not online-train" in sources["onlinewm"].warning
