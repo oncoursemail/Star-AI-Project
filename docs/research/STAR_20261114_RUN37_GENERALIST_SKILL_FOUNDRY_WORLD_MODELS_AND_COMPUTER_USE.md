@@ -98,9 +98,11 @@ The shared skill is the intent and verification contract; the environment adapte
 ## 3. V-JEPA 2: learn to predict what actions will change
 
 Primary source: https://ai.meta.com/research/vjepa/  
-Model release: https://github.com/facebookresearch/vjepa
+Official implementation: https://github.com/facebookresearch/vjepa2
 
-Meta describes V-JEPA 2 as a self-supervised video world model for visual understanding and prediction. Its encoder/predictor is pretrained on video, and its research uses 62 hours of robot data from the DROID dataset for a downstream fine-tuning stage before demonstrating robot planning in new environments.
+Meta describes V-JEPA 2 as a self-supervised video world model for visual understanding and prediction. Its encoder/predictor is pretrained on video, and the V-JEPA 2-AC research uses 62 hours of robot data from the DROID dataset for downstream action-conditioned planning in new environments.
+
+The official implementation now also announces **V-JEPA 2.1 (2026-03-16)**, with temporally consistent dense features and pretrained checkpoint sizes from 80 million parameters (ViT-B/16) through 300M, 1B, and 2B variants. The same repository documents V-JEPA 2-AC as a latent action-conditioned model post-trained from the V-JEPA 2 backbone. This makes the 80M V-JEPA 2.1 checkpoint a more sensible first resource experiment than starting with a 1B–2B model, but parameter count alone does not establish memory use, Windows compatibility, or real-time speed.
 
 ### What STAR should learn from it
 
@@ -117,7 +119,7 @@ For a game, this could eventually help predict movement, obstacle motion, enemy 
 
 ### Strict limitations
 
-- V-JEPA 2 is a research model, not a drop-in desktop-control agent.
+- V-JEPA 2 / 2.1 and V-JEPA 2-AC are research models, not drop-in desktop-control agents. The action-conditioned variant was developed for robot manipulation; that is not proof of game-control transfer.
 - A latent prediction is not a verified state transition.
 - Robot-action fine-tuning does not prove transfer to arbitrary video games.
 - Model size, inference cost, licensing, and Windows deployment must be checked against the actual artifact before any local experiment.
@@ -132,7 +134,7 @@ Start with a cheap baseline before testing a large world model:
 3. Predict a small number of measurable changes.
 4. Compare prediction error against a simple constant/heuristic baseline.
 5. Test on held-out maps/seeds and changed game versions.
-6. Only then evaluate a learned visual predictor as an optional background worker.
+6. Only then evaluate a learned visual predictor as an optional background worker. Start with the 80M V-JEPA 2.1 checkpoint for a resource-cost baseline, then compare larger variants only if the small model is insufficient.
 
 A learned predictor is worth adopting only if it improves decisions or reduces expensive perception calls without increasing false confidence.
 
