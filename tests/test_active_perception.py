@@ -101,13 +101,13 @@ def test_future_evidence_is_rejected():
 
 
 def test_evidence_age_boundary_is_inclusive():
-    result = select([candidate(evidence_at=9.6, max_evidence_age_ms=500)], now=10.1)
+    result = select([candidate(evidence_at=9.5, max_evidence_age_ms=500)], now=10.0)
     assert len(result.selected) == 1
 
 
 def test_candidate_age_boundary_is_inclusive():
     policy = ActivePerceptionPolicy(PerceptionPolicyConfig(max_candidate_age_ms=500))
-    result = select([candidate(created_at=9.6)], policy=policy, now=10.1)
+    result = select([candidate(created_at=9.5)], policy=policy, now=10.0)
     assert len(result.selected) == 1
 
 
