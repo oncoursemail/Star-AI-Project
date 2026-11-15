@@ -64,6 +64,7 @@ class GameControlConfig:
     max_future_skew_ms: int = 50
     max_session_seconds: float = 1800.0
     dedupe_capacity: int = 1024
+    observation_history_capacity: int = 16
 
     def __post_init__(self) -> None:
         if type(self.allowed_controls) is not frozenset or not self.allowed_controls:
@@ -79,6 +80,7 @@ class GameControlConfig:
             ("max_controls_per_action", 1, 32),
             ("max_future_skew_ms", 0, 1_000),
             ("dedupe_capacity", 1, 16_384),
+            ("observation_history_capacity", 2, 256),
         ):
             value = getattr(self, name)
             if type(value) is not int or not low <= value <= high:
@@ -168,9 +170,13 @@ class GameControlGate:
         self._latest_frame_id: str | None = None
         self._latest_sequence: int | None = None
         self._latest_captured_at: float | None = None
-        # One action authorization per observed frame prevents several stale decisions
-        # from being queued against the same visual state.
-        self._authorized_observation_sequence: int | None = None
+        # Keep a bounded window of exact observations. Capture can run faster than
+        # perception/reasoning; a newer frame must not invalidate a still-fresh source
+        # frame while the model is deciding what to do.
+        self._observations: deque[GameObservation] = deque()
+        # One action authorization per observed frame prevents repeated decisions from
+        # being queued against the same visual state.
+        self._authorized_observation_sequences: set[int] = set()
         self._action_times: deque[float] = deque()
         self._seen_action_order: deque[str] = deque()
         self._seen_actions: set[str] = set()
@@ -208,7 +214,8 @@ class GameControlGate:
             self._latest_frame_id = None
             self._latest_sequence = None
             self._latest_captured_at = None
-            self._authorized_observation_sequence = None
+            self._observations.clear()
+            self._authorized_observation_sequences.clear()
             self._action_times.clear()
             self._seen_action_order.clear()
             self._seen_actions.clear()
@@ -250,7 +257,13 @@ class GameControlGate:
             self._latest_frame_id = observation.frame_id
             self._latest_sequence = observation.sequence
             self._latest_captured_at = float(observation.captured_at)
-            self._authorized_observation_sequence = None
+            if len(self._observations) >= self.config.observation_history_capacity:
+                evicted = self._observations.popleft()
+                self._authorized_observation_sequences.discard(evicted.sequence)
+                for permit_id, permit in tuple(self._issued_permits.items()):
+                    if permit.observation_sequence == evicted.sequence:
+                        self._issued_permits.pop(permit_id, None)
+            self._observations.append(observation)
             return GateResult(True, "observation_accepted")
 
     def authorize(self, action: GameAction, target: GameTarget, *, now: float) -> GateResult:
@@ -271,26 +284,27 @@ class GameControlGate:
                 return GateResult(False, "wrong_session")
             if action.action_id in self._seen_actions:
                 return GateResult(False, "duplicate_action")
-            if (self._latest_frame_id is None or self._latest_sequence is None
-                    or self._capture_epoch is None or self._latest_captured_at is None):
+            if self._capture_epoch is None or not self._observations:
                 return GateResult(False, "no_fresh_observation")
-            if (action.frame_id != self._latest_frame_id
-                    or action.observation_sequence != self._latest_sequence
-                    or action.capture_epoch != self._capture_epoch):
+            source_observation = next((item for item in reversed(self._observations)
+                if item.frame_id == action.frame_id
+                and item.sequence == action.observation_sequence
+                and item.capture_epoch == action.capture_epoch), None)
+            if source_observation is None:
                 return GateResult(False, "stale_frame")
-            observation_age_ms = (now - self._latest_captured_at) * 1000.0
+            observation_age_ms = (now - source_observation.captured_at) * 1000.0
             if observation_age_ms < -self.config.max_future_skew_ms or (
                 observation_age_ms > self.config.max_observation_age_ms
             ):
                 return GateResult(False, "stale_observation")
-            if action.issued_at < self._latest_captured_at - self.config.max_future_skew_ms / 1000.0:
+            if action.issued_at < source_observation.captured_at - self.config.max_future_skew_ms / 1000.0:
                 return GateResult(False, "action_predates_observation")
             action_age_ms = (now - action.issued_at) * 1000.0
             if action_age_ms < -self.config.max_future_skew_ms:
                 return GateResult(False, "future_action")
             if action_age_ms > self.config.max_action_age_ms:
                 return GateResult(False, "stale_action")
-            if self._authorized_observation_sequence == self._latest_sequence:
+            if action.observation_sequence in self._authorized_observation_sequences:
                 return GateResult(False, "observation_action_budget_exhausted")
             if action.duration_ms > self.config.max_action_duration_ms:
                 return GateResult(False, "action_duration_exceeded")
@@ -311,8 +325,12 @@ class GameControlGate:
             if len(self._action_times) >= self.config.max_actions_per_second:
                 return GateResult(False, "action_rate_limited")
             for permit_id, issued in tuple(self._issued_permits.items()):
-                if now > issued.expires_at:
+                if now >= issued.expires_at:
                     self._issued_permits.pop(permit_id, None)
+            # Consume or let the current permit expire before authorizing another. This
+            # prevents out-of-order input batches from overwriting newer held-button state.
+            if self._issued_permits:
+                return GateResult(False, "permit_pending")
             if len(self._issued_permits) >= self.config.dedupe_capacity:
                 return GateResult(False, "permit_capacity")
             assert self._target_fingerprint is not None
@@ -321,7 +339,7 @@ class GameControlGate:
             expires_at = min(
                 now + self.config.max_action_age_ms / 1000.0,
                 self._session_expires_at,
-                self._latest_captured_at + self.config.max_observation_age_ms / 1000.0,
+                source_observation.captured_at + self.config.max_observation_age_ms / 1000.0,
             )
             hold_until = min(now + action.duration_ms / 1000.0, expires_at)
             self._action_times.append(float(now))
@@ -340,7 +358,7 @@ class GameControlGate:
                 expires_at=expires_at,
             )
             self._issued_permits[action.action_id] = permit
-            self._authorized_observation_sequence = self._latest_sequence
+            self._authorized_observation_sequences.add(action.observation_sequence)
             return GateResult(True, "authorized", permit=permit)
 
     def consume(self, permit: ActionPermit, target: GameTarget, *, now: float) -> GateResult:
@@ -363,11 +381,15 @@ class GameControlGate:
             if now >= permit.expires_at or now >= permit.hold_until:
                 self._issued_permits.pop(permit.action_id, None)
                 return GateResult(False, "permit_expired")
+            source_observation = next((item for item in reversed(self._observations)
+                if item.frame_id == permit.frame_id
+                and item.sequence == permit.observation_sequence
+                and item.capture_epoch == permit.capture_epoch), None)
             if (permit.session_id != self._session_id
                     or permit.target_fingerprint != self._target_fingerprint
                     or permit.capture_epoch != self._capture_epoch
-                    or permit.frame_id != self._latest_frame_id
-                    or permit.observation_sequence != self._latest_sequence):
+                    or source_observation is None
+                    or (now - source_observation.captured_at) * 1000.0 > self.config.max_observation_age_ms):
                 self._issued_permits.pop(permit.action_id, None)
                 return GateResult(False, "permit_observation_stale")
             self._issued_permits.pop(permit.action_id, None)
@@ -405,7 +427,8 @@ class GameControlGate:
         self._latest_frame_id = None
         self._latest_sequence = None
         self._latest_captured_at = None
-        self._authorized_observation_sequence = None
+        self._observations.clear()
+        self._authorized_observation_sequences.clear()
         self._action_times.clear()
         self._seen_action_order.clear()
         self._seen_actions.clear()
