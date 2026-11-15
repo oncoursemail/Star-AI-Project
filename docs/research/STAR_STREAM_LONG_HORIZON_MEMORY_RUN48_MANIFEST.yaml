@@ -1,0 +1,60 @@
+schema_version: 1
+campaign_id: star-stream-long-horizon-memory-run48
+mode: offline_rehearsal
+implementation:
+  module: star/stream_long_horizon_memory.py
+  test_file: tests/test_stream_long_horizon_memory.py
+  retention_ms: 3600000
+  max_sessions: 4
+  max_events_per_session: 512
+  max_recall_items: 8
+  max_context_chars: 4000
+  allowed_sources:
+    - game
+    - twitch
+    - youtube
+    - local
+  allowed_kinds:
+    - gameplay
+    - milestone
+    - viewer_question
+    - viewer_answer
+    - conversation_topic
+    - creator_action
+    - stream_state
+recall_horizons_ms:
+  - 60000
+  - 300000
+  - 900000
+  - 1800000
+  - 3600000
+consent:
+  owner_approval_required: true
+  audience_memory_approval_required: true
+  broadcast_approval_required_for_recall: true
+  audience_can_hear_required_for_recall: true
+privacy:
+  raw_audio_retained: false
+  raw_video_retained: false
+  raw_transcripts_retained: false
+  provider_message_ids_retained: false
+  viewer_handles_retained: false
+  speaker_ids_retained: false
+  cross_platform_identity_merge: false
+  metrics_may_include_event_content: false
+verification:
+  local_isolated_python_version: "3.13"
+  local_test_count: 24
+  local_test_result: passed
+  exact_head_ci: required
+  windows_host_acceptance: required
+  live_platform_acceptance: not_performed
+performance_targets:
+  retrieval_p95_ms:
+    target: 5
+    status: unmeasured
+  audio_underruns:
+    regression_allowed: 0
+  game_frame_time:
+    compare_against_same_workload_baseline: true
+  note: "Targets are acceptance goals, not measured STAR results."

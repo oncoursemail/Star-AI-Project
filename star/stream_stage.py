@@ -24,6 +24,7 @@ from .stream_budget import StreamTelemetry
 from .stream_episode import EpisodePacket
 from .stream_director import SpeechIntent, StreamDirector, StreamSignal
 from .stream_knowledge import KnowledgePacket
+from .stream_long_horizon_memory import ContinuityPacket
 from .stream_motion import (
     AudioLevel, ExpressionCue, MotionFrame, neutral_frame, plan_motion,
 )
@@ -175,6 +176,7 @@ class StarStage:
                 knowledge: KnowledgePacket | None = None,
                 telemetry: StreamTelemetry | None = None,
                 episode: EpisodePacket | None = None,
+                continuity: ContinuityPacket | None = None,
                 turn: TurnAdvice | None = None) -> StagePlan | None:
         """Propose a short reaction; measured overload favors silence and gameplay."""
         current = _time(self._clock() if now is None else now)
@@ -184,6 +186,8 @@ class StarStage:
             raise TypeError("telemetry must be host-provided StreamTelemetry")
         if episode is not None and not isinstance(episode, EpisodePacket):
             raise TypeError("episode must be a host-approved EpisodePacket")
+        if continuity is not None and not isinstance(continuity, ContinuityPacket):
+            raise TypeError("continuity must be a host-approved ContinuityPacket")
         if turn is not None and not isinstance(turn, TurnAdvice):
             raise TypeError("turn must be a host-provided TurnAdvice")
         # The host, not chat or a prompt, supplies validated GPU/FPS/voice data.
@@ -222,6 +226,12 @@ class StarStage:
                 "game_observation", "game_success", "viewer_question"
             }:
                 prompt += "\n" + episode.context_record
+            # Long-horizon events are context only, never a speech request or
+            # permission. Keep them off danger/ambient/commentary turns.
+            if continuity is not None and intent.kind in {
+                "game_observation", "game_success", "viewer_question"
+            }:
+                prompt += "\n" + continuity.context_record
             plan = StagePlan(
                 sequence=self._sequence, signal_id=intent.signal_id,
                 kind=intent.kind, evidence=intent.evidence,
