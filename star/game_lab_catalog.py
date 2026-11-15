@@ -215,6 +215,17 @@ SOURCES = (
            "20 skill-dependent tasks across 15 subdomains and 100 verified instances; evaluates skill specification, execution trajectory, and final outcome",
            warning="External verifiers and isolated Docker trials are required; paper reports self-feedback drift and no universally best method. Never let a skill author be its sole verifier or auto-promote from self-critique."),
 
+    Source("skillhorizon", "SkillHorizon long-horizon skill-composition benchmark",
+           "https://github.com/HKUST-KnowComp/SkillHorizon",
+           "benchmarks",
+           "Stateful workflows across seven business environments with dependent artifacts, shared resources, local-goal and whole-task verifiers; reference workload bands from 64K to 1M tokens",
+           warning="Only FinanceOps and FieldOps generate worlds without external assets; five environments require separately obtained database/MCP assets. Provider runs incur API use. This is business-workflow research, not a game benchmark."),
+    Source("skill2bench", "Skill2-Bench cross-skill long-horizon reasoning benchmark",
+           "https://github.com/Gen-Verse/Skill-Entropy-RL",
+           "benchmarks",
+           "558 skills across nine domains with directional skill-entropy measurements for cross-skill switching and long-horizon reasoning",
+           warning="Reported RL gains are specific to Qwen3 training experiments. Upstream pipeline uses CUDA/PyTorch, API calibration, vLLM and SLURM; use the evaluation methodology only, not as a local 8 GB GPU training dependency."),
+
     Source("nuclear","Nuclear Music Player","https://nuclearplayer.com/",
            "music","Open-source desktop music player with an optional MCP server",
            warning="AGPL licensing review before embedding sources."),
@@ -238,13 +249,13 @@ SOURCES = (
 )
 
 
-def catalog(query: str = "", category: str = "", limit: int = 60) -> dict:
+def catalog(query: str = "", category: str = "", limit: int = 70) -> dict:
     if not isinstance(query, str) or not isinstance(category, str):
         raise ValueError("Search and category must be text.")
     if len(query) > 120 or len(category) > 24:
         raise ValueError("Narrow the search text or category.")
-    if type(limit) is not int or not 1 <= limit <= 60:
-        raise ValueError("Results limit must be between 1 and 60.")
+    if type(limit) is not int or not 1 <= limit <= 70:
+        raise ValueError("Results limit must be between 1 and 70.")
     category = category.strip().lower()
     categories = sorted({s.category for s in SOURCES})
     if category and category not in categories:
