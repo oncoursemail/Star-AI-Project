@@ -426,11 +426,12 @@ A benchmark result must identify its dataset, code, model, prompt, adapter, envi
 
 ## 12. Implementation and review status
 
-Run 43 adds three reviewable workstreams:
+Run 43 adds four reviewable workstreams:
 
 - **Research PR #1180:** this Run 43 document and the benchmark manifest update, based on main.
 - **Game Lab PR #1182:** five additional reviewed research sources and regression assertions, based on main.
 - **Voice implementation PR #1187:** metadata-only EoT-Bench adapter plus opt-in right-censored turn evaluation, stacked on the existing causal turn-taking PR #1144.
+- **Frontier register PR #1178:** appends R179–R183 for EoT-Bench, SkillCAT, MemSkill, WindowsWorld and WeaveBench to the shared source register.
 
 PR #1187 must not be merged ahead of its parent #1144. The research and catalog branches are independent of that voice implementation chain. No PR in this run is merged into production main.
 
