@@ -257,18 +257,18 @@ class SoundSpeaker:
             emitted_frames = len(chunk) // 2
             self._played += emitted_frames
 
-        # Lightweight aggregate telemetry only: no PCM, transcript, or viewer data.
-        # A playback timestamp is evidence of a PortAudio callback schedule, not proof
-        # that a remote audience or physical listener heard the samples.
-        try:
-            self._playback.record_callback(
-                frames=frames,
-                emitted_frames=emitted_frames,
-                output_underflow=underflow,
-                at=output_at,
-            )
-        except Exception:
-            pass  # diagnostics must never break the audio callback
+            # Keep playback accounting under the same speaker lock as reset() and
+            # snapshots. This makes the per-reply evidence window atomic without
+            # introducing a competing reader/writer lock order.
+            try:
+                self._playback.record_callback(
+                    frames=frames,
+                    emitted_frames=emitted_frames,
+                    output_underflow=underflow,
+                    at=output_at,
+                )
+            except Exception:
+                pass  # diagnostics must never break the audio callback
 
         # Always fill the complete output buffer, including underrun silence.
         out[:len(chunk)] = chunk
@@ -313,8 +313,8 @@ class SoundSpeaker:
 
     def diagnostics(self) -> dict:
         """Aggregate PortAudio/playback health without exposing audio samples."""
-        playback = self._playback.snapshot()
         with self._lock:
+            playback = self._playback.snapshot()
             return {
                 "output_underflows": self._output_underflows,
                 "output_overflows": self._output_overflows,
@@ -341,11 +341,12 @@ class SoundSpeaker:
     def reset(self) -> None:
         with self._lock:
             self._played = 0
-        self._playback.reset()
+            self._playback.reset()
 
     def playback_snapshot(self) -> PlaybackSnapshot:
         """Return aggregate DAC-time playback evidence for the current reply."""
-        return self._playback.snapshot()
+        with self._lock:
+            return self._playback.snapshot()
 
     def pending_seconds(self) -> float:
         with self._lock:
