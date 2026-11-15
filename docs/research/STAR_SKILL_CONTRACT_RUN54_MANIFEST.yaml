@@ -70,9 +70,12 @@ research_sources:
 files:
   - star/skill_contract.py
   - star/agent_skills.py
+  - star/skill_packs/__init__.py
+  - star/skill_packs/eng-verify-before-done/SKILL.contract.json
   - tests/test_skill_contract.py
   - tests/test_skill_contract_examples.py
   - tests/test_agent_skill_contracts.py
+  - tests/test_skill_packs.py
   - docs/skills/CONTRACT_FORMAT_V1.md
   - docs/research/STAR_20261115_RUN56_SKILL_SIDECARS_GENERALIST_INTELLIGENCE_AND_VTUBER_RUNTIME.md
   - docs/research/STAR_20261115_RUN54_VERSIONED_SKILL_CONTRACTS_BEHAVIOR_COVERAGE_AND_VERIFIED_TRANSFER.md
