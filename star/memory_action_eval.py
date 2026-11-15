@@ -437,7 +437,7 @@ def evaluate_memory_action_grounding(
             raise TypeError("receipts must contain MemoryActionReceipt values")
         expected_signature = hmac.new(
             validation_key,
-            b"star.memory-action.receipt.v1\\x00" + _canonical(_receipt_payload(receipt)),
+            b"star.memory-action.receipt.v1\x00" + _canonical(_receipt_payload(receipt)),
             hashlib.sha256,
         ).hexdigest()
         if not receipt.signature or not hmac.compare_digest(receipt.signature, expected_signature):
