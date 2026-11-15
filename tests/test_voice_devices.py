@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 from star.voice.devices import MICROPHONE_QUEUE_FRAMES, Microphone, SoundSpeaker
 from star.voice.pcm import FRAME_SAMPLES, SAMPLE_RATE
+from star.voice.playback import PlaybackTelemetry
 
 
 def make_microphone(maxsize=1):
@@ -61,6 +62,7 @@ def test_speaker_reports_portaudio_underflow_without_recording_audio():
     speaker._played = 0
     speaker._output_underflows = 0
     speaker._output_overflows = 0
+    speaker._playback = PlaybackTelemetry()
     speaker._levels = deque(maxlen=64)
 
     output = bytearray(4)
@@ -77,6 +79,9 @@ def test_speaker_reports_portaudio_underflow_without_recording_audio():
         "queued_seconds": 0.0,
         "played_seconds": 0.0,
         "sample_rate": 24000,
+        "first_playback_at": None,
+        "output_callbacks_with_audio": 0,
+        "playback_output_underflows": 0,
     }
     assert not {"audio", "transcript", "device_name"} & diagnostics.keys()
 
@@ -94,11 +99,13 @@ def test_callbacks_tolerate_missing_portaudio_status():
     speaker._played = 0
     speaker._output_underflows = 0
     speaker._output_overflows = 0
+    speaker._playback = PlaybackTelemetry()
     speaker._levels = deque(maxlen=64)
     output = bytearray(4)
     speaker._callback(output, 2, None, None)
     assert output == b"\x00" * 4
     assert speaker.diagnostics()["output_underflows"] == 0
+    assert speaker.playback_snapshot().first_playback_at is None
 
 def test_speaker_callback_does_not_run_rms_inline_or_import_numpy(monkeypatch):
     entered = threading.Event()
