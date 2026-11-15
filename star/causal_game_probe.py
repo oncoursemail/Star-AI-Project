@@ -192,6 +192,7 @@ class CausalProbeReport:
     mean_effect_milli: float | None
     median_effect_milli: float | None
     block_sign_p: float | None
+    reverse_block_sign_p: float | None
     stratum_effects_milli: tuple[tuple[str, float], ...]
     note: str = (
         "randomized matched-start-state evidence; host signatures authenticate reports, "
@@ -394,7 +395,7 @@ def evaluate_causal_probe(
     if incomplete:
         return CausalProbeReport(
             "inconclusive", len(rows), len(completed), incomplete, 0, 0, 0, 0,
-            0, 0, None, None, None, None, None, (),
+            0, 0, None, None, None, None, None, None, (),
         )
 
     effects: list[int] = []
@@ -455,7 +456,8 @@ def evaluate_causal_probe(
         round(baseline_successes / total, 4),
         round(candidate_successes / total, 4),
         round(average_effect, 2), round(median(effects), 2),
-        round(p_value, 7) if p_value is not None else None, strata,
+        round(p_value, 7) if p_value is not None else None,
+        round(reverse_p, 7) if reverse_p is not None else None, strata,
     )
 
 
