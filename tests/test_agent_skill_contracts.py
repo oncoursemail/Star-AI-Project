@@ -127,3 +127,13 @@ def test_symlinked_contract_is_rejected(tmp_path):
     assert loaded["contract_status"] == "invalid"
     assert "non-symlink" in loaded["contract_error"]
     assert "contract" not in loaded
+
+
+def test_directory_at_contract_path_is_invalid_without_hiding_skill(tmp_path):
+    library, skill_dir = make_library(tmp_path)
+    (skill_dir / "SKILL.contract.json").mkdir()
+
+    loaded = library.load("demo-skill")
+    assert loaded["contract_status"] == "invalid"
+    assert "regular non-symlink file" in loaded["contract_error"]
+    assert loaded["instructions"].startswith("# Demo")
