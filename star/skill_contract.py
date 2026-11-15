@@ -536,13 +536,31 @@ def evaluate_skill_coverage(
                                coverage_rate, pass_rate, review)
 
 
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Reject duplicate keys at every JSON nesting level instead of accepting last-key-wins."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object key: {key}")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value: str) -> None:
+    raise ValueError(f"non-standard JSON constant is not allowed: {value}")
+
+
 def parse_skill_contract(raw: str | Mapping[str, Any]) -> SkillContract:
-    """Parse a JSON object or mapping; unknown fields are rejected rather than ignored."""
+    """Parse a JSON object or mapping; duplicate and unknown fields are rejected."""
     if isinstance(raw, str):
         if len(raw) > 64_000:
             raise ValueError("skill contract JSON is too large")
         try:
-            raw = json.loads(raw)
+            raw = json.loads(
+                raw,
+                object_pairs_hook=_unique_json_object,
+                parse_constant=_reject_json_constant,
+            )
         except json.JSONDecodeError as exc:
             raise ValueError("skill contract must be valid JSON") from exc
     return SkillContract.from_dict(raw)
