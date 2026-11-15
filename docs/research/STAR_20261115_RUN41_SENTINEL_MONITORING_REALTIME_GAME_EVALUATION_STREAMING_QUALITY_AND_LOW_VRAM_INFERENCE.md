@@ -295,6 +295,20 @@ Match SPEED-Bench client concurrency to server slot count. Keep model revision, 
 - Voice first-audio latency during concurrent load.
 - OBS render/encoder lag and game frame time.
 
+### Fast/deep model routing
+
+STAR should not send every event to the largest available model. Use a measured router with explicit deadlines and escalation rules:
+
+- **Fast path:** short acknowledgements, turn-state classification, simple factual lookup, skill retrieval, and bounded game-state interpretation.
+- **Deep path:** multi-step planning, unfamiliar mechanics, code architecture, complex debugging, research synthesis, and ambiguous tasks with material consequences.
+- **Background path:** long web research, codebase analysis, clip indexing, post-stream summaries, and practice curriculum generation. Background results return through the existing task/delivery ledger and are checked for freshness before being spoken.
+- **Escalation:** move from fast to deep only when a verifier fails, required evidence is missing, task complexity exceeds a measured threshold, or the cost of an incorrect result warrants it.
+- **De-escalation:** stop reasoning once the task's acceptance checks pass; do not keep generating hidden analysis without a useful expected gain.
+- **Admission:** the existing resource controller decides whether a worker can run. A router must never bypass voice/game reserves or start a second GPU scheduler.
+- **Evaluation:** compare paired task success, verifier agreement, end-to-end latency, queue wait, and resource cost. A smaller model is not "better" if it increases rework or false success.
+
+The router must use measured task outcomes, not the model's self-reported confidence alone. Preserve the same evidence, policy and tool permissions across fast/deep variants so the experiment measures model/routing differences rather than changed authority.
+
 ### Low-VRAM decision
 
 For STAR's local 8 GB Vulkan GPU target, keep a small fast local path and a CPU/RAM or second-machine path for heavier work. Do not run multiple large ASR, TTS, vision, and reasoning models on the same 8 GB GPU simultaneously. Use the existing resource-admission controller to reserve headroom for game rendering, audio, and OBS.
