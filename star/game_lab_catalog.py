@@ -303,8 +303,8 @@ SOURCES = (
            warning="Benchmark protocol and graders are versioned; retain its four dimensions separately and do not collapse them into a single naturalness score or claim STAR results."),
     Source("llama-server-docs", "llama.cpp official server and inference controls",
            "https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md", "inference",
-           "Official llama-server documentation for continuous batching, parallel slots, prompt caching, cache reuse, metrics and speculative decoding",
-           warning="Flags and backend support are revision-specific. Pin the exact llama.cpp commit; do not raise slot count or enable KV quantization/speculation without paired quality, latency and memory tests on the target 8 GB GPU."),
+           "Official llama-server documentation for continuous batching, parallel slots, prompt caching, cache reuse, metrics, speculative decoding and router-mode model management including memory-margin-based LRU unloading",
+           warning="Flags and backend support are revision-specific. Router --models-memory-margin unloads idle LRU models, never a serving model, and its estimates omit multimodal projector memory; pin the exact llama.cpp commit and test model swaps, queueing, quality, latency and memory on the target 8 GB GPU."),
     Source("vtubestudio-api", "VTube Studio public plugin API",
            "https://github.com/DenchiSoft/VTubeStudio", "vtuber",
            "Authenticated local WebSocket API for Live2D parameter injection, hotkeys, model/item events and plugin integrations",
@@ -313,16 +313,36 @@ SOURCES = (
            "https://about.roblox.com/newsroom/2026/04/roblox-studio-going-agentic", "engines",
            "Official 2026 workflow direction: editable task manifests, parallel plan execution, procedural mesh/model tools and playtesting against the original plan",
            warning="Roblox platform announcements do not grant STAR access to every beta feature. Prefer the built-in Studio MCP and StudioTestService only after owner opt-in; no automatic publishing or permission escalation."),
+    Source("agentcl", "AGENTCL continual-learning evaluation for language agents",
+           "https://arxiv.org/abs/2606.02461", "learning",
+           "Controlled compositional task streams reveal reusable subtask transfer, memory plasticity/stability and negative transfer that naive task streams can hide",
+           warning="Paper results are not STAR scores. Use preregistered dependency edges, held-out compositions and explicit memory-interference tests; avoid tuning on the holdout."),
+    Source("agenticrag-r1", "AgenticRAG-R1 stack-memory reasoning and retrieval research",
+           "https://aclanthology.org/2026.findings-emnlp.641/", "learning",
+           "EMNLP 2026 Findings research on fine-grained reasoning/retrieval/memory actions, stack memory, hierarchical action-aware rewards and information-aware trajectory filtering",
+           warning="Research paper, not a reviewed production dependency. Adapt evidence/action accounting only; do not claim STAR reasoning gains or install anonymous code."),
+    Source("duplex-mpe", "Duplex-MPE multiparty full-duplex dialogue benchmark",
+           "https://arxiv.org/abs/2609.31948", "benchmarks",
+           "2,000 scenarios with three or four human speakers and one assistant; paired explicit/implicit addressing with response initiation, answer accuracy, silence preservation and human-resolution stopping scores",
+           warning="Benchmark results are not STAR results. Use content-free, session-scoped replay labels and untouched holdouts; do not merge viewer identities across platforms."),
+    Source("aituber-onair", "AITuber OnAir modular AI VTuber toolkit",
+           "https://github.com/shinshin86/aituber-onair", "vtuber",
+           "TypeScript architecture reference for stream-ready AI VTubers with chat, speech, viewer reactions, memory and PNG/VRM/Live2D avatar adapters",
+           warning="Architecture reference only; STAR already has a Python/React runtime, room director and playback arbiter. Review license/dependencies before copying and do not create competing stage or playback authorities."),
+    Source("agentif", "AgentIF constraint-dense agentic instruction-following benchmark",
+           "https://agentif.github.io/", "benchmarks",
+           "50 real-world agentic applications with long instructions and multiple simultaneous constraints; updated 2026-10 with reasoning and non-reasoning evaluation settings",
+           warning="Pin the evaluation configuration and judge version because updated scores are not comparable with the original setting. Use local task manifests and independent verifiers; no STAR score claimed."),
 )
 
 
-def catalog(query: str = "", category: str = "", limit: int = 80) -> dict:
+def catalog(query: str = "", category: str = "", limit: int = 90) -> dict:
     if not isinstance(query, str) or not isinstance(category, str):
         raise ValueError("Search and category must be text.")
     if len(query) > 120 or len(category) > 24:
         raise ValueError("Narrow the search text or category.")
     if type(limit) is not int or not 1 <= limit <= 80:
-        raise ValueError("Results limit must be between 1 and 80.")
+        raise ValueError("Results limit must be between 1 and 90.")
     category = category.strip().lower()
     categories = sorted({s.category for s in SOURCES})
     if category and category not in categories:
