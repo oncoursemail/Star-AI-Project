@@ -347,3 +347,14 @@ class SkillContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_contract_json_rejects_duplicate_keys_at_every_level():
+    raw = json.dumps(valid_contract())
+    duplicate_top_level = raw[:-1] + ',"skill_id":"attacker-skill"}'
+    with unittest.TestCase().assertRaisesRegex(ValueError, "duplicate JSON object key"):
+        parse_skill_contract(duplicate_top_level)
+
+    duplicate_nested = raw.replace('"kind": "owner_consent"', '"kind": "owner_consent","kind":"state_exists"')
+    with unittest.TestCase().assertRaisesRegex(ValueError, "duplicate JSON object key"):
+        parse_skill_contract(duplicate_nested)
