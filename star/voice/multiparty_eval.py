@@ -17,9 +17,9 @@ from typing import Sequence
 from .room import RoomAction
 
 
-_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\\Z")
-_SHA = re.compile(r"[0-9a-f]{64}\\Z")
-_DOMAIN = b"star.multiparty-room-outcome.v1\\x00"
+_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\Z")
+_SHA = re.compile(r"[0-9a-f]{64}\Z")
+_DOMAIN = b"star.multiparty-room-outcome.v1\x00"
 _MAX_CASES = 512
 _MAX_AGE_S = 30 * 86400
 _MAX_MS = 300_000
@@ -234,7 +234,7 @@ def roster_digest(cases: Sequence[RoomReplayCase]) -> str:
         for case in cases
     )
     payload = json.dumps(rows, separators=(",", ":"), ensure_ascii=True).encode("ascii")
-    return hashlib.sha256(b"star.multiparty-room-roster.v1\\x00" + payload).hexdigest()
+    return hashlib.sha256(b"star.multiparty-room-roster.v1\x00" + payload).hexdigest()
 
 
 @dataclass(frozen=True)
