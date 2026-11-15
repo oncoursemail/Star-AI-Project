@@ -78,8 +78,8 @@ epochs:
   invalid_or_incoherent_sample: clear_interval_windows
 host_sampler_bridge:
   outputs:
-    - streaming_MetricObservation
-    - obs_dropped_pct_MetricObservation_or_null
+    - streaming_MetricObservation_at_final_GetStreamStatus_timestamp
+    - obs_dropped_pct_MetricObservation_at_GetStats_timestamp_or_null
   missing_drop_rate_behavior: fail_closed_while_streaming
   clock_epoch: supplied_by_trusted_windows_host
 security:
