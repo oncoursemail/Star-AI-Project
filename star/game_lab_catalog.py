@@ -341,7 +341,7 @@ def catalog(query: str = "", category: str = "", limit: int = 90) -> dict:
         raise ValueError("Search and category must be text.")
     if len(query) > 120 or len(category) > 24:
         raise ValueError("Narrow the search text or category.")
-    if type(limit) is not int or not 1 <= limit <= 80:
+    if type(limit) is not int or not 1 <= limit <= 90:
         raise ValueError("Results limit must be between 1 and 90.")
     category = category.strip().lower()
     categories = sorted({s.category for s in SOURCES})
