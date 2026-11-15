@@ -155,7 +155,7 @@ class CausalGameProbeTests(unittest.TestCase):
     def test_wrong_randomization_seed_is_rejected(self):
         with self.assertRaises(PermissionError):
             assignment_plan(self.cases, self.manifest,
-                            randomization_seed=b"different-randomization-seed")
+                            randomization_seed=b"different-randomization-seed-value-12345")
 
     def test_roster_change_is_rejected(self):
         changed = list(self.cases)
