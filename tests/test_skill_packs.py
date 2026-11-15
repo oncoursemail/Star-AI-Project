@@ -33,7 +33,9 @@ GAMEPLAY_PACKS = {"roblox-combat-hitboxes", "roblox-pathfinding-npc", "roblox-ph
                   "roblox-marketplace-purchases", "roblox-teleport-matchmaking", "roblox-open-cloud"}
 UI_PROMPT = "In my Roblox game: write a LocalScript that builds a ScreenGui with a ScrollingFrame and a UIListLayout."
 REMOTE_PROMPT = "In my Roblox game, my RemoteEvent handler trusts the client price. Make the server validate it."
-ENGINE_NAMES = set(skill_packs.ENGINE_CONTEXTS)   # other-engine packs, tested in test_engine_skill_packs.py
+SCIENCE_NAMES = set(skill_packs.SCIENCE_TOPICS)   # scientific guides, tested in test_scientific_skill_*.py
+# other-engine packs, tested in test_engine_skill_packs.py (the scientific guides are opt-in extras the same way)
+ENGINE_NAMES = set(skill_packs.ENGINE_CONTEXTS) | SCIENCE_NAMES
 
 
 def test_all_packs_ship_in_the_existing_skill_format():
@@ -42,6 +44,8 @@ def test_all_packs_ship_in_the_existing_skill_format():
     for pack in packs:
         assert pack.file.parent.name == pack.name and 1 <= len(pack.description) <= 1024
         assert pack.body.startswith("# ")
+        if pack.name in SCIENCE_NAMES:
+            continue    # provenance and rights are in the guide body (test_scientific_skill_guides.py)
         grounding = "ATTRIBUTION.md" if pack.name in ENGINEERING else "sources.md"
         assert (pack.file.parent / "references" / grounding).is_file(), pack.name
 
