@@ -236,7 +236,7 @@ class MemoryActionEvalTests(unittest.TestCase):
     def test_invalid_case_memory_partition_rejected(self):
         with self.assertRaises(ValueError):
             MemoryActionCase(
-                "bad", "session", 0, "coding", True, ("a",), ("a",), (),
+                "bad", "session", 0, "coding", True, ("a", "b"), ("a",), (),
                 "tool.run", sha("args"), "memory_off",
             )
 
