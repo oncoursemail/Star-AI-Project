@@ -1016,10 +1016,10 @@
   },
   {
     "id": "R150",
-    "title": "V-JEPA 2 self-supervised foundation world model",
+    "title": "V-JEPA 2 / 2.1 self-supervised visual world models",
     "url": "https://ai.meta.com/research/vjepa/",
     "kind_and_usage": "Official model/research page: video-pretrained visual prediction and downstream action-conditioned planning",
-    "audit": "Meta research page checked 2026-11-14; treated as a visual world-model candidate, not an action policy or verifier; no model downloaded"
+    "audit": "Meta research page and official facebookresearch/vjepa2 repository checked 2026-11-14; V-JEPA 2.1 (2026-03-16) includes 80M–2B checkpoints and V-JEPA 2-AC action-conditioned robot-planning research; no model downloaded"
   },
   {
     "id": "R151",
