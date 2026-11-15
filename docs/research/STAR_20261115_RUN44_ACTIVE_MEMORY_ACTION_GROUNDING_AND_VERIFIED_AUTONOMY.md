@@ -85,7 +85,7 @@ A positive holdout verdict is only `manual_review_recommended`. It does not writ
 
 ## 3. How this complements continual learning
 
-The existing #1109 evaluator asks whether memory causes transfer, retention, or interference across task streams. Run 44 asks whether the memory that is actually retrieved is applied to the parameters of a concrete tool action.
+The open #1109 draft evaluator asks whether memory causes transfer, retention, or interference across task streams. Run 44 is a standalone companion: it asks whether the memory that is actually retrieved is applied to the parameters of a concrete tool action, without importing or depending on #1109's branch.
 
 Keep both:
 - #1109 answers: "Did experience improve later capability?"
