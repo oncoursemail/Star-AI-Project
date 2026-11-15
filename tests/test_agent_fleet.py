@@ -206,3 +206,35 @@ def test_worktrees_start_from_pinned_commit(repo, tmp_path):
     for t in ("p0", "p1"):
         assert head(tmp_path / "w" / t) == base     # nothing committed: each worktree sits on the pinned commit
     assert sorted(b for _, b in fl.fleet_worktrees(repo)) == ["star/fleet-p0", "star/fleet-p1"]
+
+
+# --- pause: tasks that have not started wait; cancel still wins ---
+
+def _fleet_in_thread(repo, tmp_path, tasks, **kw):
+    box = {}
+    t = threading.Thread(target=lambda: box.update(r=fl.run_fleet(
+        repo, tasks, worktrees=tmp_path / "w", enabled=True, resources=RES, **kw)))
+    t.start()
+    return t, box
+
+
+def test_pause_holds_unstarted_tasks_until_resumed(repo, tmp_path):
+    pause = threading.Event()
+    pause.set()
+    t, box = _fleet_in_thread(repo, tmp_path, [fl.FleetTask("p1", writer("x"), PASS)], pause=pause)
+    time.sleep(0.5)
+    assert t.is_alive() and not (tmp_path / "w" / "p1").exists()
+    pause.clear()
+    t.join(20)
+    assert [r.status for r in box["r"].receipts] == ["proposed"]
+
+
+def test_cancel_wins_over_pause(repo, tmp_path):
+    pause, cancel = threading.Event(), threading.Event()
+    pause.set()
+    t, box = _fleet_in_thread(repo, tmp_path, [fl.FleetTask("p2", writer("x"), PASS)], pause=pause, cancel=cancel)
+    time.sleep(0.3)
+    cancel.set()
+    t.join(20)
+    assert [r.status for r in box["r"].receipts] == ["cancelled"]
+    assert not (tmp_path / "w" / "p2").exists()
