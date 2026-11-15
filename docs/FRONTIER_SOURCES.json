@@ -1006,5 +1006,40 @@
     "url": "https://arxiv.org/abs/2609.31281",
     "kind_and_usage": "Preprint: joint-action scoring for offline cooperative multi-agent reinforcement learning",
     "audit": "arXiv v1 inspected; offline MARL scope preserved; no real-time game transfer claim"
+  },
+  {
+    "id": "R149",
+    "title": "SIMA 2: An Agent that Plays, Reasons, and Learns With You in Virtual 3D Worlds",
+    "url": "https://deepmind.google/blog/sima-2-an-agent-that-plays-reasons-and-learns-with-you-in-virtual-3d-worlds/",
+    "kind_and_usage": "Official research report: multiworld visual game agent, demonstration learning, self-directed practice, experience-bank iteration, and held-out transfer",
+    "audit": "DeepMind article checked 2026-11-14; limited research preview and known long-horizon/goal-verification/low-level-control limits preserved; no weights installed"
+  },
+  {
+    "id": "R150",
+    "title": "V-JEPA 2 self-supervised foundation world model",
+    "url": "https://ai.meta.com/research/vjepa/",
+    "kind_and_usage": "Official model/research page: video-pretrained visual prediction and downstream action-conditioned planning",
+    "audit": "Meta research page checked 2026-11-14; treated as a visual world-model candidate, not an action policy or verifier; no model downloaded"
+  },
+  {
+    "id": "R151",
+    "title": "OSWorld 2.1 long-horizon computer-use benchmark",
+    "url": "https://github.com/xlang-ai/OSWorld-V2/tree/osworld-v2.1",
+    "kind_and_usage": "Official benchmark release: long-horizon desktop tasks with release-pinned code, task classes, assets, website fixtures, and provider images",
+    "audit": "Official repository release instructions checked 2026-11-14; gated task/assets and disposable VM requirements recorded; no benchmark assets downloaded"
+  },
+  {
+    "id": "R152",
+    "title": "AndroidWorld dynamic mobile-agent benchmark",
+    "url": "https://github.com/google-research/android_world",
+    "kind_and_usage": "Official research environment: 116 tasks across 20 Android apps with randomized variants and durable state verification",
+    "audit": "Official repository and project page checked 2026-11-14; emulator benchmark only, no Android Studio/emulator installed"
+  },
+  {
+    "id": "R153",
+    "title": "OpenHands Index software-agent evaluation",
+    "url": "https://index.openhands.dev/",
+    "kind_and_usage": "Benchmark index: issue resolution, greenfield development, frontend, testing, information gathering, and cost/performance comparison",
+    "audit": "Official index checked 2026-11-14; leaderboard data are not STAR results; no agent implementation or benchmark task data imported"
   }
 ]
