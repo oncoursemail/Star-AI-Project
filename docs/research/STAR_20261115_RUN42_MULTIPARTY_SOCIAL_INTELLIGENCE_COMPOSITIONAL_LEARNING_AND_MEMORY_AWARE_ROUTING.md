@@ -95,7 +95,7 @@ The current router documentation describes `--models-max` and `--models-memory-m
 
 ## 3. New implementation — content-free multiparty replay evaluation
 
-Companion PR: `feat/multiparty-room-replay-eval-run42` (draft; stacked on #1178).
+Companion PR: [#1186 — signed multiparty room replay evaluation](https://github.com/oncoursemail/Star-AI-Project/pull/1186) (draft; stacked on #1178).
 
 New files:
 - `star/voice/multiparty_eval.py`
