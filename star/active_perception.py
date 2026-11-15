@@ -59,6 +59,9 @@ class PerceptionPolicyConfig:
     max_future_skew_ms: int = 100
     max_media_units_per_turn: int = 24
     max_requests_per_turn: int = 4
+    # Optional deadline bonus. Zero preserves the original score exactly.
+    deadline_urgency_weight: float = 0.0
+    deadline_horizon_ms: int = 1_000
 
     def __post_init__(self) -> None:
         for name, low, high in (
@@ -67,10 +70,14 @@ class PerceptionPolicyConfig:
             ("max_future_skew_ms", 0, 5_000),
             ("max_media_units_per_turn", 1, 4_096),
             ("max_requests_per_turn", 1, 32),
+            ("deadline_horizon_ms", 1, 60_000),
         ):
             value = getattr(self, name)
             if type(value) is not int or not low <= value <= high:
                 raise ValueError(f"{name} must be an integer from {low} to {high}")
+        if (not _finite(self.deadline_urgency_weight)
+                or not 0.0 <= self.deadline_urgency_weight <= 2.0):
+            raise ValueError("deadline_urgency_weight must be finite and between 0 and 2")
 
 
 @dataclass(frozen=True)
@@ -100,8 +107,12 @@ class ActivePerceptionPolicy:
         (0.35 * priority + 0.30 * relevance
          + 0.20 * uncertainty + 0.15 * novelty) / sqrt(media_units)
 
-    It is deliberately deterministic and easy to evaluate. Weights are not
-    learned or silently adapted. Change them only through paired offline tests.
+    An optional deadline bonus multiplies this score by
+        1 + deadline_urgency_weight * clamp(1 - remaining_ms / horizon_ms, 0, 1)
+
+    The deadline bonus defaults to zero, preserving the baseline. It is deliberately
+    deterministic and must be enabled only after paired replay evaluation. Weights
+    are never learned or silently adapted.
     """
 
     def __init__(self, config: PerceptionPolicyConfig | None = None) -> None:
@@ -161,6 +172,16 @@ class ActivePerceptionPolicy:
                 + 0.15 * candidate.novelty
             )
             score = value / math.sqrt(candidate.media_units)
+            # A caller may opt into deadline-aware ranking for latency-sensitive
+            # evidence. This is a bounded heuristic, not compute admission or action
+            # authorization; the default weight of zero preserves prior ordering.
+            if candidate.deadline_at is not None and self.config.deadline_urgency_weight > 0.0:
+                remaining_ms = max(0.0, (candidate.deadline_at - float(now)) * 1000.0)
+                urgency = max(
+                    0.0,
+                    min(1.0, 1.0 - remaining_ms / self.config.deadline_horizon_ms),
+                )
+                score *= 1.0 + self.config.deadline_urgency_weight * urgency
             eligible.append(SelectedEvidence(candidate, score))
 
         eligible.sort(
