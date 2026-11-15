@@ -122,3 +122,12 @@ def test_route_blocks_a_non_free_model_without_spend_opt_in():
     assert d.provider == "local" and "spend" in d.reason
     assert fac.route(model="vendor/model:free", **kw).provider == "openrouter"
     assert fac.route(model="vendor/model", allow_spend={"openrouter"}, **kw).spend == "may_bill"
+
+
+def test_catalog_marks_search_providers_and_route_never_sends_chat_to_them():
+    assert fac.CATALOG["brave"].kind == "search" and fac.CATALOG["tavily"].kind == "search"
+    assert all(fac.CATALOG[p].kind == "inference" for p in ("groq", "openrouter", "gemini", "cloudflare", "hf"))
+    d = fac.route(opted_in=["tavily", "brave"], quotas=fac.QuotaBook(), keys={"tavily": True, "brave": True})
+    assert d.provider == "local" and "search" in d.reason
+    rows = {r["provider"]: r for r in fac.status(opted_in=[], quotas=fac.QuotaBook())}
+    assert rows["tavily"]["kind"] == "search" and rows["groq"]["kind"] == "inference"

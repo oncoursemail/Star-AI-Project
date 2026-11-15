@@ -36,6 +36,7 @@ class ProviderInfo:
     privacy: str         # PRIVACY_LABELS
     notes: str = ""
     withdrawn: bool = False
+    kind: str = "inference"   # "inference" (chat models) or "search" (never a chat route)
 
 
 CATALOG: dict[str, ProviderInfo] = {
@@ -52,9 +53,10 @@ CATALOG: dict[str, ProviderInfo] = {
     "hf": ProviderInfo("Hugging Face Inference Providers", "https://huggingface.co/docs/inference-providers/pricing",
                        "trial_credit", "unknown", "monthly credits, then billed; not wired into STAR yet"),
     "brave": ProviderInfo("Brave Search API", "https://brave.com/search/api/", "unknown", "unknown",
-                          "search only; plan terms changed during 2025, verify before relying on a free quota"),
+                          "search only; plan terms changed during 2025, verify before relying on a free quota",
+                          kind="search"),
     "tavily": ProviderInfo("Tavily", "https://docs.tavily.com/", "free_tier", "unknown",
-                           "search only; monthly free credits, then billed"),
+                           "search only; monthly free credits, then billed", kind="search"),
 }
 
 
@@ -217,6 +219,9 @@ def route(*, opted_in: Iterable[str], quotas: QuotaBook, keys: Mapping[str, bool
         if info is None:
             reasons.append(f"{pid}: not in the catalog")
             continue
+        if info.kind != "inference":
+            reasons.append(f"{pid}: {info.kind} provider, not a chat route")
+            continue
         if info.withdrawn:
             reasons.append(f"{pid}: offer withdrawn, update the catalog from {info.source}")
             continue
@@ -245,7 +250,7 @@ def status(*, opted_in: Iterable[str], quotas: QuotaBook, keys: Mapping[str, boo
     for pid, info in CATALOG.items():
         ok, why = quotas.available(pid, now)
         st = quotas.state(pid)
-        rows.append({"provider": pid, "label": info.label, "configured": bool(keys.get(pid)), "opted_in": pid in wanted,
+        rows.append({"provider": pid, "label": info.label, "kind": info.kind, "configured": bool(keys.get(pid)), "opted_in": pid in wanted,
                      "available": ok and not info.withdrawn, "reason": "withdrawn" if info.withdrawn else why,
                      "free": info.free, "privacy": info.privacy, "source": info.source, "notes": info.notes,
                      "last_status": st["last_status"], "rate": st["rate"]})
