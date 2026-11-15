@@ -92,7 +92,7 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert all(sources[key].status == "research_only" for key in
                ("sentinelbench", "full-duplex-v3", "interactionbench",
                 "llama-server-docs", "vtubestudio-api", "roblox-agentic-workflow",
-                "agentcl", "agenticrag-r1", "duplex-mpe", "aituber-onair", "agentif")))
+                "agentcl", "agenticrag-r1", "duplex-mpe", "aituber-onair", "agentif"))
     assert "no-op" in sources["sentinelbench"].warning
     assert "do not measure STAR" in sources["full-duplex-v3"].warning
     assert "four dimensions" in sources["interactionbench"].warning
