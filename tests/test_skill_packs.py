@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
+import json
+
 import pytest
 
 from star import desktop_core, doc_grounding, skill_packs
@@ -377,6 +379,8 @@ def test_structured_skill_contract_guidance_is_off_by_default_and_opt_in(monkeyp
     library = SkillLibrary(workspace=None, home=tmp_path, bundled=skill_packs.PACKS_DIR)
     loaded = library.load(name)
     assert loaded["contract_status"] == "parsed", loaded
+    normalized_contract = json.dumps(loaded["contract"], ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    assert len(normalized_contract) <= skill_packs.MAX_CONTRACT_CHARS
 
     # The structured contract is read only for the already-selected pack and only
     # when explicitly enabled; it never enters the system message.
