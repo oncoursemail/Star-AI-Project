@@ -396,3 +396,17 @@ def test_structured_skill_contract_environment_switch_is_strict():
                             ("on", True), ("true", True), ("yes", True), ("1", True),
                             ("maybe", False)):
         assert skill_packs.contracts_enabled({skill_packs.CONTRACT_ENV_VAR: value}) is expected
+
+
+def test_opt_in_contract_reaches_only_the_user_turn(monkeypatch, tmp_path):
+    monkeypatch.setenv(skill_packs.ENV_VAR, "eng-verify-before-done")
+    monkeypatch.setenv(skill_packs.CONTRACT_ENV_VAR, "on")
+    prompt = "In my Roblox game: fix this and tell me how you verified it works."
+
+    messages, text, events = run_turn(monkeypatch, tmp_path, prompt)
+    assert text.startswith(prompt)
+    assert skill_packs.CONTRACT_BLOCK_HEADING in text
+    assert "claim-only-after-evidence" in text
+    assert skill_packs.CONTRACT_BLOCK_HEADING not in messages[0]["content"]
+    assert any(event["event"] == "skill_packs"
+               and event["names"] == ["eng-verify-before-done"] for event in events)
