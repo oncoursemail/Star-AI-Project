@@ -465,16 +465,25 @@ def evaluate_multiparty_replay(
     inconclusive: list[str] = []
     if len(holdout_cases) < limits.min_holdout_cases:
         inconclusive.append("insufficient_holdout_cases")
-    counts = holdout["category_counts"]
-    assert isinstance(counts, dict)
-    for category in limits.required_categories:
-        if counts[category] < limits.min_cases_per_category:
-            inconclusive.append(f"insufficient_category:{category}")
-    if holdout["answer_label_count"] < limits.min_answer_labels:
+    counts = holdout.get("category_counts")
+    if not isinstance(counts, dict):
+        inconclusive.append("missing_category_counts")
+    else:
+        for category in limits.required_categories:
+            category_count = counts.get(category)
+            if type(category_count) is not int or category_count < limits.min_cases_per_category:
+                inconclusive.append(f"insufficient_category:{category}")
+    answer_label_count = holdout.get("answer_label_count")
+    if type(answer_label_count) is not int or answer_label_count < limits.min_answer_labels:
         inconclusive.append("insufficient_answer_labels")
-    if holdout["appropriateness_label_count"] < limits.min_appropriateness_labels:
+    appropriateness_label_count = holdout.get("appropriateness_label_count")
+    if (
+        type(appropriateness_label_count) is not int
+        or appropriateness_label_count < limits.min_appropriateness_labels
+    ):
         inconclusive.append("insufficient_appropriateness_labels")
-    if holdout["latency_sample_count"] < limits.min_latency_samples:
+    latency_sample_count = holdout.get("latency_sample_count")
+    if type(latency_sample_count) is not int or latency_sample_count < limits.min_latency_samples:
         inconclusive.append("insufficient_latency_samples")
 
     failures: list[str] = []
