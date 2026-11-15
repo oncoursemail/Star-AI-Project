@@ -64,6 +64,51 @@ def test_media_unit_budget_skips_expensive_candidate_and_keeps_smaller_one():
     }
 
 
+def test_deadline_urgency_is_opt_in_and_can_prioritize_imminent_evidence():
+    near = candidate(
+        "near", priority=0.5, relevance=0.5, uncertainty=0.5, novelty=0.5,
+        media_units=1, deadline_at=10.3,
+    )
+    far = candidate(
+        "far", priority=0.9, relevance=0.9, uncertainty=0.9, novelty=0.9,
+        media_units=1, deadline_at=11.0,
+    )
+
+    baseline = select([near, far], now=10.1)
+    assert [item.candidate.candidate_id for item in baseline.selected] == ["far", "near"]
+
+    policy = ActivePerceptionPolicy(PerceptionPolicyConfig(
+        deadline_urgency_weight=2.0, deadline_horizon_ms=1_000,
+    ))
+    urgent = select([near, far], policy=policy, now=10.1)
+    assert [item.candidate.candidate_id for item in urgent.selected] == ["near", "far"]
+    assert urgent.selected[0].score > urgent.selected[1].score
+
+
+def test_deadline_urgency_does_not_bonus_candidates_without_deadlines():
+    item = candidate("no-deadline", deadline_at=None)
+    baseline = select([item], now=10.1)
+    policy = ActivePerceptionPolicy(PerceptionPolicyConfig(deadline_urgency_weight=2.0))
+    urgent = select([item], policy=policy, now=10.1)
+    assert urgent.selected[0].score == baseline.selected[0].score
+
+
+@pytest.mark.parametrize(
+    "config",
+    [
+        {"deadline_urgency_weight": -0.1},
+        {"deadline_urgency_weight": 2.1},
+        {"deadline_urgency_weight": float("nan")},
+        {"deadline_urgency_weight": True},
+        {"deadline_horizon_ms": 0},
+        {"deadline_horizon_ms": 60_001},
+    ],
+)
+def test_invalid_deadline_urgency_config_is_rejected(config):
+    with pytest.raises(ValueError):
+        PerceptionPolicyConfig(**config)
+
+
 def test_stale_candidate_is_rejected():
     result = select([candidate(created_at=1.0)], now=10.0)
     assert not result.selected
