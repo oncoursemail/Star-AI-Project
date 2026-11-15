@@ -80,6 +80,13 @@ interaction:
   action_timeout_ms: 0
   manual_override_tested: false
   emergency_stop_tested: false
+  # Run 39: bounded evidence selection; this is not compute admission or action authorization.
+  perception_policy_revision: null
+  perception_request_kinds: []
+  max_media_units_per_turn: 0
+  max_perception_requests_per_turn: 0
+  evidence_reference_ttl_ms: 0
+  observation_selection_trace_retained: false
 
 resource_budget:
   max_wall_clock_seconds: 0
@@ -113,6 +120,25 @@ metrics:
   false_success_rate: null
   recovery_success_rate: null
   queue_wait_ms_p50: null
+  prefill_ms_p95: null
+  decode_tokens_per_second_p50: null
+  decode_tokens_per_second_p95: null
+  kv_cache_bytes_peak: null
+  kv_cache_quantization: "none | experimental | unsupported"
+  speculative_draft_acceptance_rate: null
+  audio_underrun_count: null
+  perception_candidates_per_turn_p50: null
+  perception_selected_media_units_p95: null
+  perception_rejected_stale_count: null
+  perception_duplicate_suppression_rate: null
+  evidence_retrieval_ms_p95: null
+  event_to_observation_ms_p95: null
+  intent_conditioned_turn_score: null
+  false_interruption_rate: null
+  missed_direct_request_rate: null
+  appropriate_silence_rate: null
+  task_result_delivery_rate: null
+  stale_result_drop_rate: null
   queue_wait_ms_p95: null
   first_token_ms_p50: null
   first_token_ms_p95: null
