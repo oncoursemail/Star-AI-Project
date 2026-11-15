@@ -1,0 +1,69 @@
+schema_version: 1
+run: 57
+date: 2026-11-15
+status: research_only
+repository: oncoursemail/Star-AI-Project
+pull_request: 1209
+scope:
+  - realtime_gameplay
+  - vtuber_conversation
+  - avatar_synchronization
+  - skill_counterfactual_evaluation
+  - inference_performance
+  - mixed_load_resource_policy
+sources:
+  - id: gameworld
+    url: https://gameworld-project.github.io/
+    type: benchmark
+    finding: "34 browser games and 170 tasks; state-verifiable success and progress; GameWorld-RT keeps the environment running during inference."
+    star_use: "Separate paused reasoning evaluation from latency-sensitive real-time gameplay."
+  - id: gamedevbench
+    url: https://github.com/waynchi/gamedevbench
+    type: benchmark
+    finding: "333 game-development tasks across 2D graphics, 3D graphics, UI and gameplay."
+    star_use: "External game-creation reference; retain Roblox-specific Studio and Luau acceptance."
+  - id: eot-bench
+    url: https://github.com/livekit/eot-bench
+    type: benchmark
+    finding: "14-language end-of-turn benchmark; v1.1 adds accented-English and short-turn cohorts; evaluates false cutoffs against endpointing latency."
+    star_use: "Measure conversational endpointing separately from model inference latency."
+  - id: skill-coverage
+    url: https://arxiv.org/abs/2606.20659
+    type: research
+    finding: "Trajectory-based behavior-constraint coverage distinguishes pass, fail and not-observed skill behavior."
+    star_use: "Extend existing versioned skill contracts with paired skill-on/off evaluation."
+  - id: counterfactual-trace-auditing
+    url: https://arxiv.org/abs/2605.11946
+    type: research
+    finding: "Paired with-skill/without-skill traces reveal behavior changes hidden by aggregate pass rate."
+    star_use: "Measure token cost, off-task artifacts, excess planning, recovery and negative transfer."
+  - id: llama-cpp-speed-bench
+    url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+    type: benchmark
+    finding: "Benchmark an already-running server; match client concurrency to server slots; compare saved baseline and speculative runs."
+    star_use: "Reproducible paired inference tuning."
+  - id: llama-cpp-moe-cache
+    url: https://github.com/ggml-org/llama.cpp/blob/master/docs/moe-cache.md
+    type: implementation_documentation
+    finding: "MoE expert cache and CPU cache-miss share depend on host RAM, PCIe bandwidth, pinning and cache size."
+    star_use: "Tune only on the actual model/runtime/host; never assume offload is faster."
+implementation:
+  code_changes:
+    - tests/test_skill_contract.py
+    - tests/test_skill_packs.py
+  behavior_changes: none
+  defaults_changed: false
+  permissions_changed: false
+  models_downloaded: false
+  datasets_downloaded: false
+  hardware_acceptance: false
+acceptance_gates:
+  - exact_head_offline_python_tests
+  - exact_head_windows_tests
+  - exact_head_pyright
+  - paired_skill_on_off_evaluation
+  - dependent_transfer_and_independent_interference
+  - paused_and_realtime_gameplay_tracks
+  - eot_false_cutoff_and_endpointing_latency
+  - baseline_vs_candidate_speed_bench
+  - obs_voice_game_mixed_load_guardrails
