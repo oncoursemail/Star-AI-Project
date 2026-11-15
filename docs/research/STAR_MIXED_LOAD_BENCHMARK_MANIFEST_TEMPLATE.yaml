@@ -1,0 +1,62 @@
+# STAR mixed-load A/B benchmark manifest template.
+# Host-owned; do not put secrets, raw chat, audio, viewer IDs, or stream keys here.
+schema_version: 1
+campaign:
+  id: "replace-with-unique-campaign-id"
+  suite_revision: "replace-with-pinned-harness-commit"
+  split: "validation" # practice | validation | holdout; one split per evaluator
+  hardware_fingerprint: "replace-with-stable-hardware-fingerprint"
+  workload_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  game_build: "replace-with-disposable-game-build-id"
+comparison:
+  baseline:
+    runtime_revision: "replace-with-runtime-commit"
+    model_revision: "replace-with-model-file-sha256-or-provider-revision"
+    config_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  candidate:
+    runtime_revision: "replace-with-candidate-runtime-commit"
+    model_revision: "replace-with-candidate-model-file-sha256-or-provider-revision"
+    config_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+evaluation:
+  primary_metric: "first_audible_ms_p95"
+  minimum_pairs: 8
+  minimum_primary_improvement: 20.0
+  maximum_guard_regression_fraction: 0.25
+  maximum_pair_gap_ms: 86400000
+  window_ms: 120000
+  warmup_seconds: 30
+  cooldown_seconds: 30
+  randomize_pair_order: true
+  independent_holdout_required: true
+metrics:
+  - ttft_ms_p95
+  - first_audible_ms_p95
+  - endpoint_delay_ms_p95
+  - false_cutoff_rate
+  - audio_underruns_per_min
+  - obs_dropped_frames_per_min
+  - game_frame_time_p95_ms
+  - game_frame_time_p99_ms
+  - speech_backlog_p95_ms
+  - verified_task_success_rate
+  - tokens_per_second
+  - cpu_percent_p95
+  - ram_used_mib_p95
+  - vram_used_mib_p95
+  - gpu_util_percent_p95
+  - model_queue_wait_ms_p95
+  - tool_completion_ms_p95
+provenance:
+  observer: "trusted-host-observer-revision"
+  task_verifier: "independent-verifier-revision"
+  receipt_key_ref: "OS-keyring-or-host-secret-store-reference-only"
+  raw_trace_location: "local-owner-controlled-storage"
+  retention_days: 7
+acceptance:
+  require_voice_nonregression: true
+  require_obs_nonregression: true
+  require_game_nonregression: true
+  require_task_quality_nonregression: true
+  require_resource_budget_nonregression: true
+  owner_review_required: true
+  production_default_change: false
