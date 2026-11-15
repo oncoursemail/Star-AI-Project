@@ -93,7 +93,7 @@ def test_statuses_do_not_exaggerate_capabilities():
                ("sentinelbench", "full-duplex-v3", "interactionbench",
                 "llama-server-docs", "vtubestudio-api", "roblox-agentic-workflow"))
     assert "no-op" in sources["sentinelbench"].warning
-    assert "not STAR" in sources["full-duplex-v3"].warning
+    assert "do not measure STAR" in sources["full-duplex-v3"].warning
     assert "four dimensions" in sources["interactionbench"].warning
     assert "Pin the exact llama.cpp commit" in sources["llama-server-docs"].warning
     assert "once per second" in sources["vtubestudio-api"].warning
