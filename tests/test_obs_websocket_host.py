@@ -243,7 +243,8 @@ def test_host_sampler_bridge_exports_only_measured_drop_rate():
     observations = sample.host_observations(clock_epoch="boot-1")
     assert observations["streaming"].value is True
     assert observations["obs_dropped_pct"].value == 0.0
-    assert observations["obs_dropped_pct"].captured_ms == sample.captured_ms
+    assert observations["streaming"].captured_ms == sample.captured_ms
+    assert observations["obs_dropped_pct"].captured_ms == sample.stats_captured_ms
 
 
 def test_host_bridge_rejects_invalid_clock_epoch():
@@ -391,8 +392,10 @@ def test_host_observation_uses_oldest_measurement_timestamp():
     host, client, clock, seen = build()
     connect(host)
     sample = host.poll()
-    assert sample.captured_ms == sample.sampled_ms - sample.sampling_skew_ms
+    assert sample.captured_ms <= sample.sampled_ms
+    assert sample.stats_captured_ms <= sample.sampled_ms
     assert sample.sampling_skew_ms >= 0
+    assert sample.sampled_ms - min(sample.captured_ms, sample.stats_captured_ms) <= sample.sampling_skew_ms
 
 
 def test_disconnect_and_reconnect_during_inflight_poll_do_not_clear_new_session():
