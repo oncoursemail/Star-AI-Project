@@ -202,12 +202,14 @@ def fleet_worktrees(repo: str | Path) -> list[tuple[str, str]]:
 
 
 def run_task(repo: Path, base_ref: str, task: FleetTask, worktrees: Path, cancel: threading.Event,
-             timeout: float = 1800) -> Receipt:
+             timeout: float = 1800, pause: threading.Event | None = None) -> Receipt:
     t0 = time.monotonic()
     rec = Receipt(task.task_id, "error")
     if not task.enabled:
         rec.status = "disabled"
         return rec
+    while pause is not None and pause.is_set() and not cancel.is_set():
+        time.sleep(0.05)   # paused: a task that has not started waits; one already running is not suspended
     if cancel.is_set():
         rec.status = "cancelled"
         return rec
@@ -268,11 +270,13 @@ class FleetResult:
 
 def run_fleet(repo: str | Path, tasks: list[FleetTask], *, base_ref: str = "HEAD", worktrees: str | Path | None = None,
               enabled: bool | None = None, resources: dict | None = None, cancel: threading.Event | None = None,
-              timeout: float = 1800, receipts_file: str | Path | None = None, **plan_kw) -> FleetResult:
+              timeout: float = 1800, receipts_file: str | Path | None = None,
+              pause: threading.Event | None = None, **plan_kw) -> FleetResult:
     """Run every enabled task in its own worktree, at most as many at once as live resources allow.
     With ``receipts_file`` every receipt (plus the measured resources and slot count) is appended as one JSON line.
     The repo is connected first (``connect_repo``): ``base_ref`` is pinned to one commit so every task starts from the
-    same source even if the main checkout moves during the run."""
+    same source even if the main checkout moves during the run.
+    While ``pause`` is set no new task starts (running ones finish); ``cancel`` overrides a pause."""
     if not fleet_enabled(enabled):
         return FleetResult(0, "disabled: set STAR_AGENT_FLEET=1 to opt in")
     conn = connect_repo(repo, base_ref)
@@ -287,7 +291,7 @@ def run_fleet(repo: str | Path, tasks: list[FleetTask], *, base_ref: str = "HEAD
     wts.mkdir(parents=True, exist_ok=True)
     cancel = cancel or threading.Event()
     with ThreadPoolExecutor(max_workers=n) as pool:
-        recs = list(pool.map(lambda t: run_task(root, conn.base, t, wts, cancel, timeout), tasks))
+        recs = list(pool.map(lambda t: run_task(root, conn.base, t, wts, cancel, timeout, pause), tasks))
     if receipts_file:
         with open(receipts_file, "a", encoding="utf-8") as fh:
             for rec in recs:
