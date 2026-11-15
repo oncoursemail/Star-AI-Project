@@ -134,6 +134,47 @@ Do not let the LLM invent hidden dependencies between skill steps. The planner p
 
 ---
 
+## 4. Cross-skill switching and long-horizon completion
+
+Two additional sources in STAR's existing frontier register sharpen the composition design: Skill²-Bench / Skill Entropy and SkillHorizon.
+
+### Skill²-Bench: measure the difficulty of switching skills
+
+Paper: https://arxiv.org/abs/2608.05139  
+Official implementation: https://github.com/Gen-Verse/Skill-Entropy-RL
+
+Skill²-Bench covers 558 skills across nine domains: math, science, coding, logic, information extraction, planning, creative writing, context retrieval, and instruction following. Its Skill Entropy measure is directional: switching from skill A to B can be harder than switching from B to A. The paper reports a 4–13% accuracy drop on cross-skill tasks compared with single-skill questions in its evaluated settings, and a stronger decline as task-level skill entropy rises.
+
+The paper also reports Skill-Entropy RL gains on Qwen3-4B-Instruct and Qwen3-1.7B. Those are paper-specific training results, not a recommendation to run RL on STAR's local machine. The official implementation requires a CUDA/PyTorch training stack, an API gateway for some calibration/task-generation steps, and a vLLM/SLURM-oriented pipeline.
+
+**STAR application:** add a lightweight *skill-switch planner* to the existing task plan. Before each stage, identify the current skill, the next required skill, the evidence/artifacts that must cross the boundary, and whether the previous step's assumptions remain valid. Track transition errors separately from per-skill errors. Do not train a new foundation model until this evaluation shows a real, reproducible gap.
+
+### SkillHorizon: verify the whole workflow, not only local steps
+
+Paper: https://arxiv.org/abs/2610.14966  
+Official implementation: https://github.com/HKUST-KnowComp/SkillHorizon
+
+SkillHorizon constructs long-horizon workflows in seven stateful business environments. Its paper evaluates 1,050 tasks with reference workloads from 64K to 1M tokens and reports mean local-goal completion falling from 90.4% to 46.8% as workload scales. The analysis highlights two STAR-relevant failure modes: agents may finish many local goals but fail the terminal business objective, and a script may execute successfully while its output fails a downstream business check.
+
+The official repository currently makes benchmark code public, but only FinanceOps and FieldOps generate their worlds without external assets. The other five environments require database templates and MCP support packages that are not publicly distributed. Live provider runs send task/tool content to a model provider and incur API usage. Do not provision these environments or credentials automatically.
+
+**STAR application:** every composed plan needs both node-level verification and a terminal whole-task verifier. A successful tool exit, generated file, or spoken “done” is not completion if downstream state is wrong or a required delivery remains outstanding. Reuse STAR's existing task/delivery ledger; do not create a parallel ledger.
+
+### Skill-switch and workflow metrics
+
+Add:
+- Skill-transition confusion matrix and transition-specific error rate.
+- Artifact carryover correctness between adjacent skills.
+- Local-goal completion versus terminal task success.
+- Downstream verifier failure after a locally successful tool/script call.
+- Unfinished obligations at stop time.
+- Workload scaling curves (task nodes, dependencies, tool calls, tokens, elapsed time).
+- Recovery success after an upstream node changes or fails.
+
+These measurements complement retrieval metrics: retrieving the right skills does not prove STAR can switch between them or finish the complete workflow.
+
+---
+
 ## 4. SkillLearnBench: external feedback beats recursive self-approval
 
 Paper: https://arxiv.org/abs/2604.20087  
