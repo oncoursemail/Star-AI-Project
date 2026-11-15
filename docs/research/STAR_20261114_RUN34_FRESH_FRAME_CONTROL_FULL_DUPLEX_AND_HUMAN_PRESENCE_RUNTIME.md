@@ -38,7 +38,7 @@ This is not a reason to accept stale actions. It is a reason to distinguish:
 
 ### Run 34 implementation in companion PR #1182
 
-The gate now uses a bounded observation history (default 16 metadata records, configurable from 2 to 256).
+The gate now uses a bounded observation history (default 64 metadata records, configurable from 2 to 256).
 
 - A proposed action must identify an exact frame ID, capture epoch, and monotonically increasing sequence that is still in the bounded history.
 - The source observation must still be within the configured observation-age limit.
