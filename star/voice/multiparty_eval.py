@@ -12,7 +12,7 @@ import hmac
 import json
 import math
 import re
-from typing import Sequence
+from typing import Sequence, cast
 
 from .room import RoomAction
 
@@ -61,7 +61,7 @@ def _digest(value: object, label: str) -> str:
 def _finite_rate(value: object, label: str) -> float:
     if type(value) not in (int, float):
         raise ValueError(f"{label} must be a finite number in 0..1")
-    number = float(value)
+    number = float(cast(int | float, value))
     if not math.isfinite(number) or not 0.0 <= number <= 1.0:
         raise ValueError(f"{label} must be a finite number in 0..1")
     return number
