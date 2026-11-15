@@ -143,6 +143,7 @@ class CausalGameProbeTests(unittest.TestCase):
         report = evaluate(self.cases, self.manifest, outcomes)
         self.assertEqual(report.verdict, "regressed")
         self.assertEqual(report.mean_effect_milli, -300)
+        self.assertLess(report.reverse_block_sign_p, 0.025)
 
     def test_missing_pair_is_inconclusive_without_partial_scores(self):
         outcomes = signed_trials(self.cases, self.manifest)[:-1]
