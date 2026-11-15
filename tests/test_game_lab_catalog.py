@@ -21,7 +21,7 @@ def test_sources_are_https_unique_and_research_only():
             "agentspec", "asymspec", "omniagent", "tact", "turboquant", "express-streamer",
             "memento-skills", "lumi-nox", "llama-speed-bench", "nvidia-aiperf",
             "sentinelbench", "full-duplex-v3", "interactionbench", "llama-server-docs",
-            "vtubestudio-api", "roblox-agentic-workflow", "agentcl", "agenticrag-r1", "duplex-mpe", "aituber-onair", "agentif"}.issubset(ids)
+            "vtubestudio-api", "roblox-agentic-workflow", "agentcl", "agenticrag-r1", "duplex-mpe", "aituber-onair", "agentif", "eot-bench", "skillcat", "memskill", "windowsworld", "weavebench"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -92,7 +92,13 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert all(sources[key].status == "research_only" for key in
                ("sentinelbench", "full-duplex-v3", "interactionbench",
                 "llama-server-docs", "vtubestudio-api", "roblox-agentic-workflow",
-                "agentcl", "agenticrag-r1", "duplex-mpe", "aituber-onair", "agentif"))
+                "agentcl", "agenticrag-r1", "duplex-mpe", "aituber-onair", "agentif",
+                "eot-bench", "skillcat", "memskill", "windowsworld", "weavebench"))
+    assert "right-censored" in sources["eot-bench"].warning
+    assert "not STAR results" in sources["skillcat"].warning
+    assert "Meta-memory skills" in sources["memskill"].warning
+    assert "disposable VM" in sources["windowsworld"].warning
+    assert "trajectory-aware" in sources["weavebench"].warning
     assert "no-op" in sources["sentinelbench"].warning
     assert "do not measure STAR" in sources["full-duplex-v3"].warning
     assert "four dimensions" in sources["interactionbench"].warning
@@ -121,14 +127,17 @@ def test_search_category_and_bounded_results():
     assert catalog(category="inference")["total"] >= 4
     assert catalog(category="vtuber")["total"] >= 2
     assert catalog("Memento-Skills")["total"] == 1
+    assert catalog("EoT-Bench")["total"] == 1
+    assert catalog("SkillCAT")["total"] == 1
+    assert catalog("WindowsWorld")["total"] == 1
     assert catalog("SPEED-Bench")["total"] == 1
     default_catalog = catalog()
-    assert len(default_catalog["sources"]) == 83
-    assert default_catalog["total"] == 83
+    assert len(default_catalog["sources"]) == 88
+    assert default_catalog["total"] == 88
     assert not default_catalog["truncated"]
     assert len(catalog(limit=80)["sources"]) == 80
     assert catalog(limit=80)["truncated"]
-    assert len(catalog(limit=90)["sources"]) == 83
+    assert len(catalog(limit=90)["sources"]) == 88
     with pytest.raises(ValueError, match="between 1 and 90"):
         catalog(limit=91)
 
