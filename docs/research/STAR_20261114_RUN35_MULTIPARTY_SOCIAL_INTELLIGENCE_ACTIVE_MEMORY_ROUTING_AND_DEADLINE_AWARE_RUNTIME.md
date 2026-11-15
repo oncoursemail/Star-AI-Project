@@ -66,6 +66,14 @@ A Twitch or YouTube stream is not simply a queue of independent messages. Viewer
 
 A system that answers every message will feel less natural, not more natural. A system that only detects STAR's username will miss context and interrupt conversations that do not need her.
 
+### Repository-specific gap found during this run
+
+I inspected the actual `star/voice/room.py` and `star/voice/room_host.py` implementation on the current #1178 development branch. The existing `RoomCue` already carries an opaque `speaker_id`, a boolean `addressed_to_star`, intent, confidence, timing, overlap, and event-resolution metadata. This is a useful privacy-minimizing baseline, but it does not yet preserve a distinct addressee ID, reply-to event link, or topic/thread ID. Consequently, the deterministic director can distinguish a direct-to-STAR cue from a side conversation, but it cannot itself reconstruct a multi-person reply graph or topic continuity.
+
+**Recommended additive contract:** introduce optional, bounded, session-scoped `addressee_id`, `reply_to_event_id`, and `topic_id` metadata in the trusted adapter/cue boundary, plus a small TTL- and capacity-bounded metadata-only conversation index. Keep `addressed_to_star` as a derived, validated convenience flag for the current decision path; do not let raw chat text or an untrusted viewer choose tool permissions. The index should retain opaque IDs and event relationships only, expire on session reset, and never merge identities across Twitch, YouTube, Discord, or real-world accounts. Add tests for replies to another viewer, replies to STAR, missing/expired parent events, cycles, duplicate IDs, bounded eviction, topic changes, and session reset before wiring it into response-context selection.
+
+This is a newly identified implementation gap, not a completed code change in #1178. The current room director remains the sole floor/interrupt policy authority until a reviewed additive change is accepted.
+
 ### Proposed multi-party social state
 
 Reuse the existing RoomTurnDirector and represent the following as short-lived, session-scoped state:
