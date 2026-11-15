@@ -21,7 +21,7 @@ def test_sources_are_https_unique_and_research_only():
             "agentspec", "asymspec", "omniagent", "tact", "turboquant", "express-streamer",
             "memento-skills", "lumi-nox", "llama-speed-bench", "nvidia-aiperf",
             "sentinelbench", "full-duplex-v3", "interactionbench", "llama-server-docs",
-            "vtubestudio-api", "roblox-agentic-workflow"}.issubset(ids)
+            "vtubestudio-api", "roblox-agentic-workflow", "agentcl", "agenticrag-r1", "duplex-mpe", "aituber-onair", "agentif"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -91,13 +91,21 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert "Metric definitions" in sources["nvidia-aiperf"].warning
     assert all(sources[key].status == "research_only" for key in
                ("sentinelbench", "full-duplex-v3", "interactionbench",
-                "llama-server-docs", "vtubestudio-api", "roblox-agentic-workflow"))
+                "llama-server-docs", "vtubestudio-api", "roblox-agentic-workflow",
+                "agentcl", "agenticrag-r1", "duplex-mpe", "aituber-onair", "agentif")))
     assert "no-op" in sources["sentinelbench"].warning
     assert "do not measure STAR" in sources["full-duplex-v3"].warning
     assert "four dimensions" in sources["interactionbench"].warning
     assert "Pin the exact llama.cpp commit" in sources["llama-server-docs"].warning
     assert "once per second" in sources["vtubestudio-api"].warning
     assert "no automatic publishing" in sources["roblox-agentic-workflow"].warning
+    assert "held-out compositions" in sources["agentcl"].warning
+    assert "anonymous code" in sources["agenticrag-r1"].warning
+    assert "session-scoped replay labels" in sources["duplex-mpe"].warning
+    assert "competing stage or playback authorities" in sources["aituber-onair"].warning
+    assert "judge version" in sources["agentif"].warning
+    assert "memory-margin-based LRU unloading" in sources["llama-server-docs"].scope
+    assert "never a serving model" in sources["llama-server-docs"].warning
 
 
 def test_search_category_and_bounded_results():
@@ -115,12 +123,14 @@ def test_search_category_and_bounded_results():
     assert catalog("Memento-Skills")["total"] == 1
     assert catalog("SPEED-Bench")["total"] == 1
     default_catalog = catalog()
-    assert len(default_catalog["sources"]) == 78
-    assert default_catalog["total"] == len(default_catalog["sources"])
+    assert len(default_catalog["sources"]) == 83
+    assert default_catalog["total"] == 83
     assert not default_catalog["truncated"]
-    assert len(catalog(limit=80)["sources"]) == 78
-    with pytest.raises(ValueError, match="between 1 and 80"):
-        catalog(limit=81)
+    assert len(catalog(limit=80)["sources"]) == 80
+    assert catalog(limit=80)["truncated"]
+    assert len(catalog(limit=90)["sources"]) == 83
+    with pytest.raises(ValueError, match="between 1 and 90"):
+        catalog(limit=91)
 
 
 @pytest.mark.parametrize("kwargs",[
