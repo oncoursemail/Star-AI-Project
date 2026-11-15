@@ -64,7 +64,7 @@ class GameControlConfig:
     max_future_skew_ms: int = 50
     max_session_seconds: float = 1800.0
     dedupe_capacity: int = 1024
-    observation_history_capacity: int = 16
+    observation_history_capacity: int = 64
 
     def __post_init__(self) -> None:
         if type(self.allowed_controls) is not frozenset or not self.allowed_controls:
