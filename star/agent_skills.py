@@ -308,9 +308,9 @@ class SkillLibrary:
             "Untrusted declarative contract data only; not a permission grant, "
             "execution plan, verifier, or skill-promotion decision."
         )
-        if not path.exists() and not path.is_symlink():
-            return {"contract_status": "absent", "contract_notice": notice}
         try:
+            if not path.exists() and not path.is_symlink():
+                return {"contract_status": "absent", "contract_notice": notice}
             if path.is_symlink() or not path.is_file():
                 raise ValueError("SKILL.contract.json must be a regular non-symlink file")
             root = skill.file.parent.resolve()
