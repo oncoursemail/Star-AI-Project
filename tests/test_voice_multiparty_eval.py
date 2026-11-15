@@ -297,3 +297,22 @@ def test_roster_digest_is_order_independent_and_ids_are_unique():
     assert roster_digest(cases) == roster_digest(tuple(reversed(cases)))
     with pytest.raises(ValueError, match="unique"):
         roster_digest(cases + (cases[0],))
+
+
+def test_false_stop_on_unrelated_cue_fails():
+    cases, signed, limits = _passing_fixture()
+    bad = _outcome("direct", RoomAction.STOP)
+    changed = tuple(
+        sign_room_replay_outcome(bad if item.outcome.case_id == "direct" else item.outcome, validation_key=KEY)
+        for item in signed
+    )
+    result = evaluate_multiparty_replay(
+        cases,
+        changed,
+        validation_key=KEY,
+        expected_roster_sha256=roster_digest(cases),
+        now_unix_s=NOW,
+        limits=limits,
+    )
+    assert result["status"] == "FAIL"
+    assert "false_stop_rate" in result["failed_gates"]
