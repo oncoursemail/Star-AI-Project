@@ -61,7 +61,7 @@ def make_receipt(manifest, case, arm, *, correct=True, retrieved=None, decision=
     unsigned = MemoryActionReceipt(
         manifest.sha256, case.case_id, case.session_id, arm, arm_order,
         f"run-{case.case_id}-{arm}{run_suffix}", sha(f"evidence-{case.case_id}-{arm}{run_suffix}"),
-        decision, tool, args, ids, NOW - 1000, elapsed_ms, retrieval,
+        decision, tool, args, ids, NOW - 2000 + arm_order * 500, elapsed_ms, retrieval,
         500, 100, tokens,
     )
     return replace(unsigned, signature=sign_receipt(unsigned, KEY))
@@ -199,6 +199,21 @@ class MemoryActionEvalTests(unittest.TestCase):
                             signature="")
         receipts[1] = replace(duplicate, signature=sign_receipt(duplicate, KEY))
         with self.assertRaises(ValueError):
+            self.evaluate(manifest, receipts)
+
+    def test_receipt_timestamps_must_match_preregistered_arm_order(self):
+        manifest = build_manifest()
+        receipts = list(receipts_for(manifest))
+        case = manifest.cases[0]
+        off_index = next(i for i, item in enumerate(receipts)
+                         if item.case_id == case.case_id and item.arm == "memory_off")
+        on_index = next(i for i, item in enumerate(receipts)
+                        if item.case_id == case.case_id and item.arm == "memory_on")
+        off = replace(receipts[off_index], observed_unix_ms=NOW - 1000, signature="")
+        on = replace(receipts[on_index], observed_unix_ms=NOW - 2000, signature="")
+        receipts[off_index] = replace(off, signature=sign_receipt(off, KEY))
+        receipts[on_index] = replace(on, signature=sign_receipt(on, KEY))
+        with self.assertRaises(PermissionError):
             self.evaluate(manifest, receipts)
 
     def test_future_receipt_rejected(self):
