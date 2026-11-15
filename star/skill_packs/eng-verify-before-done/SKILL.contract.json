@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "skill_id": "eng-verify-before-done",
+  "version": "1.0.0",
+  "domain": "general",
+  "summary": "Verify every completion claim against the actual requested requirements and observed check results.",
+  "preconditions": [],
+  "steps": [
+    {
+      "step_id": "inspect",
+      "operation": "observe",
+      "intent": "Inspect the changed path and the exact requirements before selecting checks."
+    },
+    {
+      "step_id": "run-checks",
+      "operation": "request_tool",
+      "intent": "Run the narrowest relevant available checks and capture their actual exit status and output.",
+      "tool_name": "run_tests",
+      "required_capabilities": [
+        "workspace.read",
+        "tests.execute"
+      ]
+    },
+    {
+      "step_id": "compare",
+      "operation": "verify",
+      "intent": "Compare every requested requirement with the observed evidence; distinguish passed, failed, skipped and not-run checks."
+    },
+    {
+      "step_id": "recover",
+      "operation": "recover",
+      "intent": "Repair verified failures or clearly report unresolved failures and missing runtime acceptance."
+    }
+  ],
+  "behavior_constraints": [
+    {
+      "constraint_id": "claim-only-after-evidence",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "completion_claim"
+      },
+      "expected_behavior": "Do not claim a change works, is fixed or is tested until a relevant check was actually run and its result inspected; otherwise state that it was not run.",
+      "severity": "critical"
+    },
+    {
+      "constraint_id": "preserve-failures",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "check_failure"
+      },
+      "expected_behavior": "Keep failed, skipped, cancelled and not-run checks distinct; repair the failure or report it without relabeling it as a pass.",
+      "severity": "critical"
+    },
+    {
+      "constraint_id": "requirement-by-requirement",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "user_requirement"
+      },
+      "expected_behavior": "Compare each requested requirement with concrete evidence and explicitly list anything not met or not checked.",
+      "severity": "normal"
+    }
+  ],
+  "postconditions": [
+    {
+      "path": "verification.evidence",
+      "operator": "exists"
+    },
+    {
+      "path": "final.claim_supported",
+      "operator": "equals",
+      "value": true
+    }
+  ],
+  "resource_budget": {
+    "max_elapsed_ms": 120000,
+    "max_steps": 8,
+    "max_tool_calls": 8,
+    "max_tokens": 2500,
+    "max_retries": 2,
+    "max_ram_mib": 256
+  },
+  "provenance": [
+    {
+      "kind": "owner_note",
+      "locator": "STAR engineering verification-before-completion policy"
+    },
+    {
+      "kind": "url",
+      "locator": "https://github.com/agentskills/agentskills"
+    }
+  ]
+}
