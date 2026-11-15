@@ -1,0 +1,42 @@
+schema_version: 1
+run_id: star-run-51
+created_at: "2026-11-15"
+branch: "feat/kv-session-admission-20261115-run51"
+base_branch: "star/next"
+status: "offline-policy-only"
+implementation:
+  module: "star/kv_session_budget.py"
+  tests: "tests/test_kv_session_budget.py"
+  research: "docs/research/STAR_20261115_RUN51_KV_SESSION_ADMISSION_AND_LONG_HORIZON_INTELLIGENCE.md"
+policy:
+  capacity_source: "trusted-backend-telemetry-required"
+  resident_kv_source: "backend-measured-or-conservative-upper-bound"
+  default_reserve_mib: "caller-supplied"
+  snapshot_max_age_ms: 2000
+  preemption:
+    enabled_in_planner: true
+    execution_enabled: false
+    allowed_victims: "explicitly-suspendable-lower-priority-only"
+    equal_or_higher_priority_preemption: false
+    host_ack_required: true
+  priorities:
+    speech: 0
+    interactive: 1
+    gameplay: 1
+    vision: 2
+    research: 3
+    training: 4
+    render: 4
+validation:
+  local_tests: "pending"
+  full_repository_ci: "required"
+  windows_backend_acceptance: "not-run"
+  multi_slot_burst_test: "not-run"
+  llama_cpp_integration: "not-implemented"
+safety:
+  no_backend_side_effects: true
+  no_process_control: true
+  no_network_io: true
+  no_audio_video_or_chat_storage: true
+  no_model_or_runtime_default_changes: true
+  no_production_main_changes: true
