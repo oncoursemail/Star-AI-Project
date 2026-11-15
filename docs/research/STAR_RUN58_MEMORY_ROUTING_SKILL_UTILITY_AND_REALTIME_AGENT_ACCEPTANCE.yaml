@@ -1,0 +1,67 @@
+run_id: 58
+date: 2026-11-15
+repository: oncoursemail/Star-AI-Project
+pull_request: 1209
+branch: feat/skill-contract-coverage-20261115-run54
+base: main
+scope:
+  - memory substrate routing
+  - memory-to-action evaluation
+  - lifelong skill utility and transfer
+  - full-duplex multiparty VTuber interaction
+  - state-verifiable real-time game control
+  - visual-feedback game development
+  - local inference and mixed-load goodput
+implementation:
+  - path: star/skill_packs/__init__.py
+    change: "Raise bounded normalized contract JSON cap from 2600 to 3600 characters; retain 6500-character total block cap."
+    defaults_changed: false
+    permission_changes: false
+  - path: tests/test_skill_packs.py
+    change: "Assert normalized serialized contract fits the configured per-contract cap."
+    tests_added: 1
+research_sources:
+  - id: harness-the-memory
+    url: https://arxiv.org/abs/2608.15008
+    date: 2026-08-15
+    status: research_only
+  - id: mem2actbench
+    url: https://aclanthology.org/2026.acl-long.370/
+    date: 2026-07
+    status: research_only
+  - id: skillflow
+    url: https://arxiv.org/abs/2604.17308
+    date: 2026-04-19
+    status: research_only
+  - id: full-duplex-bench-v3
+    url: https://arxiv.org/abs/2604.04847
+    date: 2026-04-06
+    status: research_only
+  - id: livekit-eot-bench
+    url: https://github.com/livekit/eot-bench
+    status: benchmark_reference
+  - id: gameworld
+    url: https://arxiv.org/abs/2604.07429
+    date: 2026-04-08
+    status: research_only
+  - id: gamedevbench
+    url: https://github.com/waynchi/gamedevbench
+    status: benchmark_reference
+  - id: llama-cpp-speed-bench
+    url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+    status: upstream_benchmark_reference
+validation:
+  local_full_suite: not_run
+  exact_head_github_actions: pending_after_commit
+  windows_hardware_acceptance: not_run
+  physical_audio_loopback: not_run
+  live_gameplay: not_run
+  public_stream: not_run
+safety:
+  default_contracts_enabled: false
+  new_permissions: false
+  new_executor: false
+  new_scheduler: false
+  new_memory_database: false
+  production_main_modified: false
+  auto_merge: false
