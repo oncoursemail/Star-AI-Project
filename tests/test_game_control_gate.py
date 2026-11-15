@@ -155,15 +155,21 @@ def test_non_monotonic_frames_are_rejected():
     assert gate.observe(duplicate, target, now=10.02).reason == "non_monotonic_frame"
 
 
-def test_action_must_reference_latest_frame_and_capture_epoch():
+def test_action_can_reference_a_still_fresh_prior_frame_but_not_another_epoch():
     gate, target = armed_gate()
     first = make_observation(target, sequence=1)
     second = make_observation(target, sequence=2, captured_at=10.02)
     assert gate.observe(first, target, now=10.01).accepted
     assert gate.observe(second, target, now=10.03).accepted
 
-    old_frame = make_action(first)
-    assert gate.authorize(old_frame, target, now=10.04).reason == "stale_frame"
+    prior_frame = make_action(first, action_id="prior-frame")
+    prior_result = gate.authorize(prior_frame, target, now=10.04)
+    assert prior_result.accepted and prior_result.permit is not None
+    assert gate.consume(prior_result.permit, target, now=10.05).accepted
+
+    other_epoch = make_observation(target, sequence=3, epoch="capture-2", captured_at=10.04)
+    wrong_epoch_action = make_action(other_epoch, action_id="wrong-epoch", issued_at=10.04)
+    assert gate.authorize(wrong_epoch_action, target, now=10.05).reason == "stale_frame"
 
 
 def test_action_cannot_predate_the_observation():
@@ -380,7 +386,8 @@ def test_pending_permits_are_bounded():
         target,
         now=10.05,
     )
-    assert result.reason == "permit_capacity"
+    assert result.reason == "permit_pending"
+    assert len(gate._issued_permits) == 1
 
 
 def test_rearm_after_stop_starts_a_clean_session():
