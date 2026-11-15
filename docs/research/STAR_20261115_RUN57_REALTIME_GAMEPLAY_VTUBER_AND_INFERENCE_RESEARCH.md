@@ -242,3 +242,22 @@ Promote a candidate skill only after:
 This Run 57 document is research and integration guidance. The accompanying CI follow-up changes correct a test fixture and add an explicit diagnostic assertion for the optional sidecar loader. They do not enable the optional contract path or change production behavior.
 
 The repository's latest exact-head CI must be re-run after the new commits; GitHub API-created commits in this run did not return new workflow-run IDs at the time this document was written. No Windows hardware, microphone, OBS, VTube Studio, Roblox gameplay, GPU or live-stream acceptance is claimed.
+
+
+## Existing STAR workstream audit — reuse before adding more systems
+
+The current repository already has separate draft PRs for most of the runtime capabilities discussed here. These are unfinished development branches, not shipped features:
+
+| Existing PR | Existing work | Run 57 integration decision |
+|---|---|---|
+| #1186 | Signed multiparty room replay evaluation | Reuse its labels and metrics; do not add another room director. |
+| #1187 | EoT-Bench adapter with right-censored HOLD support | Feed v1.1 cohort data through this adapter; add real-time integration only after parent CI. |
+| #1199 | Randomized causal gameplay mechanic probes | Reuse for causal action comparisons; do not create a second causal evaluator. |
+| #1200 | OpenGameEval Creator evaluation adapter | Reuse for Roblox Studio task/exploration metrics. |
+| #1201 | Paired mixed-load streaming performance evaluator | Use as the acceptance gate for inference and scheduler changes. |
+| #1202 | Hour-scale stream continuity memory and live-context integration | Extend its event timeline rather than creating a parallel stream memory store. |
+| #1207 | Owner-approved read-only OBS WebSocket telemetry | Reuse its host measurements for the live-load scorecard. |
+| #1208 | Capability-gated llama.cpp speculative-decoding canary | Run paired SPEED-Bench and mixed-load tests before considering activation. |
+| #1209 | Versioned skill contracts and behavior coverage | Add the paired skill-on/skill-off trace protocol as an evaluator extension, not a new skill runtime. |
+
+The order matters: first complete parent/stacked CI, then integrate the already-defined adapters. Do not wire multiple draft branches into the desktop runtime at once; select one compatible dependency chain, test it at the exact head, and keep all new settings opt-in until the whole mixed-load acceptance suite passes.
