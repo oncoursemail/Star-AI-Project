@@ -314,7 +314,7 @@ def test_capture_epoch_change_stops_and_releases_controls():
     assert gate.state is GateState.STOPPED
 
 
-def test_new_frame_invalidates_an_unconsumed_permit():
+def test_new_frame_does_not_invalidate_a_still_fresh_permit():
     gate, target = armed_gate()
     first = make_observation(target, sequence=1)
     assert gate.observe(first, target, now=10.01).accepted
@@ -323,7 +323,9 @@ def test_new_frame_invalidates_an_unconsumed_permit():
 
     second = make_observation(target, sequence=2, captured_at=10.03)
     assert gate.observe(second, target, now=10.04).accepted
-    assert gate.consume(permit, target, now=10.05).reason == "permit_observation_stale"
+    consumed = gate.consume(permit, target, now=10.05)
+    assert consumed.accepted
+    assert consumed.reason == "permit_consumed"
 
 
 def test_session_expiry_stops_and_returns_held_controls():
@@ -400,3 +402,55 @@ def test_permit_expiry_never_outlives_observation_freshness():
     assert authorized.permit.expires_at <= 10.25
     assert authorized.permit.hold_until <= authorized.permit.expires_at
     assert gate.consume(authorized.permit, target, now=10.26).reason == "permit_expired"
+
+
+def test_old_observation_is_rejected_after_its_freshness_budget():
+    gate, target = armed_gate(config=make_config(max_observation_age_ms=100))
+    first = make_observation(target, sequence=1, captured_at=10.0)
+    assert gate.observe(first, target, now=10.01).accepted
+
+    second = make_observation(target, sequence=2, captured_at=10.15)
+    assert gate.observe(second, target, now=10.16).accepted
+    stale_action = make_action(first, action_id="late", issued_at=10.15)
+    assert gate.authorize(stale_action, target, now=10.16).reason == "stale_observation"
+
+
+def test_observation_history_is_bounded_and_evicted_frames_cannot_authorize():
+    gate, target = armed_gate(config=make_config(observation_history_capacity=2))
+    observations = [
+        make_observation(target, sequence=1, captured_at=10.0),
+        make_observation(target, sequence=2, captured_at=10.01),
+        make_observation(target, sequence=3, captured_at=10.02),
+    ]
+    for observation in observations:
+        assert gate.observe(observation, target, now=observation.captured_at + 0.01).accepted
+
+    assert len(gate._observations) == 2
+    evicted_action = make_action(observations[0], action_id="evicted", issued_at=10.03)
+    assert gate.authorize(evicted_action, target, now=10.03).reason == "stale_frame"
+
+
+def test_only_one_unconsumed_permit_can_be_in_flight():
+    gate, target = armed_gate()
+    first = make_observation(target, sequence=1)
+    assert gate.observe(first, target, now=10.01).accepted
+    first_permit = gate.authorize(make_action(first, action_id="first"), target, now=10.02)
+    assert first_permit.accepted and first_permit.permit is not None
+
+    second = make_observation(target, sequence=2, captured_at=10.03)
+    assert gate.observe(second, target, now=10.04).accepted
+    blocked = gate.authorize(
+        make_action(second, action_id="second", issued_at=10.04), target, now=10.05
+    )
+    assert blocked.reason == "permit_pending"
+
+    assert gate.consume(first_permit.permit, target, now=10.06).accepted
+    retried = gate.authorize(
+        make_action(second, action_id="second", issued_at=10.04), target, now=10.07
+    )
+    assert retried.accepted
+
+
+def test_invalid_observation_history_capacity_is_rejected():
+    with pytest.raises(ValueError):
+        make_config(observation_history_capacity=1)
