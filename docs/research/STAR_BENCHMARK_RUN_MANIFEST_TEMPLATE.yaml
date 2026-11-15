@@ -131,6 +131,74 @@ interaction:
   cross_platform_identity_linking: false
   raw_conversation_content_retained: false
 
+# Run 41: event-driven monitoring. Keep conditions and source IDs content-free.
+monitoring:
+  enabled: false
+  benchmark_id: null
+  benchmark_revision: null
+  task_mode: "passive | active | no_op"
+  source_adapter_revision: null
+  condition_revision: null
+  event_subscription_mode: "push | bounded_poll | replay"
+  poll_backoff_policy_revision: null
+  max_observations: 0
+  max_tool_calls_while_waiting: 0
+  cancellation_tested: false
+  no_op_false_action_count: null
+  reaction_latency_ms_p95: null
+  idle_cpu_ms: null
+  idle_model_calls: null
+  idle_tool_calls: null
+
+# Run 41: game evaluation must separate state-verified success from partial progress
+# and keep paused/real-time tracks distinct.
+game_evaluation:
+  benchmark_id: null
+  benchmark_revision: null
+  game_build_revision: null
+  task_seed_manifest_sha256: null
+  track: "paused | slowed | realtime"
+  action_adapter_revision: null
+  state_verifier_revision: null
+  manual_override_tested: false
+  emergency_stop_tested: false
+  success_rate: null
+  normalized_progress_rate: null
+  invalid_action_rate: null
+  stale_observation_rejection_rate: null
+  reaction_latency_ms_p95: null
+  held_out_seed_set: null
+
+# Run 41: streaming dimensions are separate; do not collapse into one naturalness score.
+voice_evaluation:
+  benchmark_id: null
+  benchmark_revision: null
+  replay_fixture_revision: null
+  spoken_task_pass_at_1: null
+  tool_call_f1: null
+  turn_taking_score: null
+  false_interruption_rate: null
+  missed_direct_request_rate: null
+  appropriate_silence_rate: null
+  paralinguistic_control_score: null
+  long_conversation_groundedness: null
+  first_audible_response_ms_p95: null
+  interruption_stop_ms_p95: null
+  resume_correctness_rate: null
+
+# Run 41: Live2D/VTube Studio transport. No tokens or viewer identifiers belong here.
+avatar_transport:
+  api_version: null
+  plugin_api_user_authorized: false
+  local_loopback_only: true
+  playback_clock_source: "dac | unknown"
+  parameter_pump_revision: null
+  parameter_refresh_gap_ms_p95: null
+  parameter_refresh_gap_ms_p99: null
+  dropped_stale_update_count: null
+  interruption_flush_tested: false
+  model_change_reset_tested: false
+
 resource_budget:
   max_wall_clock_seconds: 0
   max_model_calls: 0
@@ -207,8 +275,16 @@ metrics:
   addressee_accuracy: null
   reply_thread_accuracy: null
   topic_continuity_score: null
-  false_interruption_rate: null
-  appropriate_silence_rate: null
+  # false_interruption_rate and appropriate_silence_rate are defined above.
+  sentinel_no_op_false_action_count: null
+  sentinel_reaction_latency_ms_p95: null
+  gameworld_success_rate: null
+  gameworld_normalized_progress_rate: null
+  gameworld_invalid_action_rate: null
+  fdbv3_pass_at_1: null
+  fdbv3_tool_call_f1: null
+  interactionbench_paralinguistic_score: null
+  avatar_parameter_refresh_gap_ms_p99: null
 
 results:
   outcome: "not_run | passed | failed | partial | blocked"
