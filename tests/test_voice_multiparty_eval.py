@@ -72,24 +72,26 @@ def _outcome(
 
 def _passing_fixture():
     cases = (
-        _case("direct", "explicit_direct"),
+        _case("direct", "explicit_direct", scenario_sha256="d" * 64, matched_pair_id="request-1"),
+        _case("implicit", "implicit_direct", scenario_sha256="e" * 64, matched_pair_id="request-1"),
         _case("side", "side_conversation"),
         _case("resolved", "human_resolution"),
         _case("barge", "urgent_barge_in"),
     )
     outcomes = (
         _outcome("direct", RoomAction.RESPOND, response=True, latency=120, correct=True, appropriate=True),
+        _outcome("implicit", RoomAction.RESPOND, response=True, latency=110, correct=True, appropriate=True),
         _outcome("side", RoomAction.IGNORE),
         _outcome("resolved", RoomAction.STOP),
         _outcome("barge", RoomAction.INTERRUPT, response=True, latency=80, correct=True, appropriate=True),
     )
     signed = tuple(sign_room_replay_outcome(item, validation_key=KEY) for item in outcomes)
     limits = RoomReplayLimits(
-        min_holdout_cases=4,
+        min_holdout_cases=5,
         min_cases_per_category=1,
-        min_answer_labels=2,
-        min_appropriateness_labels=2,
-        min_latency_samples=2,
+        min_answer_labels=3,
+        min_appropriateness_labels=3,
+        min_latency_samples=3,
     )
     return cases, signed, limits
 
