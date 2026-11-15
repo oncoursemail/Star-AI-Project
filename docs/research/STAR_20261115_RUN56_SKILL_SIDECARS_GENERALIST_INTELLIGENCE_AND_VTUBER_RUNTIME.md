@@ -280,8 +280,8 @@ Every score must pin the task roster, benchmark version, agent/model/prompt/tool
 
 ### Compatibility
 
-- No bundled skill is modified or enabled by this change.
-- No default skill list, prompt, model route, scheduler, memory store, tool permission, game controller, voice path, OBS setting or VTube Studio setting is changed.
+- One existing bundled engineering skill (`eng-verify-before-done`) receives a small declarative contract sidecar; it is not a new skill and is not enabled as a separate capability.
+- Contract prompt injection is off by default and is bounded; no default skill list, system message, model route, scheduler, memory store, tool permission, game controller, voice path, OBS setting or VTube Studio setting is changed.
 - No code in a sidecar is executed.
 - No skill is automatically promoted.
 
@@ -299,6 +299,6 @@ Every score must pin the task roster, benchmark version, agent/model/prompt/tool
 
 ## 10. Limitations
 
-This run implemented optional sidecar discovery and tests. It did not run OSWorld, GameWorld, WindowsWorld, EverMemBench, a live game, a Windows machine, a GPU benchmark, OBS, microphone, VTube Studio, or a public stream. It does not claim a measured intelligence gain, speedup, game mastery, or human-equivalent behavior.
+This run implemented optional sidecar discovery, a disabled-by-default selected-pack prompt integration, and tests. It did not run OSWorld, GameWorld, WindowsWorld, EverMemBench, a live game, a Windows machine, a GPU benchmark, OBS, microphone, VTube Studio, or a public stream. It does not claim a measured intelligence gain, speedup, game mastery, or human-equivalent behavior.
 
 Production `main` remains unchanged. PR #1209 remains draft and requires exact-head CI and owner review.
