@@ -1,0 +1,471 @@
+# STAR benchmark-run manifest template.
+# Copy into a run-specific artifact directory and fill every required field.
+# Never put API keys, passwords, OAuth tokens, personal data, or raw viewer messages here.
+schema_version: 1
+
+run:
+  id: "replace-with-unique-run-id"
+  started_at_utc: "YYYY-MM-DDTHH:MM:SSZ"
+  ended_at_utc: null
+  purpose: "baseline | ablation | holdout | regression | hardware_acceptance"
+  owner_approval_reference: null
+  operator: "STAR evaluation harness"
+  notes: ""
+
+repository:
+  name: "oncoursemail/Star-AI-Project"
+  branch: "replace-with-exact-branch"
+  commit_sha: "replace-with-full-commit-sha"
+  working_tree_clean: true
+  dirty_diff_sha256: null
+
+benchmark:
+  id: "replace-with-benchmark-id"
+  upstream_url: "https://example.invalid"
+  release_tag: "replace-with-pinned-release"
+  task_class_revision: "replace-with-tag-or-commit"
+  task_asset_revision: "replace-with-tag-or-commit"
+  evaluator_revision: "replace-with-tag-or-commit"
+  provider_image_digest: "sha256:replace-with-image-digest"
+  website_fixture_revision: null
+  task_count_expected: 0
+  task_count_executed: 0
+  task_split:
+    practice_seed_set: "private-practice-set-id"
+    validation_seed_set: "private-validation-set-id"
+    sealed_holdout_id: "private-holdout-id"
+  excluded_tasks:
+    - task_id: ""
+      reason: ""
+
+agent:
+  orchestration_revision: "replace-with-commit"
+  model_provider: "local | remote | hybrid"
+  model_id: "replace-with-exact-model-id"
+  model_weights_revision: "replace-with-hash-or-release"
+  tokenizer_revision: "replace-with-hash-or-release"
+  quantization: "none | q4 | q5 | q8 | other"
+  prompt_template_sha256: "replace-with-hash"
+  skill_registry_revision: "replace-with-commit-or-snapshot"
+  tool_adapter_revisions:
+    - name: "replace-with-adapter"
+      revision: "replace-with-commit"
+      permission_profile: "read_only | sandbox_write | owner_approved"
+  verifier_revision: "replace-with-commit"
+
+# Run 40: exact serving configuration for reproducible local llama.cpp experiments.
+inference_serving:
+  backend: "llama.cpp | other"
+  backend_build_sha: null
+  server_context_size: 0
+  server_batch_size: 0
+  server_ubatch_size: 0
+  parallel_slots: 0
+  continuous_batching: false
+  prompt_cache_enabled: false
+  prompt_cache_reuse_tokens: 0
+  flash_attention: "off | on | unsupported"
+  speculative_method: "off | draft_model | ngram | mtp | eagle3 | other"
+  draft_model_revision: null
+  speed_bench_release: null
+  speed_bench_split: null
+  speed_bench_categories: []
+  client_concurrency: 0
+  matched_sample_manifest_sha256: null
+
+# Run 40: candidate skill evolution is separate from model self-report.
+skill_evolution:
+  candidate_skill_id: null
+  baseline_skill_revision: null
+  candidate_skill_revision: null
+  failure_attribution_revision: null
+  static_checks_revision: null
+  unit_checks_revision: null
+  synthetic_eval_revision: null
+  paired_eval_revision: null
+  sealed_holdout_revision: null
+  independent_verifier: false
+  atomic_promotion_tested: false
+  rollback_tested: false
+  owner_approval_reference: null
+
+environment:
+  operating_system: "Windows | Linux | macOS | Android"
+  os_build: "replace-with-build"
+  runtime_version: "replace-with-runtime"
+  vm_or_container_image: "replace-with-image-digest"
+  display_resolution: "1920x1080"
+  dpi_scale: 100
+  cpu_model: "replace-with-model"
+  cpu_cores_available: 0
+  ram_gib: 0
+  gpu_model: "replace-with-model-or-none"
+  gpu_vram_gib: 0
+  driver_version: null
+  network_mode: "offline | controlled_fixture | internet"
+  locale: "en-US"
+  timezone: "UTC"
+
+interaction:
+  observation_mode: "screenshot | screenshot_and_accessibility | structured_state"
+  capture_region: "owner-approved application/game region only"
+  capture_rate_fps: 0
+  action_rate_limit_per_second: 0
+  max_steps_per_task: 0
+  task_timeout_seconds: 0
+  action_timeout_ms: 0
+  manual_override_tested: false
+  emergency_stop_tested: false
+  # Run 39: bounded evidence selection; this is not compute admission or action authorization.
+  perception_policy_revision: null
+  perception_request_kinds: []
+  max_media_units_per_turn: 0
+  max_perception_requests_per_turn: 0
+  evidence_reference_ttl_ms: 0
+  observation_selection_trace_retained: false
+  # Run 40: metadata-only multiparty context; never store transcripts or provider identities here.
+  conversation_index_revision: null
+  conversation_index_max_events: 0
+  conversation_index_ttl_seconds: 0
+  conversation_index_max_reply_depth: 0
+  cross_platform_identity_linking: false
+  raw_conversation_content_retained: false
+
+# Run 41: task-aware fast/deep/background model routing; record exact revisions.
+model_routing:
+  policy_revision: null
+  task_classifier_revision: null
+  fast_model_id: null
+  deep_model_id: null
+  background_model_id: null
+  escalation_policy_revision: null
+  escalation_reason_codes: []
+  max_escalations_per_task: 0
+  fast_path_fraction: null
+  deep_path_fraction: null
+  background_path_fraction: null
+  escalation_rate: null
+  verified_quality_delta: null
+  queue_wait_ms_p95: null
+
+# Run 41: event-driven monitoring. Keep conditions and source IDs content-free.
+monitoring:
+  enabled: false
+  benchmark_id: null
+  benchmark_revision: null
+  task_mode: "passive | active | no_op"
+  source_adapter_revision: null
+  condition_revision: null
+  event_subscription_mode: "push | bounded_poll | replay"
+  poll_backoff_policy_revision: null
+  max_observations: 0
+  max_tool_calls_while_waiting: 0
+  cancellation_tested: false
+  no_op_false_action_count: null
+  reaction_latency_ms_p95: null
+  idle_cpu_ms: null
+  idle_model_calls: null
+  idle_tool_calls: null
+
+# Run 41: game evaluation must separate state-verified success from partial progress
+# and keep paused/real-time tracks distinct.
+game_evaluation:
+  benchmark_id: null
+  benchmark_revision: null
+  game_build_revision: null
+  task_seed_manifest_sha256: null
+  track: "paused | slowed | realtime"
+  action_adapter_revision: null
+  state_verifier_revision: null
+  manual_override_tested: false
+  emergency_stop_tested: false
+  success_rate: null
+  normalized_progress_rate: null
+  invalid_action_rate: null
+  stale_observation_rejection_rate: null
+  reaction_latency_ms_p95: null
+  held_out_seed_set: null
+
+# Run 41: streaming dimensions are separate; do not collapse into one naturalness score.
+voice_evaluation:
+  benchmark_id: null
+  benchmark_revision: null
+  replay_fixture_revision: null
+  spoken_task_pass_at_1: null
+  tool_call_f1: null
+  turn_taking_score: null
+  false_interruption_rate: null
+  missed_direct_request_rate: null
+  appropriate_silence_rate: null
+  paralinguistic_control_score: null
+  long_conversation_groundedness: null
+  first_audible_response_ms_p95: null
+  interruption_stop_ms_p95: null
+  resume_correctness_rate: null
+
+# Run 41: Live2D/VTube Studio transport. No tokens or viewer identifiers belong here.
+avatar_transport:
+  api_version: null
+  plugin_api_user_authorized: false
+  local_loopback_only: true
+  playback_clock_source: "dac | unknown"
+  parameter_pump_revision: null
+  parameter_refresh_gap_ms_p95: null
+  parameter_refresh_gap_ms_p99: null
+  dropped_stale_update_count: null
+  interruption_flush_tested: false
+  model_change_reset_tested: false
+
+resource_budget:
+  max_wall_clock_seconds: 0
+  max_model_calls: 0
+  max_input_tokens: 0
+  max_output_tokens: 0
+  max_cpu_percent: 0
+  max_ram_mib: 0
+  max_gpu_vram_mib: 0
+  max_background_workers: 0
+  foreground_deadline_ms: 0
+  background_pause_thresholds_revision: "replace-with-config-hash"
+
+privacy_and_safety:
+  data_class: "synthetic | owner_test | public_benchmark"
+  personal_files_mounted: false
+  viewer_identity_data_enabled: false
+  raw_audio_retained: false
+  raw_video_retained: false
+  secrets_in_environment_only: true
+  untrusted_content_is_data_only: true
+  game_automation_allowlist_revision: null
+  owner_stop_available: true
+  external_side_effects_enabled: false
+  retention_policy_revision: "replace-with-policy-revision"
+
+metrics:
+  task_success_rate: null
+  partial_progress_rate: null
+  verifier_agreement_rate: null
+  false_success_rate: null
+  recovery_success_rate: null
+  queue_wait_ms_p50: null
+  prefill_ms_p95: null
+  decode_tokens_per_second_p50: null
+  decode_tokens_per_second_p95: null
+  kv_cache_bytes_peak: null
+  kv_cache_quantization: "none | experimental | unsupported"
+  speculative_draft_acceptance_rate: null
+  audio_underrun_count: null
+  perception_candidates_per_turn_p50: null
+  perception_selected_media_units_p95: null
+  perception_rejected_stale_count: null
+  perception_duplicate_suppression_rate: null
+  evidence_retrieval_ms_p95: null
+  event_to_observation_ms_p95: null
+  intent_conditioned_turn_score: null
+  false_interruption_rate: null
+  missed_direct_request_rate: null
+  appropriate_silence_rate: null
+  task_result_delivery_rate: null
+  stale_result_drop_rate: null
+  queue_wait_ms_p95: null
+  first_token_ms_p50: null
+  first_token_ms_p95: null
+  inter_token_ms_p95: null
+  first_audio_ms_p95: null
+  audible_response_ms_p95: null
+  interruption_stop_ms_p95: null
+  capture_to_action_ms_p95: null
+  game_frame_time_ms_p95: null
+  game_frame_time_ms_p99: null
+  obs_render_lag_frames: null
+  obs_encoder_lag_frames: null
+  cpu_percent_p95: null
+  ram_mib_peak: null
+  gpu_vram_mib_peak: null
+  cost_per_verified_completion: null
+  # Run 40: skill evolution and multiparty stream quality.
+  skill_trigger_precision: null
+  skill_trigger_recall: null
+  skill_transfer_success_rate: null
+  skill_regression_rate: null
+  skill_rollback_success_rate: null
+  addressee_accuracy: null
+  reply_thread_accuracy: null
+  topic_continuity_score: null
+  # false_interruption_rate and appropriate_silence_rate are defined above.
+  sentinel_no_op_false_action_count: null
+  sentinel_reaction_latency_ms_p95: null
+  gameworld_success_rate: null
+  gameworld_normalized_progress_rate: null
+  gameworld_invalid_action_rate: null
+  fdbv3_pass_at_1: null
+  fdbv3_tool_call_f1: null
+  interactionbench_paralinguistic_score: null
+  avatar_parameter_refresh_gap_ms_p99: null
+  multiparty_direct_response_rate: null
+  multiparty_unwanted_response_decision_rate: null
+  multiparty_silence_preservation_rate: null
+  multiparty_human_resolution_stop_rate: null
+  multiparty_false_stop_rate: null
+  multiparty_urgent_interrupt_recall: null
+  multiparty_false_interrupt_rate: null
+  multiparty_answer_accuracy: null
+  multiparty_response_appropriateness: null
+  multiparty_first_audible_response_ms_p95: null
+  multiparty_holdout_case_count: null
+  multiparty_required_category_coverage: null
+  agentcl_compositional_transfer_gain: null
+  agentcl_negative_transfer_rate: null
+  agentif_constraint_satisfaction_rate: null
+  model_router_load_latency_ms_p95: null
+  model_router_unexpected_unload_count: null
+  model_router_lru_evictions_count: null
+
+results:
+  outcome: "not_run | passed | failed | partial | blocked"
+  verified_successes: 0
+  verified_failures: 0
+  abstentions: 0
+  verifier_disagreements: 0
+  failure_categories: {}
+  artifacts_directory: "replace-with-private-artifact-path"
+  artifact_hashes:
+    trajectory_bundle_sha256: null
+    metrics_sha256: null
+    screenshots_sha256: null
+  promotion_eligible: false
+  promotion_decision_reference: null
+  reviewer_notes: ""
+
+reproducibility_checks:
+  all_release_components_pinned: false
+  clean_environment_verified: false
+  practice_and_holdout_disjoint: false
+  task_seeds_recorded: false
+  verifier_independent_of_agent_claim: false
+  no_secrets_or_personal_data_in_artifacts: false
+  safety_controls_tested: false
+  paired_baseline_available: false
+  target_hardware_match_confirmed: false
+  limitations_documented: false
+
+# Run 42: multiparty room evaluation. Keep all identities and content out of this file.
+multiparty_voice:
+  scenario_roster_sha256: null
+  evaluator_revision: null
+  required_categories: ["explicit_direct", "implicit_direct", "side_conversation", "human_resolution", "urgent_barge_in"]
+  holdout_min_cases: 40
+  holdout_min_per_category: 4
+  signed_outcomes_verified: false
+  participant_count_buckets: ["2-3", "4-8", "9-16"]
+  raw_audio_retained: false
+  transcripts_retained: false
+  provider_user_ids_retained: false
+  cross_platform_identity_linking: false
+
+# Run 42: compositional continual-learning evaluation.
+continual_learning:
+  task_stream_revision: null
+  dependency_graph_sha256: null
+  heldout_composition_revision: null
+  candidate_skill_revision: null
+  promotion_gate_revision: null
+  reusable_subtask_count: null
+  negative_transfer_cases: null
+
+# Run 42: llama.cpp router-mode experiment; never enable in production by this manifest.
+model_router:
+  exact_llama_cpp_commit: null
+  router_mode_enabled: false
+  models_max: null
+  models_memory_margin_mib: null
+  models_autoload_enabled: false
+  active_model_non_eviction_tested: false
+  multimodal_projector_memory_measured: false
+  worker_epoch_fencing_tested: false
+  prewarm_profile_revision: null
+
+
+# Run 43: multilingual causal endpointing. Endpointing latency is conversational
+# dead air, not model inference latency. No raw audio or transcript belongs here.
+end_of_turn_evaluation:
+  enabled: false
+  benchmark_id: "livekit/eot-bench-data"
+  benchmark_code_revision: null
+  dataset_revision: null
+  dataset_split: "validation"
+  language_filters: []
+  cohort_filters: []
+  min_silence_span_ms: 100
+  min_hold_span_duration_ms: 200
+  max_hold_span_duration_ms: 5000
+  inference_interval_ms: 100
+  transcript_lag_ms: 500
+  adapter_revision: null
+  policy_revision: null
+  allow_censored_turns: true
+  source_turn_count: null
+  retained_turn_count: null
+  censored_turn_count: null
+  retained_hold_span_count: null
+  retained_eot_span_count: null
+  excluded_hold_span_count: null
+  missing_score_span_count: null
+  false_cutoff_rate: null
+  missed_final_rate: null
+  endpointing_latency_ms_p50: null
+  endpointing_latency_ms_p95: null
+  silence_baseline_included: false
+  cohort_results_recorded: false
+  raw_audio_retained: false
+  transcript_retained: false
+
+# Run 43: topology-aware skill retrieval. Keep memory content and memory-policy
+# candidates separate; promotion remains governed by the existing skill pipeline.
+skill_topology_evaluation:
+  enabled: false
+  skill_graph_revision: null
+  candidate_topology_revision: null
+  baseline_retriever_revision: null
+  candidate_retriever_revision: null
+  task_manifest_sha256: null
+  holdout_manifest_sha256: null
+  required_skill_nodes: 0
+  retrieved_skill_nodes: 0
+  irrelevant_skill_nodes: 0
+  retrieval_recall_at_k: null
+  retrieval_mrr: null
+  prompt_tokens_p50: null
+  prompt_tokens_p95: null
+  retrieval_ms_p95: null
+  verified_task_success_delta: null
+  negative_transfer_rate: null
+  independent_verifier: false
+  holdout_sealed: false
+  auto_promotion: false
+  owner_approval_reference: null
+
+# Run 43: hybrid GUI/CLI/code workflows. Use disposable benchmark VMs and
+# synthetic accounts; never store raw screenshots or personal app content here.
+cross_app_evaluation:
+  enabled: false
+  benchmark_id: "WindowsWorld | WeaveBench | synthetic"
+  benchmark_revision: null
+  vm_image_digest: null
+  synthetic_accounts_only: true
+  workflow_manifest_sha256: null
+  verifier_revision: null
+  trajectory_digest_sha256: null
+  artifact_manifest_sha256: null
+  application_count: 0
+  workflow_count: 0
+  checkpoint_count: 0
+  gui_cli_handoff_count: 0
+  verified_workflow_success_rate: null
+  checkpoint_completion_rate: null
+  false_success_rate: null
+  artifact_provenance_verified: false
+  trajectory_reviewed: false
+  raw_screenshots_retained: false
+  personal_files_mounted: false
+  external_side_effects_enabled: false
