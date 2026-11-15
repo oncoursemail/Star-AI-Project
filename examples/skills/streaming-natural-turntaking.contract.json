@@ -90,7 +90,11 @@
   "provenance": [
     {
       "kind": "url",
-      "locator": "https://arxiv.org/abs/2606.20659"
+      "locator": "https://arxiv.org/abs/2609.13076"
+    },
+    {
+      "kind": "url",
+      "locator": "https://github.com/livekit/eot-bench"
     },
     {
       "kind": "evaluation",
