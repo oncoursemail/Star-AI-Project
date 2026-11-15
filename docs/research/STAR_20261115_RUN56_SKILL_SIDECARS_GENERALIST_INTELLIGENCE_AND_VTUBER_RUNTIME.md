@@ -209,6 +209,27 @@ STAR's current direction should remain conservative:
 
 The #1204 draft specifically disables shared cross-slot RAM prompt cache and idle-slot snapshots while preserving ordinary same-slot prefix caching. The #1205 planner is dormant until a backend exposes reliable residency and safe suspend/restore semantics.
 
+### Optimize user-experienced goodput, not raw tokens/second
+
+NVIDIA AIPerf defines goodput as completed requests per second that satisfy every configured service-level objective. It demonstrates why identical raw throughput can hide a very different fraction of requests that actually meet latency requirements.
+
+For STAR, reuse the existing streaming inference benchmark (#1167) and mixed-load evaluator (#1201), but define a verified interactive goodput cohort:
+- response was correct enough for the task-specific grader;
+- first useful content met its latency budget;
+- first audible playback met its separate budget;
+- inter-token / inter-chunk gaps stayed within the voice-quality budget;
+- game frame-time tails and OBS output remained within guardrails;
+- no request was silently dropped or counted as a success after cancellation.
+
+Keep server TTFT, client-observed first-content, first audible PCM, playback queue delay, avatar presentation delay, and first completed action as distinct timestamps. Do not call first streamed chunk server TTFT when an endpoint can buffer several tokens into one chunk. Do not combine a model's decode TPS with whole-system task throughput.
+
+Sources:
+- AIPerf goodput: https://docs.nvidia.com/aiperf/tutorials/metrics-analysis/benchmark-goodput-with-ai-perf
+- AIPerf streaming metrics: https://docs.nvidia.com/aiperf/reference/ai-perf-metrics-reference
+- Existing STAR streamed timing: PR #1167.
+- Existing STAR mixed-load evaluation: PR #1201.
+
+
 Source:
 - llama.cpp issue #30961: https://github.com/ggml-org/llama.cpp/issues/30961
 - llama.cpp server and benchmark docs: https://github.com/ggml-org/llama.cpp/tree/master/tools/server
