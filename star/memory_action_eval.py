@@ -435,9 +435,12 @@ def evaluate_memory_action_grounding(
     for receipt in receipts:
         if not isinstance(receipt, MemoryActionReceipt):
             raise TypeError("receipts must contain MemoryActionReceipt values")
-        if not receipt.signature or not hmac.compare_digest(
-            receipt.signature, sign_receipt(replace_signature(receipt, ""), validation_key)
-        ):
+        expected_signature = hmac.new(
+            validation_key,
+            b"star.memory-action.receipt.v1\\x00" + _canonical(_receipt_payload(receipt)),
+            hashlib.sha256,
+        ).hexdigest()
+        if not receipt.signature or not hmac.compare_digest(receipt.signature, expected_signature):
             raise PermissionError("receipt signature is missing or invalid")
         if receipt.manifest_sha256 != manifest.sha256:
             raise PermissionError("receipt is bound to a different manifest")
@@ -616,9 +619,3 @@ def evaluate_memory_action_grounding(
         improved_sessions, worse_sessions, tied_sessions, sign_p, tuple(warnings),
     )
 
-
-def replace_signature(receipt: MemoryActionReceipt, signature: str) -> MemoryActionReceipt:
-    """Return a receipt copy with a replacement signature, without importing dataclasses.replace."""
-    values = _receipt_payload(receipt)
-    values["signature"] = signature
-    return MemoryActionReceipt(**values)
