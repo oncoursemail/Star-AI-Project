@@ -16,7 +16,7 @@ def test_sources_are_https_unique_and_research_only():
             "javis", "realtime-venus", "hithink-turn", "joi-bench-task",
             "model-interruption-bench", "subternary", "gamedevbench",
             "robloxstudio-mcp", "mp-bench", "mem2actbench", "memagent",
-            "harness-memory", "vllm-disagg-prefill"}.issubset(ids)
+            "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -39,6 +39,14 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert "not a STAR score" in sources["mp-bench"].warning
     assert "existing task ledger" in sources["memagent"].warning
     assert "local 8 GB GPU" in sources["vllm-disagg-prefill"].warning
+    assert sources["streamarena"].status == "research_only"
+    assert sources["eventmemagent"].status == "research_only"
+    assert sources["onlinewm"].status == "research_only"
+    assert sources["ma-wam"].status == "research_only"
+    assert "not a STAR speedup" in sources["streamarena"].warning
+    assert "no implementation installed" in sources["eventmemagent"].warning
+    assert "Do not online-train" in sources["onlinewm"].warning
+    assert "Offline MARL results only" in sources["ma-wam"].warning
     assert "read-only mode first" in sources["robloxstudio-mcp"].warning
 
 
