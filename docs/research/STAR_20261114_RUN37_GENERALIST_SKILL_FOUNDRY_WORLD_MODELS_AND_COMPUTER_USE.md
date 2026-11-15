@@ -440,6 +440,54 @@ Silence is a valid successful action. A natural streamer does not need to narrat
 
 ---
 
+## General knowledge and research intelligence
+
+The Skill Foundry must cover factual and conceptual learning as well as actions. STAR should not confuse reading about a subject with being able to explain it accurately, and should not confuse explaining a procedure with successfully executing it.
+
+### Claim-level knowledge record
+
+For each important factual claim, retain:
+
+- A stable claim identifier and concise statement.
+- Source identifiers and exact supporting sections or evidence anchors.
+- Publication/update date and the time the claim was checked.
+- Scope, assumptions, jurisdiction/version, and known exceptions.
+- Separate support, contradiction, and uncertainty links.
+- A freshness or revalidation rule for time-sensitive claims.
+- Whether the claim is directly sourced, inferred, or only a hypothesis.
+
+Prefer primary sources for API behavior, laws, product documentation, benchmark methods, and official announcements. Use peer-reviewed papers or technical reports for research claims, then seek independent replication or counterevidence where practical. Community discussions are valuable for discovering failure modes but should not silently become authoritative facts.
+
+### Research workflow
+
+1. Turn the question into testable subquestions.
+2. Identify the strongest primary sources and their dates.
+3. Search for independent corroboration and plausible counterexamples.
+4. Extract only the evidence needed for each claim.
+5. Record conflicts rather than flattening them into one answer.
+6. Recheck volatile facts before presenting them.
+7. Answer with calibrated confidence and abstain when evidence is inadequate.
+8. Promote durable knowledge only through the existing governed memory process.
+
+### Knowledge and skill are different evaluations
+
+Use separate tests:
+
+- **Recall:** can STAR retrieve the correct claim and its source?
+- **Reasoning:** can she apply the claim to a changed scenario and identify assumptions?
+- **Freshness:** can she detect that a version, price, API, or policy has changed?
+- **Contradiction handling:** can she compare conflicting sources and explain why one is stronger?
+- **Procedure:** can she perform the task in a sandbox?
+- **Transfer:** can she apply the concept in a new domain without copying an old sequence?
+
+A high score on a quiz is not proof of tool competence. A successful tool action is not proof of broad conceptual understanding.
+
+### General knowledge curriculum
+
+Build a rotating, difficulty-calibrated curriculum across mathematics, science, programming, game design, history, geography, language, art, music, media production, systems administration, and everyday practical knowledge. Each domain should include factual questions, explanation tasks, source-checking tasks, and practical sandbox tasks where a safe verifier exists.
+
+Track learning curves and recurring misconceptions. Use spaced review for concepts that decay, but do not repeatedly rehearse facts that are already stable unless they are time-sensitive. The research agent should create candidate notes; the existing memory-governance system decides what becomes durable knowledge.
+
 ## 10. Evaluation plan: prove transfer, not just practice
 
 Start with a small, reproducible suite before attempting the full upstream benchmarks.
