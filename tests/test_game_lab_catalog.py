@@ -18,7 +18,8 @@ def test_sources_are_https_unique_and_research_only():
             "robloxstudio-mcp", "mp-bench", "mem2actbench", "memagent",
             "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam", "sima2", "vjepa2", "osworld-v2", "androidworld", "openhands-index",
             "skillret", "polyskill", "skilllearnbench", "skillhorizon", "skill2bench",
-            "agentspec", "asymspec", "omniagent", "tact", "turboquant", "express-streamer"}.issubset(ids)
+            "agentspec", "asymspec", "omniagent", "tact", "turboquant", "express-streamer",
+            "memento-skills", "lumi-nox", "llama-speed-bench", "nvidia-aiperf"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -78,6 +79,14 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert "production phone-control permission" in sources["androidworld"].warning
     assert "not STAR scores" in sources["openhands-index"].warning
     assert "read-only mode first" in sources["robloxstudio-mcp"].warning
+    assert sources["memento-skills"].status == "research_only"
+    assert "protected holdouts" in sources["memento-skills"].warning
+    assert sources["lumi-nox"].status == "research_only"
+    assert "does not automatically wire" in sources["lumi-nox"].warning
+    assert sources["llama-speed-bench"].status == "research_only"
+    assert "parallel slots" in sources["llama-speed-bench"].warning
+    assert sources["nvidia-aiperf"].status == "research_only"
+    assert "Metric definitions" in sources["nvidia-aiperf"].warning
 
 
 def test_search_category_and_bounded_results():
@@ -91,9 +100,11 @@ def test_search_category_and_bounded_results():
     assert catalog(category="benchmarks")["total"] >= 6
     assert catalog(category="input")["total"] == 2
     assert catalog(category="inference")["total"] >= 4
-    assert catalog(category="vtuber")["total"] >= 1
+    assert catalog(category="vtuber")["total"] >= 2
+    assert catalog("Memento-Skills")["total"] == 1
+    assert catalog("SPEED-Bench")["total"] == 1
     default_catalog = catalog()
-    assert len(default_catalog["sources"]) <= 70
+    assert len(default_catalog["sources"]) <= 80
     assert default_catalog["total"] == len(default_catalog["sources"])
     assert not default_catalog["truncated"]
 
