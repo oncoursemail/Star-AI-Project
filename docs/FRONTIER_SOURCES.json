@@ -1042,41 +1042,39 @@
     "kind_and_usage": "Benchmark index: issue resolution, greenfield development, frontend, testing, information gathering, and cost/performance comparison",
     "audit": "Official index checked 2026-11-14; leaderboard data are not STAR results; no agent implementation or benchmark task data imported"
   },
-  [
-    {
-      "id": "R154",
-      "title": "SkillRet: A Large-Scale Benchmark for Skill Retrieval in LLM Agents",
-      "url": "https://arxiv.org/abs/2605.05726",
-      "kind_and_usage": "Paper: large-scale query-to-skill retrieval evaluation with relevance labels and Recall/MRR/nDCG metrics",
-      "audit": "arXiv paper checked 2026-11-14; original paper corpus counts differ from the revised official repository test split; pin exact dataset revision before comparisons"
-    },
-    {
-      "id": "R155",
-      "title": "SkillRet official benchmark implementation",
-      "url": "https://github.com/ThakiCloud/SKILLRET",
-      "kind_and_usage": "Official retrieval evaluation/training code and dataset loader for embedding retrieval and reranking",
-      "audit": "README checked 2026-11-14; current test split 6,006 skills/4,392 queries, Python 3.13 and CUDA 12.8+ requirements, 4-GPU training recipes; not proposed as a local 8 GB GPU dependency"
-    },
-    {
-      "id": "R156",
-      "title": "PolySkill polymorphic skill learning",
-      "url": "https://github.com/simonucl/PolySkill",
-      "kind_and_usage": "MIT-licensed research implementation separating abstract skill goals from environment-specific implementations for web-agent reuse",
-      "audit": "ICLR 2026 paper and clean-room BrowserGym/LiteLLM implementation checked 2026-11-14; transfer claims are web-specific; live Mind2Web/API and self-hosted WebArena costs/permissions not enabled"
-    },
-    {
-      "id": "R157",
-      "title": "SkillLearnBench continual agent-skill generation benchmark",
-      "url": "https://github.com/cxcscmu/SkillLearnBench",
-      "kind_and_usage": "COLM 2026 benchmark: 20 skill-dependent tasks, 15 subdomains, 100 verified instances; separate skill quality, trajectory, and task outcome evaluation",
-      "audit": "Official README and paper checked 2026-11-14; Docker required and some tasks need credentials; external feedback and independent verification are emphasized because self-feedback alone can drift"
-    },
-    {
-      "id": "R158",
-      "title": "Skill Entropy / Skill2-Bench cross-skill long-horizon reasoning",
-      "url": "https://arxiv.org/abs/2608.05139",
-      "kind_and_usage": "Paper: 558 skills across nine domains, directional skill-switch difficulty, and skill-sequence evaluation/training research",
-      "audit": "Paper and official Gen-Verse implementation checked 2026-11-14; reported RL gains are specific to Qwen3 training experiments; use transition evaluation methodology, not local RL training"
-    }
-  ]
+  {
+    "id": "R154",
+    "title": "SkillRet: A Large-Scale Benchmark for Skill Retrieval in LLM Agents",
+    "url": "https://arxiv.org/abs/2605.05726",
+    "kind_and_usage": "Paper: large-scale query-to-skill retrieval evaluation with relevance labels and Recall/MRR/nDCG metrics",
+    "audit": "arXiv paper checked 2026-11-14; original paper corpus counts differ from the revised official repository test split; pin exact dataset revision before comparisons"
+  },
+  {
+    "id": "R155",
+    "title": "SkillRet official benchmark implementation",
+    "url": "https://github.com/ThakiCloud/SKILLRET",
+    "kind_and_usage": "Official retrieval evaluation/training code and dataset loader for embedding retrieval and reranking",
+    "audit": "README checked 2026-11-14; current test split 6,006 skills/4,392 queries, Python 3.13 and CUDA 12.8+ requirements, 4-GPU training recipes; not proposed as a local 8 GB GPU dependency"
+  },
+  {
+    "id": "R156",
+    "title": "PolySkill polymorphic skill learning",
+    "url": "https://github.com/simonucl/PolySkill",
+    "kind_and_usage": "MIT-licensed research implementation separating abstract skill goals from environment-specific implementations for web-agent reuse",
+    "audit": "ICLR 2026 paper and clean-room BrowserGym/LiteLLM implementation checked 2026-11-14; transfer claims are web-specific; live Mind2Web/API and self-hosted WebArena costs/permissions not enabled"
+  },
+  {
+    "id": "R157",
+    "title": "SkillLearnBench continual agent-skill generation benchmark",
+    "url": "https://github.com/cxcscmu/SkillLearnBench",
+    "kind_and_usage": "COLM 2026 benchmark: 20 skill-dependent tasks, 15 subdomains, 100 verified instances; separate skill quality, trajectory, and task outcome evaluation",
+    "audit": "Official README and paper checked 2026-11-14; Docker required and some tasks need credentials; external feedback and independent verification are emphasized because self-feedback alone can drift"
+  },
+  {
+    "id": "R158",
+    "title": "Skill Entropy / Skill2-Bench cross-skill long-horizon reasoning",
+    "url": "https://arxiv.org/abs/2608.05139",
+    "kind_and_usage": "Paper: 558 skills across nine domains, directional skill-switch difficulty, and skill-sequence evaluation/training research",
+    "audit": "Paper and official Gen-Verse implementation checked 2026-11-14; reported RL gains are specific to Qwen3 training experiments; use transition evaluation methodology, not local RL training"
+  }
 ]
