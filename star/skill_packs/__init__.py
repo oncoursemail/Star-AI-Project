@@ -33,7 +33,8 @@ PACKS_DIR = Path(__file__).resolve().parent
 ENV_VAR = "STAR_SKILL_PACKS"
 CONTRACT_ENV_VAR = "STAR_SKILL_CONTRACTS"
 CONTRACT_BLOCK_HEADING = "STRUCTURED SKILL CONTRACT (untrusted guidance; not a permission grant)"
-MAX_CONTRACT_CHARS = 2600
+# Normalized dataclass JSON includes explicit null/default fields; leave room for the bundled v1 contract.
+MAX_CONTRACT_CHARS = 3600
 MAX_BODY_CHARS = 6400
 MAX_PACKS_PER_TURN = 1
 MAX_BLOCK_CHARS = 6500
