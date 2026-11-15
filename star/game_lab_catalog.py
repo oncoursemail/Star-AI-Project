@@ -176,6 +176,23 @@ SOURCES = (
     Source("nuclear","Nuclear Music Player","https://nuclearplayer.com/",
            "music","Open-source desktop music player with an optional MCP server",
            warning="AGPL licensing review before embedding sources."),
+
+    Source("streamarena", "StreamArena long-horizon streaming video benchmark",
+           "https://arxiv.org/abs/2608.05703", "benchmarks",
+           "243 full-length videos averaging 88.8 minutes; open-ended timestamped evidence questions for real-time perception, historical recall, proactive interaction and tool use",
+           warning="Prerecorded benchmark streams are not live capture acceptance; published latency is not a STAR speedup."),
+    Source("eventmemagent", "EventMemAgent event-centric online video memory",
+           "https://arxiv.org/abs/2602.15329", "learning",
+           "Event-boundary detection, bounded short-term frame sampling, event-centric long-term evidence records and active fine-grained retrieval",
+           warning="Research paper only; no implementation installed. Keep STAR event evidence bounded, source-scoped and separate from governed persistent memory."),
+    Source("onlinewm", "OnlineWM causal action-effect world modeling",
+           "https://arxiv.org/abs/2609.23753", "learning",
+           "Active simulator queries and counterfactual comparisons of different actions from equivalent starting states",
+           warning="Preprint only; start with deterministic matched-state experiments and held-out seeds. Do not online-train STAR foundation weights."),
+    Source("ma-wam", "MA-WAM multi-agent world-action planning",
+           "https://arxiv.org/abs/2609.31281", "learning",
+           "Joint-action candidate scoring for offline cooperative multi-agent reinforcement-learning settings",
+           warning="Offline MARL results only; not evidence of visual real-time gameplay or transfer to arbitrary games."),
 )
 
 
