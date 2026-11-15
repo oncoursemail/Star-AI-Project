@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "skill_id": "game-observe-before-act",
+  "version": "1.0.0",
+  "domain": "game",
+  "summary": "Use a fresh game-state observation before a bounded action and verify the resulting state.",
+  "preconditions": [
+    {
+      "kind": "fresh_observation",
+      "subject": "game_state",
+      "max_age_ms": 250
+    },
+    {
+      "kind": "environment_matches",
+      "subject": "game_build",
+      "value": "game-build-sha256-pinned-by-host"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "observe",
+      "operation": "observe",
+      "intent": "Inspect the target, current state and available interaction before acting."
+    },
+    {
+      "step_id": "act",
+      "operation": "request_tool",
+      "intent": "Request one host-authorized game action.",
+      "tool_name": "game.input",
+      "required_capabilities": [
+        "game.control"
+      ]
+    },
+    {
+      "step_id": "verify",
+      "operation": "verify",
+      "intent": "Observe the resulting state and compare it with the expected change."
+    }
+  ],
+  "behavior_constraints": [
+    {
+      "constraint_id": "observe-before-act",
+      "condition": {
+        "kind": "fresh_observation",
+        "subject": "game_state",
+        "max_age_ms": 250
+      },
+      "expected_behavior": "Do not act from stale or missing visual state; inspect the target first.",
+      "severity": "critical"
+    },
+    {
+      "constraint_id": "verify-action-result",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "action_result"
+      },
+      "expected_behavior": "Verify the actual game-state change; never treat an issued input as success.",
+      "severity": "critical"
+    },
+    {
+      "constraint_id": "recover-on-uncertainty",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "ambiguous_game_state"
+      },
+      "expected_behavior": "Stop, re-observe or use a safe recovery plan instead of repeating uncertain inputs."
+    }
+  ],
+  "postconditions": [
+    {
+      "path": "action_result.verified",
+      "operator": "equals",
+      "value": true
+    }
+  ],
+  "resource_budget": {
+    "max_elapsed_ms": 15000,
+    "max_steps": 3,
+    "max_tool_calls": 1,
+    "max_tokens": 1200,
+    "max_retries": 1,
+    "max_ram_mib": 256
+  },
+  "provenance": [
+    {
+      "kind": "url",
+      "locator": "https://arxiv.org/abs/2305.16291"
+    },
+    {
+      "kind": "evaluation",
+      "locator": "star-game-control-holdout-v1"
+    }
+  ]
+}
