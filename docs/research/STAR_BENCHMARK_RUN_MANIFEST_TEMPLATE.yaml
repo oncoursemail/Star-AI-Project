@@ -353,7 +353,7 @@ reproducibility_checks:
 multiparty_voice:
   scenario_roster_sha256: null
   evaluator_revision: null
-  required_categories: ["explicit_direct", "side_conversation", "human_resolution", "urgent_barge_in"]
+  required_categories: ["explicit_direct", "implicit_direct", "side_conversation", "human_resolution", "urgent_barge_in"]
   holdout_min_cases: 40
   holdout_min_per_category: 4
   signed_outcomes_verified: false
