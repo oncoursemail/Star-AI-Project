@@ -19,7 +19,7 @@ The contract is data, not executable code. It does not authorize tools, grant pe
 
 ## Schema
 
-schema_version is currently 1. Unknown fields are rejected rather than silently ignored.
+schema_version is currently 1. Unknown fields, duplicate JSON object keys at any nesting level, and non-standard JSON constants such as NaN/Infinity are rejected rather than silently normalized.
 
 ### Skill contract
 
