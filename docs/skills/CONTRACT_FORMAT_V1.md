@@ -92,3 +92,15 @@ STAR's existing `SkillLibrary` recognizes an optional adjacent file named `SKILL
 - The result includes an explicit notice that contract data is untrusted and grants no permission.
 
 This is a progressive-disclosure integration only. It does not execute steps, evaluate live state, create execution receipts, change model prompts at discovery time, or alter any tool authorization. A trusted host must independently enforce policy and produce evidence before a contract can be used for evaluation or promotion.
+
+
+## Opt-in bundled-pack prompt integration
+
+The built-in `star.skill_packs` renderer can append a selected pack's valid structured contract to the same per-turn guidance block when `STAR_SKILL_CONTRACTS=on`.
+
+- The setting is off by default; an unset, false, or unknown value leaves the rendered pack text unchanged.
+- Only the pack already selected for the current turn is inspected; catalog discovery does not parse every sidecar.
+- Contract JSON is included only when it is valid, identity-matched, and fits the 1,800-character contract budget and 6,500-character overall guidance budget.
+- The contract remains in the user-turn guidance section, never the system message.
+- A missing, malformed, oversized, mismatched, symlinked, or otherwise invalid sidecar is omitted; the existing SKILL.md guidance remains available.
+- This is a prompt-guidance opt-in only. It does not create an execution receipt, evaluate host state, authorize a tool, or promote the skill.
