@@ -34,7 +34,10 @@ def _identifier(value: object, name: str) -> str:
 def _quantity(value: object, name: str, *, positive: bool = False) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{name} must be a finite nonnegative number")
-    result = float(value)
+    try:
+        result = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError(f"{name} must be a finite number") from exc
     if not math.isfinite(result) or result < 0 or (positive and result == 0):
         raise ValueError(f"{name} must be a finite {'positive' if positive else 'nonnegative'} number")
     return result
@@ -201,7 +204,7 @@ def plan_admission(
         if item.suspendable and _PRIORITY[item.workload] > incoming_priority
     ]
     # Protect importance first; within a class suspend least-recently-active
-    # sessions first, then larger residents to minimize the number of pauses.
+    # sessions first, using resident size as a deterministic tie-breaker.
     candidates.sort(key=lambda item: (
         -_PRIORITY[item.workload],
         item.last_active_ms,
