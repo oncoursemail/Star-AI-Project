@@ -19,7 +19,9 @@ def test_sources_are_https_unique_and_research_only():
             "harness-memory", "vllm-disagg-prefill", "streamarena", "eventmemagent", "onlinewm", "ma-wam", "sima2", "vjepa2", "osworld-v2", "androidworld", "openhands-index",
             "skillret", "polyskill", "skilllearnbench", "skillhorizon", "skill2bench",
             "agentspec", "asymspec", "omniagent", "tact", "turboquant", "express-streamer",
-            "memento-skills", "lumi-nox", "llama-speed-bench", "nvidia-aiperf"}.issubset(ids)
+            "memento-skills", "lumi-nox", "llama-speed-bench", "nvidia-aiperf",
+            "sentinelbench", "full-duplex-v3", "interactionbench", "llama-server-docs",
+            "vtubestudio-api", "roblox-agentic-workflow"}.issubset(ids)
 
 
 def test_statuses_do_not_exaggerate_capabilities():
@@ -87,6 +89,15 @@ def test_statuses_do_not_exaggerate_capabilities():
     assert "parallel slots" in sources["llama-speed-bench"].warning
     assert sources["nvidia-aiperf"].status == "research_only"
     assert "Metric definitions" in sources["nvidia-aiperf"].warning
+    assert all(sources[key].status == "research_only" for key in
+               ("sentinelbench", "full-duplex-v3", "interactionbench",
+                "llama-server-docs", "vtubestudio-api", "roblox-agentic-workflow"))
+    assert "no-op" in sources["sentinelbench"].warning
+    assert "not STAR" in sources["full-duplex-v3"].warning
+    assert "four dimensions" in sources["interactionbench"].warning
+    assert "Pin the exact llama.cpp commit" in sources["llama-server-docs"].warning
+    assert "once per second" in sources["vtubestudio-api"].warning
+    assert "no automatic publishing" in sources["roblox-agentic-workflow"].warning
 
 
 def test_search_category_and_bounded_results():
@@ -104,9 +115,12 @@ def test_search_category_and_bounded_results():
     assert catalog("Memento-Skills")["total"] == 1
     assert catalog("SPEED-Bench")["total"] == 1
     default_catalog = catalog()
-    assert len(default_catalog["sources"]) <= 80
+    assert len(default_catalog["sources"]) == 78
     assert default_catalog["total"] == len(default_catalog["sources"])
     assert not default_catalog["truncated"]
+    assert len(catalog(limit=80)["sources"]) == 78
+    with pytest.raises(ValueError, match="between 1 and 80"):
+        catalog(limit=81)
 
 
 @pytest.mark.parametrize("kwargs",[
