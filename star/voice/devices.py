@@ -14,6 +14,7 @@ import threading
 import time
 
 from .pcm import FRAME_SAMPLES, SAMPLE_RATE
+from .playback import PlaybackSnapshot, PlaybackTelemetry, estimate_output_time
 
 log = logging.getLogger(__name__)
 
@@ -167,6 +168,7 @@ class SoundSpeaker:
         self._played = 0
         self._output_underflows = 0
         self._output_overflows = 0
+        self._playback = PlaybackTelemetry()
 
         self._levels: collections.deque[tuple[float, float]] = collections.deque(
             maxlen=_LEVEL_HISTORY_CAPACITY
@@ -234,16 +236,39 @@ class SoundSpeaker:
                 self._levels.append((at, value))
                 self._level_processed_seq = sequence
 
-    def _callback(self, out, frames, _time, status) -> None:
+    def _callback(self, out, frames, time_info, status) -> None:
+        # PortAudio's DAC timestamp is the best available estimate of when this block
+        # becomes audible. Invalid/missing driver times fall back to callback time.
+        callback_at = time.monotonic()
+        output_at = estimate_output_time(
+            callback_at,
+            current_time=getattr(time_info, "currentTime", None),
+            output_buffer_dac_time=getattr(time_info, "outputBufferDacTime", None),
+        )
         wanted = frames * 2
+        underflow = bool(getattr(status, "output_underflow", False))
         with self._lock:
-            if getattr(status, "output_underflow", False):
+            if underflow:
                 self._output_underflows += 1
             if getattr(status, "output_overflow", False):
                 self._output_overflows += 1
             chunk = bytes(self._buffer[:wanted])
             del self._buffer[:wanted]
-            self._played += len(chunk) // 2
+            emitted_frames = len(chunk) // 2
+            self._played += emitted_frames
+
+        # Lightweight aggregate telemetry only: no PCM, transcript, or viewer data.
+        # A playback timestamp is evidence of a PortAudio callback schedule, not proof
+        # that a remote audience or physical listener heard the samples.
+        try:
+            self._playback.record_callback(
+                frames=frames,
+                emitted_frames=emitted_frames,
+                output_underflow=underflow,
+                at=output_at,
+            )
+        except Exception:
+            pass  # diagnostics must never break the audio callback
 
         # Always fill the complete output buffer, including underrun silence.
         out[:len(chunk)] = chunk
@@ -255,13 +280,13 @@ class SoundSpeaker:
             # samples, never the PCM that has already been copied to the device.
             try:
                 sequence = self._level_submitted_seq + 1
-                self._level_queue.append((sequence, time.monotonic(), chunk))
+                self._level_queue.append((sequence, output_at, chunk))
                 self._level_submitted_seq = sequence
             except Exception:
                 self.dropped_level_blocks += 1
                 self._level_overflow_until = max(
                     self._level_overflow_until,
-                    time.monotonic() + _LEVEL_WINDOW_S,
+                    callback_at + _LEVEL_WINDOW_S,
                 )
 
     def __enter__(self) -> "SoundSpeaker":
@@ -287,7 +312,8 @@ class SoundSpeaker:
             worker.join(timeout=1.0)
 
     def diagnostics(self) -> dict:
-        """Aggregate PortAudio health and queue depth without exposing audio samples."""
+        """Aggregate PortAudio/playback health without exposing audio samples."""
+        playback = self._playback.snapshot()
         with self._lock:
             return {
                 "output_underflows": self._output_underflows,
@@ -295,6 +321,9 @@ class SoundSpeaker:
                 "queued_seconds": len(self._buffer) / 2 / self.sample_rate,
                 "played_seconds": self._played / self.sample_rate,
                 "sample_rate": self.sample_rate,
+                "first_playback_at": playback.first_playback_at,
+                "output_callbacks_with_audio": playback.output_callbacks_with_audio,
+                "playback_output_underflows": playback.output_underflows,
             }
 
     # -- Speaker interface --------------------------------------------------------------------
@@ -312,6 +341,11 @@ class SoundSpeaker:
     def reset(self) -> None:
         with self._lock:
             self._played = 0
+        self._playback.reset()
+
+    def playback_snapshot(self) -> PlaybackSnapshot:
+        """Return aggregate DAC-time playback evidence for the current reply."""
+        return self._playback.snapshot()
 
     def pending_seconds(self) -> float:
         with self._lock:
