@@ -499,10 +499,9 @@ def evaluate_memory_action_grounding(
             base_warnings + ("Every case requires exactly one receipt from each arm.",),
         )
 
-    off_correct: list[bool] = []
-    on_correct: list[bool] = []
-    dependent_deltas: list[float] = []
-    independent_deltas: list[float] = []
+    session_pairs: dict[str, list[tuple[bool, bool]]] = {}
+    session_dependent_deltas: dict[str, list[float]] = {}
+    session_independent_deltas: dict[str, list[float]] = {}
     retrieval_hits = 0
     required_count = 0
     relevant_retrieved = 0
@@ -521,12 +520,10 @@ def evaluate_memory_action_grounding(
         on = paired[(case.case_id, "memory_on")]
         off_ok = _correct(case, off)
         on_ok = _correct(case, on)
-        off_correct.append(off_ok)
-        on_correct.append(on_ok)
         delta = float(on_ok) - float(off_ok)
-        session_deltas.setdefault(case.session_id, []).append(delta)
+        session_pairs.setdefault(case.session_id, []).append((off_ok, on_ok))
         if case.memory_required:
-            dependent_deltas.append(delta)
+            session_dependent_deltas.setdefault(case.session_id, []).append(delta)
             required = set(case.required_memory_ids)
             retrieved = set(on.retrieved_memory_ids)
             required_count += len(required)
@@ -534,7 +531,7 @@ def evaluate_memory_action_grounding(
             relevant_retrieved += len(required & retrieved)
             all_retrieved_for_dependent += len(retrieved)
         else:
-            independent_deltas.append(delta)
+            session_independent_deltas.setdefault(case.session_id, []).append(delta)
             independent_cases += 1
             if on.retrieved_memory_ids:
                 unnecessary_cases += 1
@@ -547,15 +544,29 @@ def evaluate_memory_action_grounding(
         retrieval_times.append(on.retrieval_ms)
         elapsed_overheads.append(on.elapsed_ms - off.elapsed_ms)
 
-    memory_off_accuracy = _percent(sum(off_correct), len(off_correct))
-    memory_on_accuracy = _percent(sum(on_correct), len(on_correct))
-    overall_gain = round(memory_on_accuracy - memory_off_accuracy, 4) if memory_off_accuracy is not None and memory_on_accuracy is not None else None
-    dependent_gain = _percent(0, 1)
-    if dependent_deltas:
-        dependent_gain = round(100.0 * sum(dependent_deltas) / len(dependent_deltas), 4)
-    independent_gain = None
-    if independent_deltas:
-        independent_gain = round(100.0 * sum(independent_deltas) / len(independent_deltas), 4)
+    session_off_rates = [
+        sum(1 for off_ok, _ in pairs if off_ok) / len(pairs)
+        for pairs in session_pairs.values()
+    ]
+    session_on_rates = [
+        sum(1 for _, on_ok in pairs if on_ok) / len(pairs)
+        for pairs in session_pairs.values()
+    ]
+    session_overall_deltas = [
+        sum(float(on_ok) - float(off_ok) for off_ok, on_ok in pairs) / len(pairs)
+        for pairs in session_pairs.values()
+    ]
+    memory_off_accuracy = round(100.0 * sum(session_off_rates) / len(session_off_rates), 4)
+    memory_on_accuracy = round(100.0 * sum(session_on_rates) / len(session_on_rates), 4)
+    overall_gain = round(100.0 * sum(session_overall_deltas) / len(session_overall_deltas), 4)
+    dependent_means = [
+        sum(values) / len(values) for values in session_dependent_deltas.values() if values
+    ]
+    independent_means = [
+        sum(values) / len(values) for values in session_independent_deltas.values() if values
+    ]
+    dependent_gain = round(100.0 * sum(dependent_means) / len(dependent_means), 4) if dependent_means else None
+    independent_gain = round(100.0 * sum(independent_means) / len(independent_means), 4) if independent_means else None
     required_recall = _percent(retrieval_hits, required_count)
     required_precision = _percent(relevant_retrieved, all_retrieved_for_dependent)
     unnecessary_rate = _percent(unnecessary_cases, independent_cases)
@@ -563,8 +574,8 @@ def evaluate_memory_action_grounding(
     tool_accuracy = _percent(tool_correct_count, len(manifest.cases))
 
     improved_sessions = worse_sessions = tied_sessions = 0
-    for deltas in session_deltas.values():
-        mean_delta = sum(deltas) / len(deltas)
+    for pairs in session_pairs.values():
+        mean_delta = sum(float(on_ok) - float(off_ok) for off_ok, on_ok in pairs) / len(pairs)
         if mean_delta > 0:
             improved_sessions += 1
         elif mean_delta < 0:
