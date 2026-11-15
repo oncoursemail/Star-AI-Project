@@ -1,0 +1,258 @@
+"""Bounded asynchronous speaker metering tests; no physical audio device is required."""
+from __future__ import annotations
+
+import struct
+import threading
+import time
+from types import SimpleNamespace
+
+import pytest
+
+from star.voice import devices
+
+
+class FakeRawOutputStream:
+    def __init__(self, **kwargs):
+        self.callback = kwargs["callback"]
+        self.stopped = 0
+        self.closed = 0
+
+    def start(self):
+        pass
+
+    def stop(self):
+        self.stopped += 1
+
+    def close(self):
+        self.closed += 1
+
+
+def make_speaker(monkeypatch):
+    fake = SimpleNamespace(RawOutputStream=FakeRawOutputStream)
+    monkeypatch.setattr(devices, "_sounddevice", lambda: fake)
+    return devices.SoundSpeaker(sample_rate=24000)
+
+
+def emit(speaker, pcm: bytes) -> bytes:
+    frames = len(pcm) // 2
+    output = bytearray(frames * 2)
+    speaker._callback(
+        output,
+        frames,
+        SimpleNamespace(currentTime=1.0, outputBufferDacTime=1.0),
+        SimpleNamespace(output_underflow=False, output_overflow=False),
+    )
+    return bytes(output)
+
+
+def wait_for_meter(speaker, timeout: float = 1.0) -> bool:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if (
+            speaker._level_processed_seq >= speaker._level_submitted_seq
+            and not speaker._level_queue
+        ):
+            return True
+        time.sleep(0.005)
+    return False
+
+
+def test_pcm_rms_uses_native_pcm16_and_handles_empty_or_malformed_data():
+    half_scale = struct.pack("=h", 16384) * 8
+    assert devices._pcm_rms(half_scale) == pytest.approx(0.5)
+    assert devices._pcm_rms(b"\x00\x00" * 8) == 0.0
+    assert devices._pcm_rms(b"\x01") == 0.0
+    assert devices._pcm_rms(b"") == 0.0
+
+
+def test_slow_meter_worker_never_blocks_callback_or_changes_pcm(monkeypatch):
+    entered = threading.Event()
+    release = threading.Event()
+    returned = threading.Event()
+    original = devices._pcm_rms
+
+    def slow_meter(pcm):
+        entered.set()
+        release.wait(2.0)
+        return original(pcm)
+
+    monkeypatch.setattr(devices, "_pcm_rms", slow_meter)
+    speaker = make_speaker(monkeypatch)
+    pcm = struct.pack("=h", 8192) * 8
+    try:
+        speaker.play(pcm, 24000)
+        output = bytearray(len(pcm))
+
+        def run_callback():
+            speaker._callback(output, len(pcm) // 2, None, None)
+            returned.set()
+
+        callback_thread = threading.Thread(target=run_callback, daemon=True)
+        callback_thread.start()
+        assert entered.wait(1.0)
+        assert returned.wait(0.2), "audio callback waited for the meter worker"
+        assert bytes(output) == pcm
+        assert speaker.level() == 1.0  # pending telemetry is unknown, never assumed silent
+        callback_thread.join(0.2)
+        assert not callback_thread.is_alive()
+    finally:
+        release.set()
+        assert wait_for_meter(speaker, timeout=2.0)
+        assert speaker.level() == pytest.approx(0.25)
+        speaker.close()
+
+
+def test_meter_queue_overflow_drops_only_telemetry_not_audio(monkeypatch):
+    entered = threading.Event()
+    release = threading.Event()
+    original = devices._pcm_rms
+
+    def blocked_meter(pcm):
+        entered.set()
+        release.wait(2.0)
+        return original(pcm)
+
+    monkeypatch.setattr(devices, "_pcm_rms", blocked_meter)
+    speaker = make_speaker(monkeypatch)
+    pcm = struct.pack("=h", 4096) * 8
+    try:
+        speaker.play(pcm, 24000)
+        assert emit(speaker, pcm) == pcm
+        assert entered.wait(1.0)
+
+        # The worker is held on its first sample. Queue overflow may evict meter
+        # samples, but every corresponding PCM block must still reach the output.
+        speaker.play(pcm * 65, 24000)
+        for _ in range(65):
+            assert emit(speaker, pcm) == pcm
+
+        assert len(speaker._level_queue) <= devices._LEVEL_QUEUE_CAPACITY
+        assert speaker.pending_seconds() == pytest.approx(0.0)
+        assert speaker.played_seconds() == pytest.approx(66 * 8 / 24000)
+        assert speaker.level() == 1.0
+    finally:
+        release.set()
+        assert wait_for_meter(speaker, timeout=2.0)
+        assert speaker.dropped_level_blocks >= 1
+        assert speaker.level() == 1.0  # dropped telemetry remains conservative for the echo window
+        speaker.close()
+
+
+def test_meter_failure_is_conservative_and_close_is_idempotent(monkeypatch):
+    def failed_meter(_pcm):
+        raise RuntimeError("synthetic meter failure")
+
+    monkeypatch.setattr(devices, "_pcm_rms", failed_meter)
+    speaker = make_speaker(monkeypatch)
+    pcm = struct.pack("=h", 2048) * 8
+    try:
+        speaker.play(pcm, 24000)
+        assert emit(speaker, pcm) == pcm
+        assert wait_for_meter(speaker)
+        assert speaker.level() == 1.0
+        worker = speaker._level_worker
+        speaker.close()
+        speaker.close()
+        assert not worker.is_alive()
+    finally:
+        speaker.close()
+
+
+
+def test_speaker_playback_snapshot_uses_dac_time_and_resets_per_reply(monkeypatch):
+    speaker = make_speaker(monkeypatch)
+    pcm = struct.pack("=h", 8192) * 8
+    speaker.play(pcm, 24000)
+    output = bytearray(len(pcm))
+    before = time.monotonic()
+    speaker._callback(
+        output,
+        len(pcm) // 2,
+        SimpleNamespace(currentTime=10.0, outputBufferDacTime=10.025),
+        SimpleNamespace(output_underflow=True, output_overflow=False),
+    )
+    after = time.monotonic()
+
+    snapshot = speaker.playback_snapshot()
+    assert bytes(output) == pcm
+    assert snapshot.first_playback_at is not None
+    assert before + 0.015 <= snapshot.first_playback_at <= after + 0.100
+    assert snapshot.output_callbacks_with_audio == 1
+    assert snapshot.output_underflows == 1
+
+    speaker.reset()
+    reset_snapshot = speaker.playback_snapshot()
+    assert reset_snapshot.first_playback_at is None
+    assert reset_snapshot.output_callbacks_with_audio == 0
+    assert reset_snapshot.output_underflows == 0
+    speaker.close()
+
+
+def test_idle_underflow_does_not_claim_audio_was_played(monkeypatch):
+    speaker = make_speaker(monkeypatch)
+    output = bytearray(16)
+    speaker._callback(
+        output,
+        8,
+        SimpleNamespace(currentTime=1.0, outputBufferDacTime=1.025),
+        SimpleNamespace(output_underflow=True, output_overflow=False),
+    )
+    snapshot = speaker.playback_snapshot()
+    assert snapshot.first_playback_at is None
+    assert snapshot.output_callbacks_with_audio == 0
+    assert snapshot.output_underflows == 0
+    speaker.close()
+
+
+
+def test_reset_serializes_with_inflight_playback_callback(monkeypatch):
+    speaker = make_speaker(monkeypatch)
+    pcm = struct.pack("=h", 4096) * 8
+    speaker.play(pcm, 24000)
+    entered = threading.Event()
+    release = threading.Event()
+    reset_done = threading.Event()
+    original_record = speaker._playback.record_callback
+
+    def blocked_record(**kwargs):
+        entered.set()
+        assert release.wait(2.0)
+        return original_record(**kwargs)
+
+    monkeypatch.setattr(speaker._playback, "record_callback", blocked_record)
+
+    output = bytearray(len(pcm))
+
+    def emit_audio():
+        speaker._callback(
+            output,
+            len(pcm) // 2,
+            SimpleNamespace(currentTime=2.0, outputBufferDacTime=2.025),
+            SimpleNamespace(output_underflow=False, output_overflow=False),
+        )
+
+    callback_thread = threading.Thread(target=emit_audio, daemon=True)
+    callback_thread.start()
+    assert entered.wait(1.0), "callback did not enter playback accounting"
+
+    def reset_reply():
+        speaker.reset()
+        reset_done.set()
+
+    reset_thread = threading.Thread(target=reset_reply, daemon=True)
+    reset_thread.start()
+    time.sleep(0.02)
+    assert not reset_done.is_set(), "reset must serialize behind the in-flight callback"
+
+    release.set()
+    callback_thread.join(1.0)
+    reset_thread.join(1.0)
+    assert not callback_thread.is_alive()
+    assert not reset_thread.is_alive()
+    assert bytes(output) == pcm
+    assert reset_done.is_set()
+    snapshot = speaker.playback_snapshot()
+    assert snapshot.first_playback_at is None
+    assert snapshot.output_callbacks_with_audio == 0
+    assert snapshot.output_underflows == 0
+    speaker.close()

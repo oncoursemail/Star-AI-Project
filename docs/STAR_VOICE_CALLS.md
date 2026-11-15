@@ -826,3 +826,45 @@ The host now:
 This is a bounded-ingress hardening change. Speaker IDs remain session-scoped pseudonyms,
 not real-world identities. The behavior is covered with a synthetic-clock regression test
 that proves ID churn cannot erase an active speaker's limit and that expired slots recover.
+
+## 16. Asynchronous speaker level metering (2026-11-14)
+
+The physical `SoundSpeaker` keeps PCM delivery separate from the output-level meter used by the echo/floor gate.
+
+The PortAudio callback copies the queued PCM into the output buffer and fills any underrun remainder with silence. It then submits a bounded, best-effort meter sample to a worker. The worker computes PCM16 RMS and updates a short level history. NumPy conversion and RMS reduction do not run inside the PortAudio callback.
+
+The meter queue is intentionally lossy; speaker PCM is not. If meter work is pending, dropped, or fails, `level()` returns a conservative non-silent value for the echo window rather than treating unknown telemetry as silence. This may briefly delay a new response, but it must not cause STAR to talk over audio that may still be playing.
+
+The worker is stopped during `SoundSpeaker.close()` and drains the bounded queue before exiting. Tests use a fake PortAudio stream and synthetic PCM; they do not open physical devices.
+
+This reduces callback work but does not make the Python callback hard real-time safe: the existing PCM buffer lock and bytes copy remain. Measure callback duration and actual PortAudio underflows on Windows before claiming a latency or stability improvement.
+
+
+## 17. DAC-time playback evidence (2026-11-14)
+
+The physical SoundSpeaker now exposes a bounded, per-reply PlaybackSnapshot alongside
+its existing queue-depth and PortAudio status diagnostics.
+
+- The output callback maps outputBufferDacTime to the host monotonic clock using
+  currentTime; missing, invalid, reversed, or implausibly distant driver timestamps
+  fall back to callback-invocation time.
+- The snapshot records the first callback that emitted non-empty queued PCM, the count
+  of callbacks that emitted audio, and output-underflow flags observed on callbacks
+  that actually emitted audio.
+- SoundSpeaker.reset() starts a new playback-evidence window. Callback accounting,
+  reset, and snapshots serialize under the speaker lock so one reply's evidence cannot
+  leak into the next. playback_snapshot() exposes the immutable snapshot; aggregate
+  diagnostics include the same counters.
+- The existing 16-frame freshness-first microphone queue and bounded asynchronous
+  speaker-level worker remain intact. Playback telemetry does not change PCM bytes,
+  queue policy, model routing, or audio-device selection.
+
+This is PortAudio DAC-time evidence, not proof of acoustic arrival at a local
+speaker, OBS capture, encoder output, or remote viewer playback. The callback still
+uses the existing PCM buffer lock and a small telemetry lock; this is a soft-real-time
+measurement improvement, not a hard-real-time guarantee. Measure callback p95/p99,
+device underflows, OBS render/encode lag, and loopback-audible latency on the actual
+Windows host before tuning lip-sync or claiming a streaming latency improvement.
+
+Hardware-free tests use synthetic callback time information. No microphone, speaker,
+OBS, VTube Studio, or live-stream device is opened by these tests.
