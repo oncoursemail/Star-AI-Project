@@ -155,7 +155,11 @@ class MemoryActionEvalTests(unittest.TestCase):
         manifest = build_manifest()
         receipts = list(receipts_for(manifest))
         original = next(item for item in receipts if item.arm == "memory_off")
-        bad = replace(original, memory_tokens_read=1, signature="")
+        case = next(item for item in manifest.cases if item.case_id == original.case_id)
+        bad = replace(
+            original, retrieved_memory_ids=case.available_memory_ids[:1],
+            memory_tokens_read=1, retrieval_ms=1, signature="",
+        )
         receipts[receipts.index(original)] = replace(bad, signature=sign_receipt(bad, KEY))
         with self.assertRaises(PermissionError):
             self.evaluate(manifest, receipts)
