@@ -105,7 +105,7 @@ Public types:
 
 ### Invariants
 
-1. **Explicit opt-in:** starting a session requires both owner approval and separate audience-memory approval.
+1. **Explicit opt-in:** starting a session requires both owner approval and separate audience-memory approval. Retrieval additionally requires a distinct broadcast approval and a host-confirmed audience-hearing state.
 2. **Host authenticity:** event payloads use domain-separated HMAC receipts. The host key must be supplied at runtime and is not stored in the repository.
 3. **Honest evidence semantics:** an HMAC authenticates the adapter that submitted an event; it does not prove the adapter's observation was true.
 4. **No raw media:** no PCM, video frames, transcripts, provider message IDs, viewer handles, or speaker identities are represented.
@@ -138,7 +138,7 @@ The new memory module is **not yet wired into** `StreamContextHost` or `StarStag
 
 New file: `tests/test_stream_long_horizon_memory.py`
 
-23 offline tests cover:
+24 offline tests cover:
 - dual approval;
 - HMAC validation;
 - unstarted sessions;
@@ -160,7 +160,7 @@ New file: `tests/test_stream_long_horizon_memory.py`
 - backward clock rejection;
 - bounded packets and content-free metrics.
 
-The isolated Python 3.13 harness ran **23 tests successfully** before the GitHub commit. Exact-head repository CI remains required.
+The isolated Python 3.13 harness ran **24 tests successfully** before the GitHub commit. Exact-head repository CI remains required.
 
 ## Run 49 integration plan
 
