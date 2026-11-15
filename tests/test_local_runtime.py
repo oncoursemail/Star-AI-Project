@@ -15,6 +15,9 @@ def test_local_runtime_args(tmp_path):
     assert '--host' in args and '127.0.0.1' in args
     assert args[args.index('-ngl')+1]=='20'
     assert args.count('--jinja')==1
+    assert '--no-cache-idle-slots' in args
+    assert args[args.index('--cache-ram')+1] == '0'
+    assert '--no-cache-prompt' not in args
 
 
 def test_local_runtime_refuses_nonserver_exe(tmp_path):
@@ -248,7 +251,22 @@ def test_a_vision_projector_must_be_a_gguf_file(tmp_path, engine):
     projector = tmp_path / "mmproj.gguf"
     projector.write_bytes(b"x")
     args = Runtime.arguments(*engine, projector=projector)
-    assert args[-2:] == ["--mmproj", str(projector.resolve())]
+    assert args[args.index("--mmproj")+1] == str(projector.resolve())
+
+
+def test_both_server_modes_disable_cross_slot_ram_cache_but_keep_slot_cache(tmp_path, engine):
+    exe, model = engine
+    models = tmp_path / "models"
+    models.mkdir()
+    (models / "small.gguf").write_bytes(b"a" * 100_100)
+    commands = [
+        Runtime.arguments(exe, model),
+        Runtime.router_arguments(exe, models),
+    ]
+    for args in commands:
+        assert args.count("--no-cache-idle-slots") == 1
+        assert args[args.index("--cache-ram") + 1] == "0"
+        assert "--no-cache-prompt" not in args
 
 
 def test_router_serves_one_resident_model_from_the_folder(tmp_path, engine, fake_popen):
@@ -261,6 +279,7 @@ def test_router_serves_one_resident_model_from_the_folder(tmp_path, engine, fake
     argv = fake_popen.started[0].argv
     assert argv[argv.index("--models-max") + 1] == "1" and argv[argv.index("-np") + 1] == "1"
     assert argv[argv.index("--host") + 1] == "127.0.0.1" and argv[argv.index("--ctx-size") + 1] == "8192"
+    assert "--no-cache-idle-slots" in argv and argv[argv.index("--cache-ram") + 1] == "0"
     assert runtime.router_running() and runtime.mode == "router"
     with pytest.raises(RuntimeError, match="Stop the current"):
         runtime.start_router(exe, models, tmp_path / "router.log")
