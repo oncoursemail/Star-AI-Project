@@ -1118,5 +1118,33 @@
     "url": "https://doi.org/10.1177/10949968261471154",
     "kind_and_usage": "2026 experimental study of the interaction between responsiveness and response naturalness in virtual livestreaming",
     "audit": "Publisher abstract checked 2026-11-15; e-commerce livestream context, treated as a product-design hypothesis rather than direct Twitch/game-stream evidence"
+  },
+  {
+    "id": "R165",
+    "title": "Memento-Skills: Let Agents Design Agents",
+    "url": "https://arxiv.org/abs/2603.18743",
+    "kind_and_usage": "Paper and official implementation: Read-Execute-Reflect-Write skill memory, task-aware skill routing, candidate repair, evaluation, atomic deployment, audit and rollback",
+    "audit": "arXiv paper and Memento-Teams/Memento-Skills README and evolution/skill-creator sources checked 2026-11-15; GAIA/HLE gains are paper-specific, not STAR results; Apache-2.0 and third-party notices require review before code reuse; no code or data imported"
+  },
+  {
+    "id": "R166",
+    "title": "Lumi_Nox open-core multi-character VTuber stage orchestration",
+    "url": "https://github.com/MIO-456/Lumi_Nox",
+    "kind_and_usage": "Architecture and source reference: event bus, global state machine, speaker scheduler, one-at-a-time speech-output arbiter, character history mirroring, and game-specific adapters",
+    "audit": "Official repository README, architecture, scheduler, arbiter, state-machine and game integration docs inspected 2026-11-15; public host explicitly does not wire all realtime ASR, memory, game modules, OBS or production broadcast; project self-description is not independent STAR acceptance; no code imported"
+  },
+  {
+    "id": "R167",
+    "title": "llama.cpp official SPEED-Bench server client",
+    "url": "https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench",
+    "kind_and_usage": "Official llama-server benchmark client for prompt/decode throughput, client latency, speculative acceptance, workload categories and matched baseline/candidate runs",
+    "audit": "Official llama.cpp SPEED-Bench README checked 2026-11-15; client concurrency should match server parallel slot count and baseline/candidate sample configuration must be identical; no STAR hardware run performed"
+  },
+  {
+    "id": "R168",
+    "title": "NVIDIA AIPerf LLM inference metrics reference",
+    "url": "https://docs.nvidia.com/aiperf/reference/ai-perf-metrics-reference",
+    "kind_and_usage": "Official metric definitions for TTFT, ITL/TPOT, end-to-end request latency and percentile-based streaming inference reporting",
+    "audit": "NVIDIA AIPerf documentation checked 2026-11-15; tool definitions differ, so align empty-chunk handling and token timing semantics; no AIPerf run performed"
   }
 ]
