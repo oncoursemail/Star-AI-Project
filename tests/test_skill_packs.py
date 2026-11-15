@@ -370,7 +370,7 @@ def test_structured_skill_contract_guidance_is_off_by_default_and_opt_in(monkeyp
     assert skill_packs.contracts_enabled() is False
     plain = skill_packs.render([pack])
     assert skill_packs.CONTRACT_BLOCK_HEADING not in plain
-    assert plain == pack.body + "\\n"
+    assert plain == pack.body + "\n"
 
     # The structured contract is read only for the already-selected pack and only
     # when explicitly enabled; it never enters the system message.
