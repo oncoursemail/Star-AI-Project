@@ -233,7 +233,9 @@ def evaluate_turn_policy(
     Missed final turns are counted separately and assigned the observed horizon
     as a right-censored latency, so a system cannot look fast by failing to
     answer. False cutoffs are the fraction of HOLD spans that trigger an action
-    before the human resumes.
+    before the human resumes. With allow_censored_turns enabled, turns containing
+    only HOLD spans contribute to that denominator but not to final-turn misses
+    or endpointing latency; at least one complete turn is still required.
     """
     rows = _validate_spans(spans, allow_censored_turns=allow_censored_turns)
     if not isinstance(policy, TurnPolicy):
