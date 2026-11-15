@@ -268,7 +268,6 @@ class MemoryActionEvalTests(unittest.TestCase):
 
     def test_campaign_requires_dependent_and_independent_cases_per_session(self):
         manifest = build_manifest()
-        first = manifest.cases[0]
         cases = tuple(case for case in manifest.cases if case.case_id != "independent-00")
         with self.assertRaises(ValueError):
             MemoryActionManifest(
