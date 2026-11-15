@@ -45,7 +45,6 @@ def test_guide_is_short_and_carries_scope_licence_rights_and_fallback(tmp_path, 
     assert not re.search(r"https?://\S*@|\b(?:api[_-]?key|password|token)\s*[:=]", lowered)
 
 
-def test_guides_are_not_routed_or_enabled_before_a_sealed_experiment():
-    assert set(NAMES).isdisjoint(skill_packs.TRIGGERS)
+def test_guides_are_not_enabled_before_a_sealed_experiment():
     assert set(NAMES).isdisjoint(skill_packs.DEFAULT_ENABLED)
-    assert set(NAMES).isdisjoint({pack.name for pack in skill_packs.available()})
+    assert set(NAMES).isdisjoint(skill_packs.enabled_names({}))

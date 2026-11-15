@@ -47,8 +47,12 @@ def candidates(prompt: str, allowed) -> list[Pack]:
     if engines:
         # A named engine outranks Roblox packs, as in the keyword router.
         return [p for p in skill_packs.available() if p.name in engines]
+    science = bool(skill_packs.SCIENCE_CONTEXT.search(prompt))
     return [p for p in skill_packs.available() if p.name in allowed and p.name not in ENGINE_CONTEXTS
-            and ((p.name in GODOT_PACKS and godot and not roblox) or (p.name not in GODOT_PACKS and roblox and not godot))]
+            and ((p.name in skill_packs.SCIENCE_TOPICS and science)
+                 or (p.name not in skill_packs.SCIENCE_TOPICS
+                     and ((p.name in GODOT_PACKS and godot and not roblox)
+                          or (p.name not in GODOT_PACKS and roblox and not godot))))]
 
 
 def _cosine(a, b) -> float:

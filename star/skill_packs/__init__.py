@@ -56,6 +56,36 @@ _GODOT_CONTEXT = re.compile(r"\b(?:godot(?:\s*4)?|gdscript|PackedScene|Character
 GODOT_PACKS = frozenset(("godot-scenes-and-nodes", "godot-gdscript-typing-and-signals",
                          "godot-physics-and-input", "godot-ui-and-themes"))
 
+# Scientific method guides (sci-*): untrusted reference text, off by default until a sealed held-out experiment
+# shows a net improvement. The prompt must read as a scientific-method question and name the guide's topic.
+SCIENCE_CONTEXT = re.compile(
+    r"\b(?:experiments?|hypothes[ie]s|control group|evidence|studies|study|sources?|claims?|reproducib\w*|replicat\w*|"
+    r"statistic\w*|signific\w*|confidence|benchmark\w*|held-?out|usability|participants?|uncertain\w*|estimates?)\b",
+    re.IGNORECASE)
+SCIENCE_TOPICS: dict[str, re.Pattern] = {
+    "sci-experiment-design": re.compile(
+        r"\b(?:design an? experiment|experiment design|experimental design|hypothes[ie]s|control group|"
+        r"a/b test\w*|ablation|confound\w*|randomi[sz]\w*)\b", re.IGNORECASE),
+    "sci-source-grading": re.compile(
+        r"\b(?:grade (?:the )?sources?|source grading|independent sources?|primary sources?|secondary sources?|"
+        r"source reliability|provenance|corroborat\w*|citations?)\b", re.IGNORECASE),
+    "sci-reproducibility": re.compile(
+        r"\b(?:reproducib\w*|replicab\w*|replicat\w*|random seed|fixed seed|pinned versions?|lock ?file)\b",
+        re.IGNORECASE),
+    "sci-statistical-confidence": re.compile(
+        r"\b(?:statistical\w*|significan\w*|confidence intervals?|p-?values?|effect sizes?|sample sizes?|"
+        r"error bars?|bootstrap\w*|power analysis)\b", re.IGNORECASE),
+    "sci-benchmarking": re.compile(
+        r"\b(?:benchmark\w*|held-?out|holdout|baselines?|latency|throughput|token overhead|leaderboard)\b",
+        re.IGNORECASE),
+    "sci-ux-study": re.compile(
+        r"\b(?:usability|user study|ux (?:study|research|test\w*)|participants?|task success|think-?aloud|"
+        r"user interviews?)\b", re.IGNORECASE),
+    "sci-uncertainty": re.compile(
+        r"\b(?:uncertain\w*|unknowns?|margin of error|error range|credible interval|how confident)\b",
+        re.IGNORECASE),
+}
+
 # ... and name the pack's topic.
 TRIGGERS: dict[str, re.Pattern] = {
     "godot-scenes-and-nodes": re.compile(r"\b(?:PackedScene|instantiate|scene tree|node tree|add_child|owner|@onready|scenes|nodes)\b", re.IGNORECASE),
@@ -182,6 +212,7 @@ TRIGGERS: dict[str, re.Pattern] = {
         r"UV unwrap\w*|modelling|modeling)\b", re.IGNORECASE),
     # Other-engine packs (star/skill_packs/engines.py): opt-in, each chosen only when the prompt names its engine.
     **ENGINE_TOPICS,
+    **SCIENCE_TOPICS,
     # Gameplay and platform recipes with typed (--!strict) examples. Default OFF until the evaluation gate passes.
     "roblox-combat-hitboxes": re.compile(
         r"\b(?:hit ?box(?:es)?|hitscan|hit detection|hit validation|melee|swords?|guns?|weapons?|damage|TakeDamage|"
@@ -316,7 +347,8 @@ def select(prompt, *, enabled=None, limit: int = MAX_PACKS_PER_TURN, home=None) 
     godot_context = bool(_GODOT_CONTEXT.search(prompt))
     # Other-engine packs: the prompt must name that engine (ENGINE_CONTEXTS); naming it is enough.
     engines = {name for name, context in ENGINE_CONTEXTS.items() if context.search(prompt)}
-    if not roblox_context and not godot_context and not engines:
+    science_context = bool(SCIENCE_CONTEXT.search(prompt))
+    if not roblox_context and not godot_context and not engines and not science_context:
         return []
     allowed = enabled_names(home=home) if enabled is None else frozenset(enabled)
     if not allowed:
@@ -330,12 +362,19 @@ def select(prompt, *, enabled=None, limit: int = MAX_PACKS_PER_TURN, home=None) 
                         {m.group(0).lower() for m in TRIGGERS[pack.name].finditer(prompt)})
                 # A named engine outranks Roblox packs: "port my RemoteEvent to Bevy" wants the Bevy pack.
                 scored.append((0, -len(hits), order, pack))
-        elif pack.name in allowed and ((pack.name in GODOT_PACKS and godot_context and not roblox_context) or
+        elif pack.name in allowed and pack.name not in SCIENCE_TOPICS and ((pack.name in GODOT_PACKS and godot_context and not roblox_context) or
                                       (pack.name not in GODOT_PACKS and roblox_context and not godot_context)):
             hits = {m.group(0).lower() for m in TRIGGERS[pack.name].finditer(prompt)}
             # One generic word ("UI", "Tool", "validate") is not enough to spend the reader's time.
             if len(hits) >= 2 or any(len(h) > 6 for h in hits):
                 scored.append((1, -len(hits), order, pack))
+    if science_context:
+        # Scientific guides rank after every Roblox/engine pack, inside the same one-pack-per-turn budget.
+        for order, pack in enumerate(available()):
+            if pack.name in SCIENCE_TOPICS and pack.name in allowed:
+                hits = {m.group(0).lower() for m in TRIGGERS[pack.name].finditer(prompt)}
+                if hits:
+                    scored.append((2, -len(hits), order, pack))
     return [item[-1] for item in sorted(scored, key=lambda item: item[:3])[:max(0, limit)]]
 
 
