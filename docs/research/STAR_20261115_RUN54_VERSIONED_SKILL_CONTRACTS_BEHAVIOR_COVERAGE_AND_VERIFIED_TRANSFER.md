@@ -191,3 +191,131 @@ evaluate_skill_coverage() requires the exact constraint roster, rejects duplicat
 - OpenGameEval: https://arxiv.org/abs/2610.02563
 - OpenGameEval code: https://github.com/Roblox/open-game-eval
 - Agent Skills specification: https://github.com/agentskills/agentskills
+
+
+## Run 55 research addendum — lifelong skill utility, game completion, and capability transfer
+
+**Research date:** 2026-11-15. This addendum extends the original contract design; it does not claim that the external benchmarks have been run against STAR.
+
+### 1. Skill usage is not skill value
+
+**SkillFlow** evaluates lifelong skill discovery and evolution over 166 tasks in 20 task families. Its reported results show why STAR must not use skill-selection frequency as a success metric: one evaluated system gained 8.43 percentage points from lifelong skill evolution, while another showed only 0.60 points despite using skills frequently; another configuration regressed against its no-skill baseline.
+
+STAR consequence:
+
+- Record skill-off and skill-on results on matched task families.
+- Track per-skill success uplift, latency, tokens, tool calls, repair rate, and regression rate.
+- Separate dependent transfer (where the prior skill should help) from independent tasks (where it should not).
+- Retain a skill only when its measured utility is positive on sealed holdouts and it does not cause unacceptable interference.
+- Measure discovery, patching, repair, reuse, and library coherence—not just whether a skill was selected.
+
+Source: https://arxiv.org/abs/2604.17308
+
+### 2. General game-playing needs both progress and task closure
+
+**GameWorld** covers 34 browser games and 170 tasks across runner, arcade, platformer, puzzle, and simulation genres. It uses serialized game state to calculate normalized progress and binary success rather than relying on screenshot heuristics or an LLM judge. Its published results show a material gap between progress and completion; the site also separates its real-time track from its paused track.
+
+STAR consequence:
+
+- Report normalized progress and completed-task success separately.
+- A run at 90% progress is not a win.
+- Record the exact objective, action budget, reset state, game build, and evaluator version.
+- Include timing-sensitive tasks, spatial navigation, recovery, and long-horizon coordination.
+- Keep paused and real-time evaluation results in separate cohorts.
+- Use an environment-provided state oracle only for evaluation; do not expose hidden evaluator state to the acting agent.
+
+Source: https://gameworld-bench.github.io/  
+Paper: https://arxiv.org/abs/2604.07429
+
+### 3. Game creation is a distinct capability from game playing
+
+**GameDevBench** evaluates 333 Godot game-development tasks spanning 2D graphics, 3D graphics, UI, and gameplay. Its public results emphasize that visual feedback matters and that the more visually demanding categories remain harder. It is a useful general creator benchmark, but it is not a substitute for Roblox Studio/Luau tests.
+
+STAR consequence:
+
+- Maintain separate Creator Brain scores for code correctness, visual correctness, scene structure, runtime behavior, and performance.
+- Use screenshots/video as observations, not as proof of hidden scene structure.
+- Verify the saved project and executable play result.
+- Pin the engine version, benchmark revision, task subset, and test harness.
+- Keep Roblox-specific acceptance in Studio/OpenGameEval and use GameDevBench only as a cross-engine comparison.
+
+Sources:
+- https://waynechi.com/gamedevbench/
+- https://github.com/waynchi/gamedevbench
+- https://arxiv.org/abs/2602.11103
+
+### 4. Externalized reflective learning is promising, but requires governance
+
+**Memento-Skills** studies a read/write reflective loop in which agents route to reusable skills, then revise or add skill artifacts from experience without changing foundation-model weights. This is a useful model for local-first adaptation, but it does not remove the need for evidence, review, or rollback.
+
+STAR consequence:
+
+- Keep the read path selective and token-budgeted.
+- Make the write path propose versioned candidate patches only.
+- Require reproducible tests, provenance, dependent transfer, independent interference checks, and rollback before promotion.
+- Keep model-generated skill text non-executable and separate from runtime authorization.
+
+Source: https://arxiv.org/abs/2603.18743
+
+### 5. Streaming naturalness must be measured at pauses, not guessed from transcript text
+
+LiveKit's **EoT-Bench** provides aligned speech/context with pause-level annotations across 14 languages. It distinguishes mid-turn hesitation from a true end of turn, which is directly relevant to avoiding premature VTuber interruptions.
+
+STAR consequence:
+
+- Evaluate false cutoffs, missed final turns, p95 decision latency, and language-specific results.
+- Keep silence/hold decisions separate from speech-generation latency.
+- Do not use generated text as evidence that playback finished.
+- Preserve actual silence as an acceptable action.
+- Keep multiparty speaker identity session-scoped and avoid building persistent viewer profiles by default.
+
+Source: https://github.com/livekit/eot-bench
+
+### 6. Inference speed must be benchmarked at the server's real concurrency
+
+The upstream **llama.cpp SPEED-Bench** client evaluates an already-running server and reports category-level throughput, latency, and speculative-draft acceptance. Its documentation recommends matching client concurrency to the server's configured parallel slots.
+
+STAR consequence:
+
+- Compare identical model weights, quantization, prompt, context, generation settings, and host conditions.
+- Match concurrency to actual server slots; do not inflate it to manufacture throughput.
+- Report first-content latency, TTFT, decode/inter-token latency, throughput, acceptance, and memory pressure separately.
+- Repeat under gaming + OBS + voice load.
+- Reject an optimization if task quality, audio continuity, or game frame-time tails regress—even if tokens/second rises.
+
+Source: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+
+### 7. Unified capability scorecard for STAR
+
+Do not collapse STAR into one self-reported “intelligence” number. Maintain a versioned scorecard with independent evidence for:
+
+| Capability | Evidence to require |
+|---|---|
+| General knowledge | Source-grounded accuracy, freshness, calibration, contradiction handling |
+| Research | Claim-level provenance, reproducibility, uncertainty, source diversity |
+| Game playing | Progress, completion, control latency, recovery, held-out transfer |
+| Game creation | Build validity, visual/structural checks, playable result, performance |
+| Memory | Correct retrieval, action grounding, temporal updates, forgetting, privacy |
+| Skill learning | Matched skill uplift, repair success, dependent transfer, independent interference |
+| Streaming | Turn timing, groundedness, spoken-task accuracy, audio continuity, viewer-event moderation |
+| Avatar | Audio-to-mouth sync, frame age, expression appropriateness, dropped/coalesced frames |
+| Inference | TTFT, first audible, inter-token latency, throughput, CPU/RAM/VRAM, cost per verified task |
+
+Each score must identify its benchmark version, task split, environment fingerprint, evidence source, and sample size. Missing evidence is inconclusive, not zero and not a pass.
+
+### 8. Integration map and next engineering order
+
+The repository already has focused draft work for causal gameplay probes (#1199), Roblox Creator evaluation (#1200), paired stream/model evaluation (#1166), spoken-task and long-form voice quality (#1165), end-of-turn evaluation (#1187), speculative decoding (#1208), and versioned skill contracts (#1209). Do not create parallel schedulers, memory stores, voice pipelines, or game controllers.
+
+Next, in order:
+
+1. Fix and pass exact-head CI for this contract PR.
+2. Add a trusted-host adapter that maps minimized, real action/observation/verification events to contract constraints.
+3. Connect skill contracts to the existing candidate-skill and promotion workflow only after independent review.
+4. Add SkillFlow-style matched skill-off/skill-on dependent-transfer and independent-interference cohorts.
+5. Add a GameWorld-compatible result adapter only if no existing branch already owns that schema.
+6. Run GameDevBench-style creator tasks alongside Roblox-specific Studio evaluations.
+7. Run the private VTuber rehearsal with EoT/MP-Bench-derived measures and real OBS/audio/avatar telemetry.
+8. Run paired inference and mixed-load tests before changing any model or scheduler defaults.
+
+**Implementation boundary:** this addendum is research and acceptance guidance. It does not enable skills, run games, change voice behavior, launch OBS, control VTube Studio, change inference defaults, or claim a hardware performance gain.
