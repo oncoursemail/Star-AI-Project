@@ -213,7 +213,11 @@ def _checked_cases(cases: Sequence[ProbeCase]) -> tuple[ProbeCase, ...]:
 def roster_digest(cases: Sequence[ProbeCase]) -> str:
     """Hash the exact matched-state roster before the experiment begins."""
     rows = _checked_cases(cases)
-    payload = sorted(asdict(case).items() for case in rows)
+    payload = sorted(
+        (case.pair_id, case.block_id, case.game_id, case.game_version,
+         case.objective_id, case.situation_id, case.start_state_sha256, case.stratum_id)
+        for case in rows
+    )
     return hashlib.sha256(_ROSTER_DOMAIN + _canonical(payload)).hexdigest()
 
 
