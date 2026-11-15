@@ -100,7 +100,7 @@ The built-in `star.skill_packs` renderer can append a selected pack's valid stru
 
 - The setting is off by default; an unset, false, or unknown value leaves the rendered pack text unchanged.
 - Only the pack already selected for the current turn is inspected; catalog discovery does not parse every sidecar.
-- Contract JSON is included only when it is valid, identity-matched, and fits the 1,800-character contract budget and 6,500-character overall guidance budget.
+- Contract JSON is included only when it is valid, identity-matched, and fits the 2,600-character contract budget and 6,500-character overall guidance budget.
 - The contract remains in the user-turn guidance section, never the system message.
 - A missing, malformed, oversized, mismatched, symlinked, or otherwise invalid sidecar is omitted; the existing SKILL.md guidance remains available.
 - This is a prompt-guidance opt-in only. It does not create an execution receipt, evaluate host state, authorize a tool, or promote the skill.
