@@ -16,10 +16,9 @@ transport:
   password_storage: memory_only
   requests_allowlist:
     - GetVersion
-    - GetStreamStatus_start_and_end_bracket
+    - GetStreamStatus
     - GetStats
     - GetVideoSettings
-    - GetStreamStatus_end_state_confirmation
   write_requests: []
   media_capture: false
   stream_control: false
@@ -29,6 +28,7 @@ sampling:
   allowed_min_poll_interval_ms: [250, 5000]
   default_max_sample_skew_ms: 500
   state_bracket_required: true
+  get_stream_status_calls_per_poll: 2
   allowed_max_sample_skew_ms: [50, 2000]
   default_snapshot_max_age_ms: 1500
   allowed_snapshot_max_age_ms: [100, 10000]
