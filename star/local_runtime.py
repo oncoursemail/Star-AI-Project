@@ -11,6 +11,13 @@ import threading
 from .model_fleet import inspect_models_dir
 
 
+# Upstream llama.cpp reports show stale prompt/KV state can cross conversation
+# boundaries through the shared RAM cache. Keep same-slot prefix reuse, but
+# disable the cross-slot pool and idle-slot snapshots until a fixed build passes
+# STAR's sequential + concurrent canary suite.
+_PROMPT_CACHE_ISOLATION_FLAGS = ("--no-cache-idle-slots", "--cache-ram", "0")
+
+
 class Runtime:
     def __init__(self):
         self.process: subprocess.Popen | None = None
@@ -69,7 +76,8 @@ class Runtime:
                 or not 512<=context<=32768 or type(gpu_layers) is not int or not 0<=gpu_layers<=1000):
             raise ValueError('Invalid port, context length or GPU layers')
         args = [str(executable), '-m', str(model), '--host', '127.0.0.1',
-                '--port', str(port), '--ctx-size', str(context), '-ngl', str(gpu_layers), '--jinja']
+                '--port', str(port), '--ctx-size', str(context), '-ngl', str(gpu_layers), '--jinja',
+                *_PROMPT_CACHE_ISOLATION_FLAGS]
         if projector is not None:
             proj = projector.expanduser().resolve(strict=True)
             if proj.suffix.lower() != '.gguf':
@@ -100,7 +108,8 @@ class Runtime:
         return [str(exe), '--models-dir', str(inventory.directory),
                 '--models-max', '1', '--host', '127.0.0.1',
                 '--port', str(port), '--ctx-size', str(context),
-                '-ngl', str(gpu_layers), '-np', '1', '--jinja'] + Runtime._speculative_flags(
+                '-ngl', str(gpu_layers), '-np', '1', '--jinja',
+                *_PROMPT_CACHE_ISOLATION_FLAGS] + Runtime._speculative_flags(
                     speculative, max_draft_tokens)
 
     def start_router(self, executable: Path, models_dir: Path, log_path: Path,
