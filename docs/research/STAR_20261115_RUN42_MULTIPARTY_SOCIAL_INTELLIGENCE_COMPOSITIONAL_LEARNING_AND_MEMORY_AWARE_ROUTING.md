@@ -113,7 +113,7 @@ The evaluator accepts:
 - An opaque evidence digest and timestamp.
 - A host-key HMAC receipt for each outcome.
 
-It rejects duplicate/missing cases, invalid signatures, stale/future evidence, invalid action/label combinations, unbounded values, and roster changes.
+It rejects duplicate/missing cases, invalid signatures, stale/future evidence, invalid action/label combinations, unbounded values, and roster changes. Matched-pair IDs must contain exactly one explicit and one implicit version of the same request in the same split, and scenario hashes cannot leak across development and holdout.
 
 It never accepts or stores transcripts, audio, raw speaker names, provider user IDs, chat text, or cross-platform identity links.
 
