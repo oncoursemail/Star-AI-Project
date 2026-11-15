@@ -288,6 +288,31 @@ SOURCES = (
            "https://docs.nvidia.com/aiperf/reference/ai-perf-metrics-reference", "inference",
            "Reference definitions for TTFT, ITL/TPOT, end-to-end latency and percentile reporting for streaming inference",
            warning="Metric definitions and empty-chunk handling differ between tools. Align timestamps, token semantics and streaming behavior before comparing; this is not a STAR benchmark result."),
+
+    Source("sentinelbench", "SentinelBench long-running monitoring benchmark",
+           "https://github.com/microsoft/sentinel_environments", "benchmarks",
+           "100 tasks across 10 evolving synthetic web environments; measures task completion, reaction time and resource use for passive, active and no-op monitoring",
+           warning="Synthetic benchmark only. Use to evaluate wait/notice/act behavior and false-positive no-op actions; do not install its environment into the live desktop or create an independent scheduler."),
+    Source("full-duplex-v3", "Full-Duplex-Bench v3 tool-use and speech benchmark",
+           "https://arxiv.org/abs/2604.04847", "benchmarks",
+           "100 human-recorded requests, 79 scenarios, 12 speakers and chained mock-API tool calls; evaluates Pass@1, tool-call F1, latency and turn-taking",
+           warning="Published results are benchmark-specific and do not measure STAR. Use fixed replay fixtures and report task accuracy, latency and turn-taking separately."),
+    Source("interactionbench", "InteractionBench realtime voice interaction evaluation",
+           "https://avera-labs.github.io/InteractionBench/", "benchmarks",
+           "13 scenarios and 221 items across seven systems; separates conversational timing, spoken-task accuracy, paralinguistic control and long-conversation grounding",
+           warning="Benchmark protocol and graders are versioned; retain its four dimensions separately and do not collapse them into a single naturalness score or claim STAR results."),
+    Source("llama-server-docs", "llama.cpp official server and inference controls",
+           "https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md", "inference",
+           "Official llama-server documentation for continuous batching, parallel slots, prompt caching, cache reuse, metrics and speculative decoding",
+           warning="Flags and backend support are revision-specific. Pin the exact llama.cpp commit; do not raise slot count or enable KV quantization/speculation without paired quality, latency and memory tests on the target 8 GB GPU."),
+    Source("vtubestudio-api", "VTube Studio public plugin API",
+           "https://github.com/DenchiSoft/VTubeStudio", "vtuber",
+           "Authenticated local WebSocket API for Live2D parameter injection, hotkeys, model/item events and plugin integrations",
+           warning="The user must enable Plugin API access and approve authentication. Injected parameters must be refreshed at least once per second; use the existing playback-clock/latest-wins path and never expose the local API externally."),
+    Source("roblox-agentic-workflow", "Roblox Studio agentic plan-build-test workflow",
+           "https://about.roblox.com/newsroom/2026/04/roblox-studio-going-agentic", "engines",
+           "Official 2026 workflow direction: editable task manifests, parallel plan execution, procedural mesh/model tools and playtesting against the original plan",
+           warning="Roblox platform announcements do not grant STAR access to every beta feature. Prefer the built-in Studio MCP and StudioTestService only after owner opt-in; no automatic publishing or permission escalation."),
 )
 
 
@@ -297,7 +322,7 @@ def catalog(query: str = "", category: str = "", limit: int = 80) -> dict:
     if len(query) > 120 or len(category) > 24:
         raise ValueError("Narrow the search text or category.")
     if type(limit) is not int or not 1 <= limit <= 80:
-        raise ValueError("Results limit must be between 1 and 70.")
+        raise ValueError("Results limit must be between 1 and 80.")
     category = category.strip().lower()
     categories = sorted({s.category for s in SOURCES})
     if category and category not in categories:
