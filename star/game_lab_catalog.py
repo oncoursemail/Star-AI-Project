@@ -222,7 +222,7 @@ SOURCES = (
 )
 
 
-def catalog(query: str = "", category: str = "", limit: int = 50) -> dict:
+def catalog(query: str = "", category: str = "", limit: int = 60) -> dict:
     if not isinstance(query, str) or not isinstance(category, str):
         raise ValueError("Search and category must be text.")
     if len(query) > 120 or len(category) > 24:
