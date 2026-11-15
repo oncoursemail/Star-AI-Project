@@ -156,3 +156,49 @@ def test_meter_failure_is_conservative_and_close_is_idempotent(monkeypatch):
         assert not worker.is_alive()
     finally:
         speaker.close()
+
+
+
+def test_speaker_playback_snapshot_uses_dac_time_and_resets_per_reply(monkeypatch):
+    speaker = make_speaker(monkeypatch)
+    pcm = struct.pack("=h", 8192) * 8
+    speaker.play(pcm, 24000)
+    output = bytearray(len(pcm))
+    before = time.monotonic()
+    speaker._callback(
+        output,
+        len(pcm) // 2,
+        SimpleNamespace(currentTime=10.0, outputBufferDacTime=10.025),
+        SimpleNamespace(output_underflow=True, output_overflow=False),
+    )
+    after = time.monotonic()
+
+    snapshot = speaker.playback_snapshot()
+    assert bytes(output) == pcm
+    assert snapshot.first_playback_at is not None
+    assert before + 0.015 <= snapshot.first_playback_at <= after + 0.100
+    assert snapshot.output_callbacks_with_audio == 1
+    assert snapshot.output_underflows == 1
+
+    speaker.reset()
+    reset_snapshot = speaker.playback_snapshot()
+    assert reset_snapshot.first_playback_at is None
+    assert reset_snapshot.output_callbacks_with_audio == 0
+    assert reset_snapshot.output_underflows == 0
+    speaker.close()
+
+
+def test_idle_underflow_does_not_claim_audio_was_played(monkeypatch):
+    speaker = make_speaker(monkeypatch)
+    output = bytearray(16)
+    speaker._callback(
+        output,
+        8,
+        SimpleNamespace(currentTime=1.0, outputBufferDacTime=1.025),
+        SimpleNamespace(output_underflow=True, output_overflow=False),
+    )
+    snapshot = speaker.playback_snapshot()
+    assert snapshot.first_playback_at is None
+    assert snapshot.output_callbacks_with_audio == 0
+    assert snapshot.output_underflows == 0
+    speaker.close()
