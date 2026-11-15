@@ -494,7 +494,7 @@
     "title": "AGENTCL: Rigorous Evaluation of Continual Learning in Language Agents",
     "url": "https://arxiv.org/abs/2606.02461",
     "kind_and_usage": "Research paper: controlled compositional task streams, transfer gains, memory interference, and negative transfer",
-    "audit": "abstract and methodology checked 2026-11-14"
+    "audit": "Full arXiv abstract and task-stream methodology checked 2026-11-15; STAR should use compositional streams with explicit reusable subtask edges and held-out compositions, and separately measure negative transfer and memory interference."
   },
   {
     "id": "R72",
@@ -599,14 +599,14 @@
     "title": "MP-Bench: Evaluating Voice Agents as a Multiparty Conversation Participant",
     "url": "https://arxiv.org/abs/2609.13076",
     "kind_and_usage": "Research benchmark: multiparty turn-taking, response appropriateness and comprehension",
-    "audit": "abstract and findings checked 2026-11-14"
+    "audit": "Full arXiv abstract checked 2026-11-15; EMNLP 2026 Findings acceptance verified; 12-agent evaluation reports at-or-below 22% multiparty comprehension for real-time agents and near-chance turn-taking; use as benchmark motivation, not a STAR score."
   },
   {
     "id": "R87",
     "title": "Duplex-MPE: Benchmarking Multi-Party Interaction in Full-Duplex Dialogue",
     "url": "https://arxiv.org/abs/2609.31948",
     "kind_and_usage": "Research benchmark: explicit/implicit addressing, answer accuracy, silence preservation and stopping after human resolution",
-    "audit": "abstract and benchmark design checked 2026-11-14"
+    "audit": "Full arXiv abstract and official benchmark summary checked 2026-11-15; 2,000 three-/four-speaker scenarios pair explicit and implicit addressing and score response initiation, answer accuracy, silence preservation and stopping after human resolution."
   },
   {
     "id": "R88",
@@ -1180,7 +1180,7 @@
     "title": "llama.cpp official server runtime and speculative decoding documentation",
     "url": "https://github.com/ggml-org/llama.cpp/tree/master/tools/server",
     "kind_and_usage": "Official llama-server reference for continuous batching, parallel slots, prompt caching, cache reuse, metrics, model routing and supported speculative-decoding methods",
-    "audit": "Official server README and speculative decoding documentation checked 2026-11-15; pin exact llama.cpp build and feature support; do not transfer CUDA/H100 or other-backend gains to STAR's Vulkan/8 GB target"
+    "audit": "Official llama.cpp server README checked 2026-11-15: router mode supports --models-max and --models-memory-margin for LRU unloading of idle models while preserving a per-device memory margin; serving models are not unloaded, host RAM is assumed unlimited, and multimodal projector memory is not included in estimates. Pin exact build and measure on STAR's target backend."
   },
   {
     "id": "R174",
@@ -1195,5 +1195,26 @@
     "url": "https://about.roblox.com/newsroom/2026/04/roblox-studio-going-agentic",
     "kind_and_usage": "Official Roblox 2026 direction for editable task manifests, parallel planning/building, procedural generation and playtesting agents that verify against the original plan",
     "audit": "Roblox newsroom article published 2026-04-15; beta feature availability is platform-controlled and does not imply STAR integration; use official Studio MCP and StudioTestService only with owner opt-in"
+  },
+  {
+    "id": "R176",
+    "title": "AgenticRAG-R1: Agentic Reinforcement Learning with Stack Memory for Multi-Step Reasoning, Retrieval and Memorizing",
+    "url": "https://aclanthology.org/2026.findings-emnlp.641/",
+    "kind_and_usage": "EMNLP 2026 Findings research: fine-grained reasoning/retrieval/memory actions, stack memory, hierarchical action-aware rewards and information-aware trajectory filtering for long-horizon agentic RAG",
+    "audit": "ACL Anthology abstract checked 2026-11-15; paper reports benchmark-specific improvements; anonymous code is not a reviewed production dependency. Adapt the action/evidence accounting as a research design, not as a drop-in runtime or claim of STAR intelligence gain."
+  },
+  {
+    "id": "R177",
+    "title": "AITuber OnAir modular TypeScript AI VTuber toolkit",
+    "url": "https://github.com/shinshin86/aituber-onair",
+    "kind_and_usage": "Open-source architecture reference for modular stream-ready AI VTubers with chat, speech, viewer reactions, memory and PNG/VRM/Live2D avatar adapters",
+    "audit": "Official README inspected 2026-11-15; use only as a provider/adapter modularity reference. STAR already has a Python/React runtime, room director and playback arbiter; do not import a second competing voice or stage authority without license, dependency and architecture review."
+  },
+  {
+    "id": "R178",
+    "title": "AgentIF: Benchmarking Instruction Following of Large Language Models in Agentic Scenarios",
+    "url": "https://agentif.github.io/",
+    "kind_and_usage": "Agentic instruction-following benchmark covering 50 real-world applications, long instructions and multiple simultaneous constraints; updated evaluation setting in 2026-10",
+    "audit": "Official benchmark site checked 2026-11-15; the updated reasoning/non-reasoning configuration and judge version must be pinned because scores across settings are not comparable. Use local synthetic acceptance manifests and independent verifiers; no STAR score claimed."
   }
 ]
