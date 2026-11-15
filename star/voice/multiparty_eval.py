@@ -81,7 +81,7 @@ def _nearest_rank(values: list[int], quantile: float) -> int | None:
 
 @dataclass(frozen=True)
 class RoomReplayCase:
-    """A preregistered content-free scenario label."""
+    """A preregistered content-free scenario label; participant_count excludes STAR."""
 
     case_id: str
     scenario_sha256: str
