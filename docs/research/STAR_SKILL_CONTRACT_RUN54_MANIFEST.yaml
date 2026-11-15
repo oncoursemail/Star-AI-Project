@@ -56,11 +56,21 @@ research_sources:
   - https://arxiv.org/abs/2609.13076
   - https://github.com/livekit/eot-bench
   - https://github.com/agentskills/agentskills
+  - https://github.com/xlang-ai/OSWorld-V2/releases/tag/osworld-v2.1
+  - https://arxiv.org/abs/2604.27776
+  - https://gameworld-project.github.io/
+  - https://arxiv.org/abs/2602.01313
+  - https://arxiv.org/abs/2609.23465
+  - https://docs.livekit.io/agents/logic/turns/tuning/
+  - https://github.com/ggml-org/llama.cpp/issues/30961
 files:
   - star/skill_contract.py
+  - star/agent_skills.py
   - tests/test_skill_contract.py
   - tests/test_skill_contract_examples.py
+  - tests/test_agent_skill_contracts.py
   - docs/skills/CONTRACT_FORMAT_V1.md
+  - docs/research/STAR_20261115_RUN56_SKILL_SIDECARS_GENERALIST_INTELLIGENCE_AND_VTUBER_RUNTIME.md
   - docs/research/STAR_20261115_RUN54_VERSIONED_SKILL_CONTRACTS_BEHAVIOR_COVERAGE_AND_VERIFIED_TRANSFER.md
   - examples/skills/roblox-open-door.contract.json
   - examples/skills/game-observe-before-act.contract.json
