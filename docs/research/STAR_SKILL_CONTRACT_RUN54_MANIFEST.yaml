@@ -1,0 +1,62 @@
+run_id: star-run54-20261115
+title: Versioned Skill Contracts, Behavior Coverage and Verified Transfer
+date: 2026-11-15
+repository: oncoursemail/Star-AI-Project
+base_branch: main
+branch: feat/skill-contract-coverage-20261115-run54
+status: draft
+schema:
+  contract_version: 1
+  receipt_version: 1
+  domains:
+    - general
+    - research
+    - desktop
+    - game
+    - roblox
+    - creator
+    - streaming
+limits:
+  max_steps: 32
+  max_conditions: 32
+  max_sources: 32
+  max_capabilities_per_step: 16
+  max_tool_calls: 64
+  max_elapsed_ms: 3600000
+  max_tokens: 100000
+  max_ram_mib: 1048576
+  max_retries: 5
+evaluation:
+  coverage_labels:
+    - pass
+    - fail
+    - not_observed
+  pass_fail_requires:
+    - independent_verifier
+    - sha256_evidence_digest
+  missing_constraint_policy: reject
+  duplicate_constraint_policy: reject
+  unobserved_counts_as_pass: false
+  automatic_promotion: false
+  owner_review_required: true
+trust:
+  executable_code_in_contract: false
+  permission_grants: false
+  tool_execution: false
+  runtime_integration: false
+  storage: none
+  network_access: false
+  generated_skill_auto_execution: false
+research_sources:
+  - https://arxiv.org/abs/2606.20659
+  - https://arxiv.org/abs/2606.02461
+  - https://arxiv.org/abs/2602.07755
+  - https://arxiv.org/abs/2305.16291
+  - https://arxiv.org/abs/2610.02563
+  - https://github.com/agentskills/agentskills
+files:
+  - star/skill_contract.py
+  - tests/test_skill_contract.py
+  - docs/skills/CONTRACT_FORMAT_V1.md
+  - docs/research/STAR_20261115_RUN54_VERSIONED_SKILL_CONTRACTS_BEHAVIOR_COVERAGE_AND_VERIFIED_TRANSFER.md
+  - examples/skills/roblox-open-door.contract.json
