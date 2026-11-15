@@ -384,3 +384,88 @@ model_router:
   multimodal_projector_memory_measured: false
   worker_epoch_fencing_tested: false
   prewarm_profile_revision: null
+
+
+# Run 43: multilingual causal endpointing. Endpointing latency is conversational
+# dead air, not model inference latency. No raw audio or transcript belongs here.
+end_of_turn_evaluation:
+  enabled: false
+  benchmark_id: "livekit/eot-bench-data"
+  benchmark_code_revision: null
+  dataset_revision: null
+  dataset_split: "validation"
+  language_filters: []
+  cohort_filters: []
+  min_silence_span_ms: 100
+  min_hold_span_duration_ms: 200
+  max_hold_span_duration_ms: 5000
+  inference_interval_ms: 100
+  transcript_lag_ms: 500
+  adapter_revision: null
+  policy_revision: null
+  allow_censored_turns: true
+  source_turn_count: null
+  retained_turn_count: null
+  censored_turn_count: null
+  retained_hold_span_count: null
+  retained_eot_span_count: null
+  excluded_hold_span_count: null
+  missing_score_span_count: null
+  false_cutoff_rate: null
+  missed_final_rate: null
+  endpointing_latency_ms_p50: null
+  endpointing_latency_ms_p95: null
+  silence_baseline_included: false
+  cohort_results_recorded: false
+  raw_audio_retained: false
+  transcript_retained: false
+
+# Run 43: topology-aware skill retrieval. Keep memory content and memory-policy
+# candidates separate; promotion remains governed by the existing skill pipeline.
+skill_topology_evaluation:
+  enabled: false
+  skill_graph_revision: null
+  candidate_topology_revision: null
+  baseline_retriever_revision: null
+  candidate_retriever_revision: null
+  task_manifest_sha256: null
+  holdout_manifest_sha256: null
+  required_skill_nodes: 0
+  retrieved_skill_nodes: 0
+  irrelevant_skill_nodes: 0
+  retrieval_recall_at_k: null
+  retrieval_mrr: null
+  prompt_tokens_p50: null
+  prompt_tokens_p95: null
+  retrieval_ms_p95: null
+  verified_task_success_delta: null
+  negative_transfer_rate: null
+  independent_verifier: false
+  holdout_sealed: false
+  auto_promotion: false
+  owner_approval_reference: null
+
+# Run 43: hybrid GUI/CLI/code workflows. Use disposable benchmark VMs and
+# synthetic accounts; never store raw screenshots or personal app content here.
+cross_app_evaluation:
+  enabled: false
+  benchmark_id: "WindowsWorld | WeaveBench | synthetic"
+  benchmark_revision: null
+  vm_image_digest: null
+  synthetic_accounts_only: true
+  workflow_manifest_sha256: null
+  verifier_revision: null
+  trajectory_digest_sha256: null
+  artifact_manifest_sha256: null
+  application_count: 0
+  workflow_count: 0
+  checkpoint_count: 0
+  gui_cli_handoff_count: 0
+  verified_workflow_success_rate: null
+  checkpoint_completion_rate: null
+  false_success_rate: null
+  artifact_provenance_verified: false
+  trajectory_reviewed: false
+  raw_screenshots_retained: false
+  personal_files_mounted: false
+  external_side_effects_enabled: false
