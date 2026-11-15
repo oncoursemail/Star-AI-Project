@@ -176,6 +176,25 @@ Sources:
 - Adaptive interruption handling: https://docs.livekit.io/agents/logic/turns/adaptive-interruption-handling/
 - STAR existing work: #1105, #1106, #1178, #1186, #1159.
 
+### Avatar control and believable motion
+
+VTube Studio's official API supports user-approved plugins and custom Live2D parameters. Plugin access is a real control grant: STAR must request the documented permission and respect denial/revocation. Custom parameters are injected through the API; a parameter should have one clear writer, and values sent by a plugin must be refreshed at least once per second to remain active. The API documentation also warns against repeatedly requesting the full parameter list at 60+ FPS.
+
+STAR implications:
+- Keep one explicit owner-approved VTube Studio plugin identity and local endpoint.
+- Register only the small set of custom parameters STAR's approved model actually needs.
+- Use one parameter writer per parameter; arbitrate face tracking and STAR-authored motion rather than allowing competing writers.
+- Drive mouth, cheek, head, shoulder and hair response from the same actual playback clock/PCM envelope as the audible speech.
+- Bind every frame to a playback epoch and audible cursor; drop stale frames, and flush the current epoch on interruption before returning to a neutral pose.
+- Use latest-wins coalescing for animation samples only. Never coalesce speech segments, game actions or durable events.
+- Keep idle motion subtle and low-frequency; do not invent random gestures or facial emotion unrelated to the current scene.
+- Treat custom parameter registration, API permission, connection readiness and model-loaded state as separate health signals.
+
+Sources:
+- VTube Studio API development page: https://github.com/DenchiSoft/VTubeStudio
+- Plugin permissions and authentication: https://github.com/DenchiSoft/VTubeStudio/wiki/Plugins
+- Existing STAR latest-wins frame pump: PR #1159.
+
 ## 6. Research: local inference speed and cache correctness
 
 The llama.cpp issue #30961 reports a specific failure mode with unified KV cache, RAM prompt cache and two or more slots: restoring a cached prompt before idle-slot cells are cleared can fail, dropping the cache entry and forcing a full prefill. This is an upstream issue report, not evidence that STAR's current one-slot router is affected.
