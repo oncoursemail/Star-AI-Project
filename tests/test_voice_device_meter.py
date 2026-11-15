@@ -202,3 +202,56 @@ def test_idle_underflow_does_not_claim_audio_was_played(monkeypatch):
     assert snapshot.output_callbacks_with_audio == 0
     assert snapshot.output_underflows == 0
     speaker.close()
+
+
+
+def test_reset_serializes_with_inflight_playback_callback(monkeypatch):
+    speaker = make_speaker(monkeypatch)
+    pcm = struct.pack("=h", 4096) * 8
+    speaker.play(pcm, 24000)
+    entered = threading.Event()
+    release = threading.Event()
+    reset_done = threading.Event()
+    original_record = speaker._playback.record_callback
+
+    def blocked_record(**kwargs):
+        entered.set()
+        assert release.wait(2.0)
+        return original_record(**kwargs)
+
+    monkeypatch.setattr(speaker._playback, "record_callback", blocked_record)
+
+    def emit_audio():
+        output = bytearray(len(pcm))
+        speaker._callback(
+            output,
+            len(pcm) // 2,
+            SimpleNamespace(currentTime=2.0, outputBufferDacTime=2.025),
+            SimpleNamespace(output_underflow=False, output_overflow=False),
+        )
+        assert bytes(output) == pcm
+
+    callback_thread = threading.Thread(target=emit_audio, daemon=True)
+    callback_thread.start()
+    assert entered.wait(1.0), "callback did not enter playback accounting"
+
+    def reset_reply():
+        speaker.reset()
+        reset_done.set()
+
+    reset_thread = threading.Thread(target=reset_reply, daemon=True)
+    reset_thread.start()
+    time.sleep(0.02)
+    assert not reset_done.is_set(), "reset must serialize behind the in-flight callback"
+
+    release.set()
+    callback_thread.join(1.0)
+    reset_thread.join(1.0)
+    assert not callback_thread.is_alive()
+    assert not reset_thread.is_alive()
+    assert reset_done.is_set()
+    snapshot = speaker.playback_snapshot()
+    assert snapshot.first_playback_at is None
+    assert snapshot.output_callbacks_with_audio == 0
+    assert snapshot.output_underflows == 0
+    speaker.close()
