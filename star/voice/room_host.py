@@ -29,7 +29,11 @@ def _finite(value: object) -> bool:
 
 @dataclass(frozen=True)
 class RoomHostConfig:
-    """Per-call source consent and conservative ingress limits."""
+    """Per-call source consent and conservative ingress limits.
+
+    ``max_speakers`` is a hard cap on tracked source/speaker rate windows. Active windows
+    are never evicted to admit a new opaque speaker ID; expired windows are reclaimed.
+    """
 
     allowed_sources: frozenset[CueSource]
     rate_window_seconds: float = 10.0
@@ -73,6 +77,7 @@ class RoomHostStats:
     rejected_empty: int = 0
     rejected_oversize: int = 0
     rejected_rate: int = 0
+    rejected_speaker_capacity: int = 0
     rejected_moderation: int = 0
     moderation_errors: int = 0
     dispatch_started: int = 0
@@ -130,6 +135,7 @@ class RoomStreamHost:
             "rejected_empty": 0,
             "rejected_oversize": 0,
             "rejected_rate": 0,
+            "rejected_speaker_capacity": 0,
             "rejected_moderation": 0,
             "moderation_errors": 0,
             "dispatch_started": 0,
@@ -154,6 +160,7 @@ class RoomStreamHost:
                 rejected_empty=self._counts["rejected_empty"],
                 rejected_oversize=self._counts["rejected_oversize"],
                 rejected_rate=self._counts["rejected_rate"],
+                rejected_speaker_capacity=self._counts["rejected_speaker_capacity"],
                 rejected_moderation=self._counts["rejected_moderation"],
                 moderation_errors=self._counts["moderation_errors"],
                 dispatch_started=self._counts["dispatch_started"],
@@ -189,6 +196,19 @@ class RoomStreamHost:
                 or len(cue.speaker_id) > 128
                 or not isinstance(cue.source, CueSource)
                 or not isinstance(cue.intent, CueIntent)
+                or (
+                    cue.intent is CueIntent.HUMAN_RESOLUTION
+                    and (
+                        not isinstance(cue.resolves_event_id, str)
+                        or not cue.resolves_event_id
+                        or len(cue.resolves_event_id) > 128
+                        or cue.resolves_event_id == cue.event_id
+                    )
+                )
+                or (
+                    cue.intent is not CueIntent.HUMAN_RESOLUTION
+                    and cue.resolves_event_id is not None
+                )
                 or type(cue.addressed_to_star) is not bool
                 or type(cue.final) is not bool
                 or type(cue.overlap_ms) is not int
@@ -228,9 +248,12 @@ class RoomStreamHost:
             if not _finite(now):
                 self._bump("rejected_rate")
                 return self._decision(RoomAction.WAIT, cue, "host_clock_unavailable")
-            if not self._admit_rate_locked(cue, float(now)):
+            rate_rejection = self._admit_rate_locked(cue, float(now))
+            if rate_rejection is not None:
                 self._bump("rejected_rate")
-                return self._decision(RoomAction.WAIT, cue, "room_rate_limited")
+                if rate_rejection == "room_speaker_capacity":
+                    self._bump("rejected_speaker_capacity")
+                return self._decision(RoomAction.WAIT, cue, rate_rejection)
             self._remember_event_locked(cue.event_id)
 
             # Apply cheap bounded admission before invoking the moderation callback.
@@ -284,26 +307,41 @@ class RoomStreamHost:
             expired = self._seen_order.popleft()
             self._seen.discard(expired)
 
-    def _admit_rate_locked(self, cue: RoomCue, now: float) -> bool:
+    def _admit_rate_locked(self, cue: RoomCue, now: float) -> str | None:
+        """Admit within source/speaker limits without evicting live speaker history.
+
+        A stream can present many opaque speaker IDs over time. Evicting the least-recently
+        used active speaker here would let ID churn erase that speaker's rate history. Only
+        expired speaker windows are reclaimed; if the bounded table is still full, reject
+        the new ID until a slot naturally expires.
+        """
         cutoff = now - self.config.rate_window_seconds
         source_events = self._source_times[cue.source]
         self._prune(source_events, cutoff)
+        if len(source_events) >= self.config.max_events_per_source:
+            return "room_rate_limited"
+
         key = (cue.source, cue.speaker_id)
         speaker_events = self._speaker_times.get(key)
         if speaker_events is None:
             if len(self._speaker_times) >= self.config.max_speakers:
-                self._speaker_times.popitem(last=False)
+                for old_key, old_events in tuple(self._speaker_times.items()):
+                    self._prune(old_events, cutoff)
+                    if not old_events:
+                        del self._speaker_times[old_key]
+                if len(self._speaker_times) >= self.config.max_speakers:
+                    return "room_speaker_capacity"
             speaker_events = deque()
             self._speaker_times[key] = speaker_events
         else:
             self._speaker_times.move_to_end(key)
-        self._prune(speaker_events, cutoff)
-        if (len(source_events) >= self.config.max_events_per_source
-                or len(speaker_events) >= self.config.max_events_per_speaker):
-            return False
+            self._prune(speaker_events, cutoff)
+
+        if len(speaker_events) >= self.config.max_events_per_speaker:
+            return "room_rate_limited"
         source_events.append(now)
         speaker_events.append(now)
-        return True
+        return None
 
     @staticmethod
     def _prune(events: deque[float], cutoff: float) -> None:
