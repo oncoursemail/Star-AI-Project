@@ -326,6 +326,7 @@ class StreamLongHorizonMemory:
         topic_id: str | None = None,
         kinds: frozenset[str] | None = None,
         limit: int = 6,
+        broadcast_approved: bool = False,
         audience_can_hear: bool = False,
     ) -> ContinuityPacket | None:
         """Return a compact timeline, or silence when consent/data is absent."""
@@ -341,7 +342,7 @@ class StreamLongHorizonMemory:
             raise ValueError("kinds must be a nonempty frozenset of known event kinds")
         if type(limit) is not int or not 1 <= limit <= 8:
             raise ValueError("limit must be 1..8")
-        if audience_can_hear is not True:
+        if broadcast_approved is not True or audience_can_hear is not True:
             return None
         with self._lock:
             state = self._sessions.get(session_id)
