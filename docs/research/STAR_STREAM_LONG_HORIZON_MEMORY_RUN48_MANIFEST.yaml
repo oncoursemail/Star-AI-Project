@@ -31,6 +31,7 @@ recall_horizons_ms:
 consent:
   owner_approval_required: true
   audience_memory_approval_required: true
+  broadcast_approval_required_for_recall: true
   audience_can_hear_required_for_recall: true
 privacy:
   raw_audio_retained: false
@@ -43,7 +44,7 @@ privacy:
   metrics_may_include_event_content: false
 verification:
   local_isolated_python_version: "3.13"
-  local_test_count: 23
+  local_test_count: 24
   local_test_result: passed
   exact_head_ci: required
   windows_host_acceptance: required
