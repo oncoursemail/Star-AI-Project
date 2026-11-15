@@ -89,6 +89,22 @@ STAR implication:
 
 Specification: https://github.com/agentskills/agentskills
 
+
+### 7. VTuber turn-taking is a separate skill domain, not just a persona prompt
+
+**MP-Bench** (arXiv:2609.13076, 2026-09-11; accepted to EMNLP 2026 Findings) evaluates voice agents as active participants in multi-party conversations. It separates turn-taking awareness, response appropriateness and comprehension. Its 12-agent evaluation found that real-time systems remained at or below 22% on multiparty comprehension and near chance on multiparty turn-taking.
+
+**LiveKit EoT-Bench** evaluates whether an agent should keep listening through a mid-turn pause or take the floor after a genuine turn end. Its causal pause-level evaluation reports the trade-off between false cutoffs and endpointing latency, rather than conflating conversational timing with model inference latency.
+
+STAR implication:
+- Encode human-floor preservation, stop-on-human-resolution, addressee relevance and truthful AI identity as separate behavior constraints.
+- Evaluate them on trusted replay events; a language model's own explanation is not the label.
+- Keep EoT false-cutoff rate, endpointing delay, interruption precision/recall, response appropriateness and audible latency separate.
+- Do not optimize for constant speech; silence and not-speaking decisions are valid outcomes.
+
+Sources: https://arxiv.org/abs/2609.13076 and https://github.com/livekit/eot-bench
+
+
 ## Repository architecture audit
 
 The current main branch already contains:
