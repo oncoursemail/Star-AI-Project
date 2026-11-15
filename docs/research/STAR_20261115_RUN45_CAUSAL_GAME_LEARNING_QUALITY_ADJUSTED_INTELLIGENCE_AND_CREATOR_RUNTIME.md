@@ -230,6 +230,33 @@ On an 8 GB GPU, protect the foreground game/OBS/avatar/audio budget first. Keep 
 
 Never enable a speculative-decoding mode globally based on one coding benchmark. Compare by workload class, warm/cold state, and concurrent load. A higher token rate that increases audible latency or causes frame drops is a regression.
 
+### 8.1 AIPerf goodput and llama.cpp router implications
+
+AIPerf defines goodput as completed requests per second that meet **all configured service-level objectives**, not raw throughput. Its TTFT includes network, queueing, prompt processing, and first-token generation; TTFO distinguishes the first non-reasoning output from a reasoning token. ITL is a decode average and should be read alongside request latency, output length, and chunk-jitter distributions. References:
+
+- https://docs.nvidia.com/aiperf/reference/ai-perf-metrics-reference
+- https://docs.nvidia.com/aiperf/tutorials/metrics-analysis/benchmark-goodput-with-ai-perf
+
+For STAR, define separate SLOs for:
+- First audible PCM for a short streamer reaction.
+- First useful text token for a foreground answer.
+- p95/p99 completion latency for a bounded tool task.
+- Game frame-time and OBS dropped-frame limits during that task.
+
+Count only requests that satisfy every applicable SLO as goodput. Include failed/cancelled requests in the denominator so overload cannot appear faster by silently dropping work.
+
+The current llama.cpp server documentation exposes a router with model-count limits and optional memory-based LRU unloading. With `--models-memory-margin`, it measures each model's minimum/maximum device requirements and unloads idle models until the requested model fits while keeping the configured device-memory margin; a model serving a request is not unloaded. The docs explicitly warn that host RAM is assumed unlimited and multimodal projector memory is not yet included in the estimates. See https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md#memory-based-unloading.
+
+STAR should therefore test router mode only as an opt-in experiment:
+1. Pin exact llama.cpp build, model hashes, quantization, context, slots, and device placement.
+2. Keep the foreground voice/chat model resident during live rehearsal.
+3. Permit LRU eviction only for idle background models.
+4. Reserve extra VRAM beyond router estimates for mmproj, OBS, avatar rendering, capture, and transient allocations.
+5. Measure model-load/unload latency and cache loss as part of end-to-end latency.
+6. Reject a configuration if first-audio latency, p99 frame-time, audio underflows, or task success regresses.
+
+Prompt caching, cache reuse, idle-slot caching, context checkpoints, KV-cache quantization, CPU/GPU layer placement, and speculative decoding are separate experimental variables. Change one at a time, use paired warm/cold trials, and retain the simplest configuration that improves quality-adjusted goodput.
+
 ## 9. General knowledge and creator capability
 
 Reuse STAR's existing general-knowledge lab, knowledge practice host, source grounding, and skill retrieval. Do not create another memory database.
