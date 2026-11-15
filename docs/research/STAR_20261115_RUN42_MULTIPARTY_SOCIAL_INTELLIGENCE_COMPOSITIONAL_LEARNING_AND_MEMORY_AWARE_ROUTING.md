@@ -131,7 +131,7 @@ It never accepts or stores transcripts, audio, raw speaker names, provider user 
 
 ### Gate behavior
 
-Only the sealed holdout contributes to acceptance. Development results are reported separately. The result is `INCONCLUSIVE` when the holdout roster, required cue categories, independently scored responses, or latency sample count is insufficient. It is `FAIL` when configured quality thresholds are missed, otherwise `PASS`.
+Only the sealed holdout contributes to acceptance. Development results are reported separately. The result is `INCONCLUSIVE` when the holdout roster, required cue categories (including both explicit and implicit addressing), independently scored responses, or latency sample count is insufficient. It is `FAIL` when configured quality thresholds are missed, otherwise `PASS`.
 
 A pass means only that this replay policy passed the supplied thresholds. It does not prove natural human-level conversation, production readiness, or live-platform behavior. It does not promote a policy or change runtime behavior.
 
