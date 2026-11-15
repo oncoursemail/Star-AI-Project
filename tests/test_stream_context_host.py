@@ -15,6 +15,7 @@ from star.stream_brain_governor import StreamBrainGovernor
 from star.stream_context_host import StreamContextHost
 from star.stream_director import StreamSignal
 from star.stream_episode import StreamEpisode
+from star.stream_long_horizon_memory import StreamEvent, StreamLongHorizonMemory
 from star.stream_hardware_telemetry import RealtimeTelemetryHost
 from star.stream_qos import AdaptiveQoS, InferenceJob
 from star.stream_stage import StarStage
@@ -22,6 +23,19 @@ from star.stream_stage import StarStage
 NOW = 1_800_000_000
 PRACTICE = b"host-only-practice-signer-0123456789012345678"
 VALIDATION = b"independent-validation-signer-0123456789012"
+CONTINUITY_KEY = b"stream-event-host-key-32-bytes-minimum-123456"
+
+
+def add_continuity_event(memory, session_id, now_ms, summary, *, event_id="evt_1"):
+    event = StreamEvent(
+        session_id=session_id, event_id=event_id, sequence=1,
+        source="game", kind="gameplay", topic_id="obby",
+        summary=summary, occurred_ms=now_ms,
+        evidence_sha256=sha256(event_id.encode()).hexdigest(),
+    )
+    receipt = hmac.new(CONTINUITY_KEY, event.canonical_bytes(), "sha256").hexdigest()
+    assert memory.ingest(event, receipt, now_ms=now_ms)
+    return event
 
 
 class Rig:
@@ -90,13 +104,17 @@ class Rig:
         self.bank.ingest(row, receipt, now_unix_s=self.unix)
         return self.episode.append(row, now_unix_s=self.unix)
 
-    def context(self, *, notes=frozenset(), actions=frozenset()):
+    def context(self, *, notes=frozenset(), actions=frozenset(),
+                continuity=None, continuity_session_id=None):
         return StreamContextHost(
             governor=self.governor, knowledge=self.store, episode=self.episode,
             project="obby", public_note_ids=frozenset(notes),
             public_action_ids=frozenset(actions),
             utc_clock=lambda: datetime.now(timezone.utc),
             unix_clock=lambda: self.unix,
+            continuity_memory=continuity,
+            continuity_session_id=continuity_session_id,
+            continuity_clock_ms=(lambda: int(self.now)) if continuity is not None else None,
         )
 
     def signal(self, kind, message, *, ident="event1"):
@@ -333,3 +351,119 @@ def test_context_packets_not_retained_in_anonymous_stats(rig):
     assert "bridge" not in status
     assert "checkpoint" not in status
     assert "favorite" not in status
+
+
+
+def test_continuity_needs_a_third_separate_audience_memory_consent(rig):
+    rig.ready()
+    memory = StreamLongHorizonMemory(host_key=CONTINUITY_KEY)
+    context = rig.context(continuity=memory, continuity_session_id="stream_one")
+    with pytest.raises(PermissionError):
+        context.enable(owner_approved=True, broadcast_approved=True)
+    assert memory.status()["active_sessions"] == 0
+    context.enable(
+        owner_approved=True, broadcast_approved=True,
+        audience_memory_approved=True,
+    )
+    assert memory.status()["active_sessions"] == 1
+    context.disable()
+    assert memory.status()["active_sessions"] == 0
+
+
+def test_historical_event_reaches_only_the_existing_governed_stage_plan(rig):
+    rig.ready()
+    memory = StreamLongHorizonMemory(host_key=CONTINUITY_KEY)
+    context = rig.context(continuity=memory, continuity_session_id="stream_one")
+    context.enable(
+        owner_approved=True, broadcast_approved=True,
+        audience_memory_approved=True,
+    )
+    add_continuity_event(
+        memory, "stream_one", int(rig.now),
+        "The second switch opened the gold gate.",
+    )
+    assert rig.signal("viewer_question", "What happened before I arrived?")
+    plan = context.prepare(
+        moderated_question="what happened before I arrived",
+        continuity_lookback_ms=300_000, audience_can_hear=True,
+    )
+    assert plan is not None
+    assert "The second switch opened the gold gate." in plan.context_record
+    assert "STAR SESSION CONTINUITY DATA" in plan.context_record
+    assert context.status()["continuity_candidates"] == 1
+    assert rig.governor.status()["enabled"] is True
+
+
+def test_continuity_is_not_retrieved_without_host_confirmed_audience_hearing(rig):
+    rig.ready()
+    memory = StreamLongHorizonMemory(host_key=CONTINUITY_KEY)
+    context = rig.context(continuity=memory, continuity_session_id="stream_one")
+    context.enable(
+        owner_approved=True, broadcast_approved=True,
+        audience_memory_approved=True,
+    )
+    add_continuity_event(
+        memory, "stream_one", int(rig.now),
+        "The second switch opened the gold gate.",
+    )
+    assert rig.signal("viewer_question", "What happened before I arrived?")
+    plan = context.prepare(
+        moderated_question="what happened before I arrived",
+        continuity_lookback_ms=300_000, audience_can_hear=False,
+    )
+    assert plan is not None
+    assert "The second switch opened the gold gate." not in plan.context_record
+    assert context.status()["continuity_misses"] == 1
+
+
+def test_continuity_is_not_attached_to_urgent_danger_or_unrelated_commentary(rig):
+    rig.ready()
+    memory = StreamLongHorizonMemory(host_key=CONTINUITY_KEY)
+    context = rig.context(continuity=memory, continuity_session_id="stream_one")
+    context.enable(
+        owner_approved=True, broadcast_approved=True,
+        audience_memory_approved=True,
+    )
+    add_continuity_event(
+        memory, "stream_one", int(rig.now),
+        "The second switch opened the gold gate.",
+    )
+    assert rig.signal("game_danger", "A hazard is approaching")
+    plan = context.prepare(
+        continuity_lookback_ms=300_000, audience_can_hear=True,
+    )
+    assert plan is not None
+    assert plan.kind == "game_danger"
+    assert "The second switch opened the gold gate." not in plan.context_record
+
+
+def test_continuity_session_erasure_and_retrieval_faults_are_fail_closed(rig, monkeypatch):
+    rig.ready()
+    memory = StreamLongHorizonMemory(host_key=CONTINUITY_KEY)
+    context = rig.context(continuity=memory, continuity_session_id="stream_one")
+    context.enable(
+        owner_approved=True, broadcast_approved=True,
+        audience_memory_approved=True,
+    )
+    add_continuity_event(
+        memory, "stream_one", int(rig.now),
+        "The second switch opened the gold gate.",
+    )
+    def broken(*_args, **_kwargs):
+        raise OSError("private event text must not enter metrics")
+    monkeypatch.setattr(memory, "retrieve", broken)
+    assert rig.signal("viewer_question", "What happened earlier?")
+    assert context.prepare(
+        moderated_question="what happened earlier",
+        continuity_lookback_ms=300_000, audience_can_hear=True,
+    ) is None
+    assert context.status()["continuity_faults"] == 1
+    assert "private event text" not in str(context.status())
+    context.disable()
+    assert memory.status()["active_sessions"] == 0
+
+
+def test_continuity_request_without_a_configured_store_is_rejected(rig):
+    context = rig.context()
+    with pytest.raises(RuntimeError):
+        context.prepare(continuity_lookback_ms=60_000, audience_can_hear=True)
