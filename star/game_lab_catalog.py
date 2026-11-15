@@ -246,6 +246,31 @@ SOURCES = (
            "https://arxiv.org/abs/2609.31281", "learning",
            "Joint-action candidate scoring for offline cooperative multi-agent reinforcement-learning settings",
            warning="Offline MARL results only; not evidence of visual real-time gameplay or transfer to arbitrary games."),
+
+    Source("agentspec", "AgentSpec agent-workload speculative decoding",
+           "https://arxiv.org/abs/2608.24004", "inference",
+           "Structure-isolated drafting and redundancy-aware token budgets for batched agent inference in vLLM",
+           warning="Paper evaluates vLLM workloads; not a llama.cpp/Vulkan/8 GB desktop drop-in. Speculative drafts must never execute side effects before authoritative verification."),
+    Source("asymspec", "AsymSpec context-asymmetric speculative decoding",
+           "https://arxiv.org/abs/2608.26004", "inference",
+           "Full-context lightweight drafter and compressed-context verifier with divergence-aware acceptance for agentic LLM pipelines",
+           warning="Preprint results are task/backend-specific. Preserve critical evidence, permissions, and constraints in the verifier; independently measure quality and latency before adoption."),
+    Source("omniagent", "OmniAgent native active multimodal perception",
+           "https://github.com/harryhsing/omniagent", "learning",
+           "ICML 2026 Observation-Thought-Action agent requests selected frames, audio, and clips and consolidates evidence rather than uniformly processing long video",
+           warning="The 7B research checkpoint is not assumed to fit STAR's local 8 GB GPU alongside voice/game/OBS workloads. Reuse the active-perception pattern only after a bounded policy and hardware evaluation."),
+    Source("tact", "TACT intent-conditioned full-duplex turn-taking benchmark",
+           "https://arxiv.org/abs/2609.27372", "benchmarks",
+           "9,728 episodes / 73.2 hours; evaluates turn timing conditioned on speaker intent rather than fixed pause windows",
+           warning="Benchmark is primarily dyadic and its reported scores are not STAR results. Use the intent labels as a replay-evaluation design; do not infer or retain cross-platform voice identities."),
+    Source("turboquant", "TurboQuant KV-cache and vector quantization research",
+           "https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/", "inference",
+           "Google Research quantization methods for compact KV-cache storage and high-dimensional vector search",
+           warning="Published attention-logit speedups are H100-specific, not end-to-end token/s or RTX 4060 results. Require a supported backend/kernel and paired quality, VRAM, and latency tests."),
+    Source("express-streamer", "EXPRESS virtual-streamer responsiveness and naturalness study",
+           "https://doi.org/10.1177/10949968261471154", "vtuber",
+           "2026 experimental study of how response naturalness interacts with responsiveness in virtual livestreaming",
+           warning="E-commerce livestream findings are not direct Twitch/game-stream evidence. Treat as a UX hypothesis: responsiveness without natural conversational fit is not a quality win."),
 )
 
 
@@ -264,7 +289,7 @@ def catalog(query: str = "", category: str = "", limit: int = 70) -> dict:
     selected = [s for s in SOURCES if (not category or s.category == category)
                 and (not search or search in (
                     s.name + " " + s.scope + " " + s.category + " " + s.id).casefold())]
-    return {"checked_on": "2026-11-14", "categories": categories,
+    return {"checked_on": "2026-11-15", "categories": categories,
             "total": len(selected), "sources": [asdict(s) for s in selected[:limit]],
             "truncated": len(selected) > limit,
             "note": "Research index only. No third-party software was installed or authorized."}
