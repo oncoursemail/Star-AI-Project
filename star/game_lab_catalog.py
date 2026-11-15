@@ -333,6 +333,27 @@ SOURCES = (
            "https://agentif.github.io/", "benchmarks",
            "50 real-world agentic applications with long instructions and multiple simultaneous constraints; updated 2026-10 with reasoning and non-reasoning evaluation settings",
            warning="Pin the evaluation configuration and judge version because updated scores are not comparable with the original setting. Use local task manifests and independent verifiers; no STAR score claimed."),
+
+    Source("eot-bench", "LiveKit multilingual end-of-turn benchmark",
+           "https://github.com/livekit/eot-bench", "benchmarks",
+           "Real human-to-agent turns across 14 languages with causal hold/EoT silence spans, accented-English and short-turn cohorts, threshold/action-delay/timeout sweeps and a silence-only baseline",
+           warning="The short_turns cohort includes rows with no observed EoT; preserve them as right-censored HOLD evidence rather than inventing final turns. Endpointing latency is not model inference latency. Pin dataset and harness revisions; raw audio is not required by STAR's metadata adapter."),
+    Source("skillcat", "SkillCAT contrastive and topology-aware skill evolution",
+           "https://arxiv.org/abs/2606.13317", "learning",
+           "Compares successful and failed same-task trajectories, replays candidate skill patches on task clones, and routes only the relevant sub-skill topology at inference",
+           warning="Reported gains are benchmark-specific, not STAR results. Reuse the contrastive and topology ideas with STAR's existing skill_evolution_lab, protected holdouts and independent verifiers; do not auto-promote patches."),
+    Source("memskill", "MemSkill learned memory-construction strategies",
+           "https://github.com/ViktorAxelsen/MemSkill", "learning",
+           "Learns reusable meta-memory skills for what to extract, preserve, retrieve and forget; mines hard cases and conditions memory construction on task-relevant operations",
+           warning="Meta-memory skills are policies for remembering, not the stored facts or experiences. Keep STAR's governed memory authority, retention rules and reversible evaluation; do not let a model directly rewrite persistent memory."),
+    Source("windowsworld", "WindowsWorld cross-application computer-use benchmark",
+           "https://aclanthology.org/2026.findings-acl.750/", "benchmarks",
+           "181 tasks across 17 desktop applications with an average of five sub-goals; stresses conditional multi-app workflows and intermediate process checks",
+           warning="Research benchmark and simulated environment, not a permission grant for the owner's desktop. Run only in a disposable VM with synthetic accounts and state verifiers; published scores are not STAR results."),
+    Source("weavebench", "WeaveBench hybrid GUI and CLI workflow benchmark",
+           "https://arxiv.org/abs/2606.09426", "benchmarks",
+           "114 long-horizon tasks across eight domains requiring interleaved GUI observation/action, CLI/code edits and artifact/log verification with trajectory-aware judging",
+           warning="Paper reports that outcome-only grading can overestimate agent performance. Use synthetic fixtures, inspect action traces and deliverable provenance, and keep real user files/accounts out of benchmark runs."),
 )
 
 
