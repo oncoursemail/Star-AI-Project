@@ -262,7 +262,7 @@ class OpenGameEvalAttempt:
         events: Sequence[ToolEvent] = (),
         annotations: TaskAnnotations | Mapping[str, Any] | None = None,
     ) -> "OpenGameEvalAttempt":
-        """Parse an exported authenticated API record; performs no HTTP request."""
+        """Parse an exported API record after the caller verifies its source; no HTTP."""
         if not isinstance(record, Mapping):
             raise TypeError("record must be a mapping")
         status = record.get("status")
