@@ -269,6 +269,7 @@ class RoomReplayLimits:
     max_validation_age_s: int = 7 * 86400
     required_categories: tuple[str, ...] = (
         "explicit_direct",
+        "implicit_direct",
         "side_conversation",
         "human_resolution",
         "urgent_barge_in",
