@@ -159,6 +159,30 @@ Sources:
 - https://arxiv.org/abs/2605.15051
 - https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
 
+### 1.10 General knowledge needs separate parametric, retrieval, and multi-step evaluations
+
+STAR's current general-foundations suite is explicitly a ten-task development set for arithmetic, logic, fixed-offset time, structured filtering, corrections, and missing-data abstention. Its own scope statement says it is not a broad factual-knowledge or unseen-performance benchmark. That is a useful smoke test, but it cannot establish general knowledge.
+
+Use complementary benchmark families rather than one score:
+
+- **SimpleQA** tests short, single-answer factual questions. Its original design emphasizes verifiable answers, topic diversity, and calibration, while acknowledging that short answers do not measure long-form factual density. https://openai.com/index/introducing-simpleqa/
+- **SimpleQA Verified** filters duplicates, topical imbalance, and noisy labels to provide a cleaner parametric-factuality evaluation. https://arxiv.org/abs/2509.07968
+- **GAIA** tests general-assistant work involving reasoning, multimodality, browsing, and tool use. https://arxiv.org/abs/2311.12983
+- **BrowseComp** tests hard-to-find, entangled facts that may require searching many sources rather than retrieving one isolated fact. https://openai.com/index/browsecomp/
+- **FACTS Benchmark Suite** is a broader factual-accuracy and grounding evaluation family. https://www.kaggle.com/benchmarks/google/facts
+
+STAR decision:
+1. Separate no-tool parametric recall from web-grounded research; never compare their scores as the same capability.
+2. Include stable facts, changing facts, disputed facts, false premises, missing evidence, and multi-hop questions.
+3. Require claim-level evidence for retrieval answers: source URL, publication/update date, exact supporting passage, and the claim it supports.
+4. Score answer correctness, evidence entailment, citation correctness, freshness, contradiction handling, and abstention separately.
+5. Measure confidence calibration and selective risk/coverage. A system that abstains on uncertain facts should not be punished as if it fabricated a confident answer.
+6. Use independent source verification for benchmark labels; citations themselves are not proof, and fabricated citations must be a negative test.
+7. Keep development and sealed holdout sets separate. Deduplicate near-identical questions and monitor benchmark contamination before interpreting gains.
+8. Build a balanced STAR-owned general-knowledge suite across science, technology, history, geography, arts, games, practical computing, and current-events research, with time-sensitive labels pinned to an as-of date.
+
+The live Knowledge Brain should route by question type: direct parametric answer for stable common facts; retrieval for obscure or changing facts; multi-source synthesis for entangled questions; and explicit uncertainty when evidence is missing or conflicting. For a VTuber, the same rule prevents confidently inventing game lore, patch notes, viewer facts, or current news on stream.
+
 ## 2. Repository architecture audit and reuse map
 
 Run 59 intentionally reuses existing components:
