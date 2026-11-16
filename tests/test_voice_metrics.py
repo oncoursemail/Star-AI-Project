@@ -1,7 +1,7 @@
 """Latency arithmetic and report formatting independently of live voice calls."""
 import pytest
 
-from star.voice.metrics import TurnMetrics, latency_table
+from star.voice.metrics import TurnMetrics, latency_summary, latency_table
 
 
 def test_empty_turn_has_unknown_stage_latencies_and_empty_table():
@@ -80,3 +80,50 @@ def test_latency_table_only_averages_complete_turns_and_reports_failure_reasons(
 def test_latencies_do_not_silently_accept_non_numeric_timestamps():
     with pytest.raises(TypeError):
         TurnMetrics(speech_end=0.0, first_audio_at="invalid").stages()
+
+
+def test_latency_summary_reports_nearest_rank_tails_and_keeps_incomplete_turns_visible():
+    turns = [
+        TurnMetrics(turn=1, speech_end=0.0, turn_end=0.1, transcript_at=0.2,
+                    first_token_at=0.3, first_audio_at=0.5, last_token_at=0.4, tokens=3),
+        TurnMetrics(turn=2, speech_end=0.0, turn_end=0.2, transcript_at=0.3,
+                    first_token_at=0.5, first_audio_at=1.0, last_token_at=0.9, tokens=5,
+                    interrupted=True, interrupt_reason="barge_in"),
+        TurnMetrics(turn=3, speech_end=0.0, turn_end=0.4, transcript_at=0.8,
+                    first_token_at=1.2, first_audio_at=2.0, last_token_at=1.8, tokens=4,
+                    error="tts unavailable"),
+        TurnMetrics(turn=4, error="no transcript"),
+    ]
+    report = latency_summary(turns)
+    assert report["turns"] == 4
+    assert report["complete_turns"] == 3
+    assert report["interrupted_turns"] == 1
+    assert report["error_turns"] == 2
+    assert report["interruption_rate"] == 0.25
+    assert report["error_rate"] == 0.5
+    assert report["percentile_method"] == "nearest_rank"
+    assert report["stages"]["total"] == {
+        "count": 3, "p50": 1.0, "p95": 2.0, "p99": 2.0,
+    }
+    assert report["stages"]["total"]["count"] == 3
+    assert report["tail_guidance"] == {
+        "p95_min_samples": 20, "p99_min_samples": 100, "release_gate": False,
+    }
+
+
+def test_latency_summary_returns_unknown_percentiles_for_empty_or_missing_samples():
+    report = latency_summary([])
+    assert report["turns"] == 0
+    assert report["complete_turns"] == 0
+    assert report["interruption_rate"] is None
+    assert report["stages"]["total"] == {
+        "count": 0, "p50": None, "p95": None, "p99": None,
+    }
+    incomplete = latency_summary([TurnMetrics(turn=1)])
+    assert incomplete["turns"] == 1
+    assert incomplete["stages"]["total"]["count"] == 0
+
+
+def test_latency_summary_rejects_untyped_records():
+    with pytest.raises(TypeError):
+        latency_summary([{"total": 1.0}])
