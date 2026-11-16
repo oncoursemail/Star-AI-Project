@@ -14,8 +14,8 @@ import re
 from typing import cast
 
 MAX_TRIALS = 100_000
-_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\\Z")
-_SHA256 = re.compile(r"[0-9a-f]{64}\\Z")
+_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\Z")
+_SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 _SPLITS = frozenset(("train", "validation", "holdout"))
 _ARMS = frozenset(("off", "on"))
 
@@ -117,9 +117,9 @@ def _validate(row: Trial) -> None:
         _identifier(getattr(row, field), field)
     if type(row.replicate) is not int or row.replicate < 0:
         raise ValueError("replicate must be a nonnegative integer")
-    if row.split not in _SPLITS:
+    if not isinstance(row.split, str) or row.split not in _SPLITS:
         raise ValueError("split must be train, validation, or holdout")
-    if row.arm not in _ARMS:
+    if not isinstance(row.arm, str) or row.arm not in _ARMS:
         raise ValueError("arm must be off or on")
     if type(row.success) is not bool:
         raise ValueError("success must be a boolean")
@@ -160,15 +160,19 @@ def _summarize(skill_id: str, split: str, rows: list[Trial]) -> dict:
     regressions = sum(off.success and not on.success for off, on in matched)
     ties = len(matched) - wins - regressions
 
-    latency_delta = [float(on.latency_ms) - float(off.latency_ms) for off, on in matched]
+    latency_delta = [on.latency_ms - off.latency_ms for off, on in matched]
     input_delta = [float(on.input_tokens - off.input_tokens) for off, on in matched]
     output_delta = [float(on.output_tokens - off.output_tokens) for off, on in matched]
     deadline_pairs = [
         (off, on) for off, on in matched
         if off.deadline_ms is not None and on.deadline_ms is not None
     ]
-    off_deadline_pass = sum(float(off.latency_ms) <= float(off.deadline_ms) for off, _ in deadline_pairs)
-    on_deadline_pass = sum(float(on.latency_ms) <= float(on.deadline_ms) for _, on in deadline_pairs)
+    off_deadline_pass = 0
+    on_deadline_pass = 0
+    for off, on in deadline_pairs:
+        assert off.deadline_ms is not None and on.deadline_ms is not None
+        off_deadline_pass += off.latency_ms <= off.deadline_ms
+        on_deadline_pass += on.latency_ms <= on.deadline_ms
     off_tokens = sum(off.input_tokens for off, _ in matched)
 
     return {
