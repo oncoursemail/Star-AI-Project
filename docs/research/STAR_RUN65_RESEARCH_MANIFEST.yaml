@@ -1,0 +1,79 @@
+run: 65
+date: 2026-11-16
+repository: oncoursemail/Star-AI-Project
+branch: research/run63-duplex-cue-in-turn-adaptation-20261115
+change_type:
+  - research
+  - read_only_catalog
+  - regression_test_isolation
+summary: >
+  Adds complete-game creation, full-duplex tool-use, cross-application recovery,
+  and OBS protocol research to STAR's reviewed Game Lab catalog. Isolates a
+  cold-start warm-up test from process-global turn-shape state.
+research:
+  - id: cegame-bench
+    url: https://arxiv.org/abs/2610.26098
+    date: 2026-10-19
+    focus: long_horizon_complete_game_creation
+    status: research_only
+  - id: full-duplex-bench-v3
+    url: https://arxiv.org/abs/2604.04847
+    date: 2026-04-06
+    focus: natural_speech_disfluency_and_chained_tool_use
+    status: research_only
+  - id: windowsworld
+    url: https://aclanthology.org/2026.findings-acl.750/
+    focus: multi_application_workflows_and_intermediate_checkpoints
+    status: research_only
+  - id: cua-recovery
+    url: https://arxiv.org/abs/2610.27645
+    date: 2026-10-20
+    focus: inherited_error_detection_and_recovery
+    status: research_only
+  - id: obs-websocket
+    url: https://github.com/obsproject/obs-websocket
+    focus: authenticated_local_obs_rpc_and_events
+    status: research_only
+  - id: llama.cpp-speed-bench
+    url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+    focus: matched_latency_throughput_and_concurrency_measurement
+    status: research_only
+files:
+  - path: star/game_lab_catalog.py
+    operation: append_four_reviewed_sources
+  - path: tests/test_game_lab_catalog.py
+    operation: add_run65_discoverability_and_caveat_assertions
+  - path: tests/test_knowledge_bank.py
+    operation: isolate_turn_memory_shape_in_cold_start_test
+  - path: docs/research/STAR_20261116_RUN65_COMPLETE_GAME_FULL_DUPLEX_CROSS_APP_AND_MIXED_LOAD.md
+    operation: create
+  - path: docs/research/STAR_RUN65_RESEARCH_MANIFEST.yaml
+    operation: create
+validation:
+  prior_head: 30cd7a2bf84c7405a6ad89f33e62ed1fd34f2f3a
+  prior_linux_offline_checks: success
+  prior_pyright: success
+  prior_windows_desktop_packaging_and_install_smoke: success
+  prior_windows_offline_shard_1: success
+  prior_windows_offline_shard_2: failure
+  prior_windows_failure:
+    test: tests/test_knowledge_bank.py::test_real_and_warmup_prefixes_include_the_same_bank
+    reason: process_global_turn_memory_leaked_a_previous_request_shape_into_a_cold_start_test
+    result: 4878_passed_99_skipped_1_failed
+  post_repair_exact_head_ci: pending
+  target_pc_acceptance: not_run
+  gpu_mixed_load_benchmark: not_run
+  live_vtuber_rehearsal: not_run
+limitations:
+  - no_model_weights_changed
+  - no_hardware_settings_changed
+  - no_new_runtime_dependencies
+  - no_new_permissions_or_credentials
+  - no_obs_or_vtube_studio_control_enabled
+  - no_live_gameplay_or_public_stream_verified
+  - paper_speedups_are_not_star_measurements
+promotion:
+  auto_merge: false
+  require_exact_head_ci: true
+  require_owner_review: true
+  require_target_pc_acceptance_for_device_claims: true
