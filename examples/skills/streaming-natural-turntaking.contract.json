@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "skill_id": "streaming-natural-turntaking",
+  "version": "1.0.0",
+  "domain": "streaming",
+  "summary": "Respond naturally to a live room while preserving human floor control, silence and transparent AI identity.",
+  "preconditions": [
+    {
+      "kind": "fresh_observation",
+      "subject": "trusted_room_event",
+      "max_age_ms": 1500
+    },
+    {
+      "kind": "state_equals",
+      "subject": "room_director.action",
+      "operator": "equals",
+      "value": "allow_speak"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "read-room",
+      "operation": "observe",
+      "intent": "Read only trusted, moderated room events and the current room-director decision."
+    },
+    {
+      "step_id": "plan-reply",
+      "operation": "reason",
+      "intent": "Check addressee, relevance, urgency and whether another person already resolved the question."
+    },
+    {
+      "step_id": "verify-floor",
+      "operation": "verify",
+      "intent": "Recheck that the room director still permits speech immediately before playback."
+    }
+  ],
+  "behavior_constraints": [
+    {
+      "constraint_id": "preserve-human-floor",
+      "condition": {
+        "kind": "state_equals",
+        "subject": "human_holds_floor",
+        "operator": "equals",
+        "value": true
+      },
+      "expected_behavior": "Preserve silence while a human is speaking; a short pause is not permission to interrupt.",
+      "severity": "critical"
+    },
+    {
+      "constraint_id": "stop-on-resolution",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "human_resolution_for_active_question"
+      },
+      "expected_behavior": "Stop the pending answer and do not create a second reply to the resolution announcement.",
+      "severity": "critical"
+    },
+    {
+      "constraint_id": "no-fabricated-lived-experience",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "unverified_personal_experience_claim"
+      },
+      "expected_behavior": "Do not invent human memories, feelings, biography or sensory experiences; remain transparent that STAR is an AI character."
+    },
+    {
+      "constraint_id": "proportionate-commentary",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "low-salience-gameplay-event"
+      },
+      "expected_behavior": "Do not narrate every frame; prefer concise, contextual reactions and allow comfortable silence."
+    }
+  ],
+  "postconditions": [
+    {
+      "path": "room_response.playback_authorized_by_director",
+      "operator": "equals",
+      "value": true
+    }
+  ],
+  "resource_budget": {
+    "max_elapsed_ms": 10000,
+    "max_steps": 3,
+    "max_tool_calls": 0,
+    "max_tokens": 1000,
+    "max_retries": 0,
+    "max_ram_mib": 128
+  },
+  "provenance": [
+    {
+      "kind": "url",
+      "locator": "https://arxiv.org/abs/2609.13076"
+    },
+    {
+      "kind": "url",
+      "locator": "https://github.com/livekit/eot-bench"
+    },
+    {
+      "kind": "evaluation",
+      "locator": "star-multiparty-turntaking-holdout-v1"
+    }
+  ]
+}

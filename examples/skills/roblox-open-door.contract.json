@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "skill_id": "roblox-open-door",
+  "version": "1.2.0",
+  "domain": "roblox",
+  "summary": "Open a door after observing its state and checking the interaction preconditions.",
+  "environment_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "expires_at": "2026-12-01T00:00:00Z",
+  "preconditions": [
+    {
+      "kind": "fresh_observation",
+      "subject": "door",
+      "max_age_ms": 1000
+    },
+    {
+      "kind": "owner_consent",
+      "subject": "selected_test_place",
+      "value": true
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "inspect",
+      "operation": "observe",
+      "intent": "Read the selected door state."
+    },
+    {
+      "step_id": "interact",
+      "operation": "request_tool",
+      "intent": "Request the approved interaction tool.",
+      "tool_name": "studio.inspect",
+      "required_capabilities": [
+        "studio.read"
+      ],
+      "expected_deltas": [
+        {
+          "path": "door.open",
+          "operator": "equals",
+          "value": true
+        }
+      ]
+    },
+    {
+      "step_id": "verify",
+      "operation": "verify",
+      "intent": "Independently inspect the resulting door state."
+    }
+  ],
+  "behavior_constraints": [
+    {
+      "constraint_id": "inspect-before-act",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "door"
+      },
+      "expected_behavior": "Inspect the target door before requesting a mutating tool.",
+      "severity": "critical"
+    },
+    {
+      "constraint_id": "verify-result",
+      "condition": {
+        "kind": "state_equals",
+        "subject": "door.open",
+        "operator": "equals",
+        "value": true
+      },
+      "expected_behavior": "Verify the door state using an independent host observation."
+    }
+  ],
+  "postconditions": [
+    {
+      "path": "door.open",
+      "operator": "equals",
+      "value": true
+    }
+  ],
+  "resource_budget": {
+    "max_elapsed_ms": 30000,
+    "max_steps": 3,
+    "max_tool_calls": 1,
+    "max_tokens": 2000,
+    "max_retries": 1,
+    "max_ram_mib": 256
+  },
+  "provenance": [
+    {
+      "kind": "url",
+      "locator": "https://create.roblox.com/docs/reference/engine/classes/ProximityPrompt"
+    },
+    {
+      "kind": "evaluation",
+      "locator": "roblox-door-holdout-v1"
+    }
+  ]
+}

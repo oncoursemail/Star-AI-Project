@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "skill_id": "research-source-grounding",
+  "version": "1.0.0",
+  "domain": "research",
+  "summary": "Produce current, source-grounded answers with explicit dates, claim-level evidence and calibrated uncertainty.",
+  "preconditions": [
+    {
+      "kind": "fresh_observation",
+      "subject": "source_snapshot",
+      "max_age_ms": 3600000
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "collect",
+      "operation": "request_tool",
+      "intent": "Retrieve primary sources and record publication/update dates.",
+      "tool_name": "research.search",
+      "required_capabilities": [
+        "web.read"
+      ]
+    },
+    {
+      "step_id": "cross-check",
+      "operation": "observe",
+      "intent": "Compare source claims, dates, scope and contradictory evidence."
+    },
+    {
+      "step_id": "verify",
+      "operation": "verify",
+      "intent": "Bind each material claim to evidence or explicitly abstain."
+    }
+  ],
+  "behavior_constraints": [
+    {
+      "constraint_id": "claim-level-citations",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "material_claim"
+      },
+      "expected_behavior": "Attach source evidence to each material claim rather than citing an unrelated source list.",
+      "severity": "critical"
+    },
+    {
+      "constraint_id": "freshness-and-scope",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "time_sensitive_claim"
+      },
+      "expected_behavior": "Record source date, claim scope and freshness; re-check changing facts."
+    },
+    {
+      "constraint_id": "contradiction-check",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "conflicting_sources"
+      },
+      "expected_behavior": "Surface material disagreement and distinguish established facts from inference."
+    },
+    {
+      "constraint_id": "calibrated-abstention",
+      "condition": {
+        "kind": "state_exists",
+        "subject": "insufficient_evidence"
+      },
+      "expected_behavior": "State what is unknown instead of filling gaps with plausible-sounding claims."
+    }
+  ],
+  "postconditions": [
+    {
+      "path": "answer.claims_with_evidence_ratio",
+      "operator": "equals",
+      "value": 1
+    }
+  ],
+  "resource_budget": {
+    "max_elapsed_ms": 120000,
+    "max_steps": 3,
+    "max_tool_calls": 1,
+    "max_tokens": 6000,
+    "max_retries": 1,
+    "max_ram_mib": 256
+  },
+  "provenance": [
+    {
+      "kind": "url",
+      "locator": "https://arxiv.org/abs/2606.02461"
+    },
+    {
+      "kind": "evaluation",
+      "locator": "star-research-grounding-holdout-v1"
+    }
+  ]
+}

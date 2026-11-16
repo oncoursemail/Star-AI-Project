@@ -1,0 +1,96 @@
+run: 59
+date: "2026-11-15"
+title: "Reliability-first streaming, gameplay, learning, and inference"
+branch: "feat/skill-contract-coverage-20261115-run54"
+pull_request: 1209
+base_branch: "main"
+status: "draft; exact-head CI required"
+principles:
+  - "Measure repeated verified outcomes, not isolated lucky success."
+  - "Protect interactive voice and game-control deadlines from background work."
+  - "Use one authority for resource admission, avatar parameter writes, and action authorization."
+  - "Keep user content out of default telemetry; correlate with IDs and monotonic timestamps."
+  - "Promote skills only after paired transfer and negative-transfer evaluation."
+implementation:
+  - path: "star/voice/metrics.py"
+    change: "Add latency_summary with nearest-rank p50/p95/p99 and sample counts."
+    compatibility: "Additive; existing TurnMetrics, to_dict, and latency_table remain unchanged."
+    runtime_wiring: "None; consumers must explicitly call the helper."
+  - path: "tests/test_voice_metrics.py"
+    change: "Cover percentile selection, incomplete turns, interruption/error rates, empty samples, and type rejection."
+    validation: "Pending exact-head GitHub Actions."
+research:
+  skill_learning:
+    source: "https://arxiv.org/abs/2604.20087"
+    name: "SkillLearnBench"
+    date: "2026-04-22"
+    star_decision: "Paired skill-on/off tests, external feedback, transfer and negative-transfer gates."
+  computer_use_reliability:
+    source: "https://arxiv.org/abs/2604.17849"
+    date: "2026-04-20"
+    star_decision: "Repeated identical-task trials, pass^k, ambiguity resolution, recovery and paired comparisons."
+  multiparty_voice:
+    source: "https://aclanthology.org/2026.findings-emnlp.1437/"
+    name: "MP-Bench"
+    date: "2026-10"
+    star_decision: "Separate speaker, addressee, floor ownership, comprehension and response appropriateness."
+  voice_turns:
+    sources:
+      - "https://docs.livekit.io/agents/logic/turns/"
+      - "https://docs.livekit.io/agents/logic/turns/tuning/"
+      - "https://github.com/livekit/eot-bench"
+    star_decision: "Keep endpointing, interruption, preemptive generation, audio preprocessing and inference latency distinct."
+  avatar:
+    sources:
+      - "https://github.com/DenchiSoft/VTubeStudio"
+      - "https://github.com/DenchiSoft/VTubeStudio/wiki/Expressions-%28a.k.a.-Stickers-or-Emotes%29"
+    star_decision: "Single-writer parameter arbitration, latest-wins frames, model-specific validated parameter profiles."
+  obs:
+    source: "https://github.com/obsproject/obs-websocket"
+    star_decision: "Authenticated loopback by default; separate read-only telemetry from mutations."
+  gameplay:
+    source: "https://arxiv.org/abs/2604.07429"
+    name: "GameWorld"
+    date: "2026-04-08"
+    star_decision: "Two-speed control, fresh-observation action binding, state-verifiable outcomes, practice/holdout separation."
+  game_creation:
+    source: "https://github.com/waynchi/gamedevbench"
+    star_decision: "Separate code, scene, visual, gameplay and performance acceptance."
+  inference:
+    sources:
+      - "https://arxiv.org/abs/2605.15051"
+      - "https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench"
+    star_decision: "Paired load-aware speculation tests; accept only if end-to-end tails and task accuracy improve."
+  general_knowledge:
+    sources:
+      - "https://openai.com/index/introducing-simpleqa/"
+      - "https://arxiv.org/abs/2509.07968"
+      - "https://arxiv.org/abs/2311.12983"
+      - "https://openai.com/index/browsecomp/"
+      - "https://www.kaggle.com/benchmarks/google/facts"
+    star_decision: "Separate parametric recall, retrieval-grounded factuality, multi-hop browsing, freshness, calibration, citation entailment, and abstention."
+architecture_reuse:
+  - "star/voice/turn.py"
+  - "star/voice/call.py"
+  - "star/voice/metrics.py"
+  - "star/voice/bridge.py"
+  - "star/brain_router.py"
+  - "star/inference_benchmark.py"
+  - "star/agent_resource_planner.py"
+  - "star/conversation_memory.py"
+  - "star/skill_contract.py"
+  - "star/skill_evolution_lab.py"
+  - "star/clips_obs.py"
+acceptance:
+  - "Exact-head Python and Windows tests pass."
+  - "p95 requires at least 20 observations before being used as a release gate."
+  - "p99 requires at least 100 observations before being used as a release gate."
+  - "Repeated task success and paired deltas are reported."
+  - "Mixed-load voice, game, avatar, OBS and background-work guardrails are measured."
+  - "No content-bearing telemetry is added by default."
+  - "No physical hardware or public-stream claim without an actual host rehearsal."
+non_claims:
+  - "No model weights were trained or changed."
+  - "No live microphone, GPU, OBS, VTube Studio, Roblox Studio, or game session was tested."
+  - "No automatic skill promotion or new permission authority was added."
+  - "The percentile helper measures tails; it does not itself accelerate inference."
