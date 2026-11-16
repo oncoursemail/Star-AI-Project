@@ -77,6 +77,12 @@ primary_research:
     date: 2026-04-06
     focus: Real-human disfluencies and chained spoken tool use.
     star_use: Evaluate speech understanding, latency, turn-taking, and action correctness together.
+  - id: adaptduplex
+    url: https://arxiv.org/abs/2609.29217
+    date: 2026-09-24
+    focus: Adaptive full-duplex response windows and non-blocking cognitive consolidation.
+    star_use: Compare adaptive versus fixed response windows while protecting real-time audio and game-control deadlines.
+    limitation: Reported benchmark scores are not STAR scores and do not establish local RTX 4060 compatibility.
   - id: dualdecoder
     url: https://arxiv.org/abs/2607.26475
     date: 2026-07-29
@@ -96,6 +102,7 @@ catalog_additions:
   - cua-recovery
   - interactionbench
   - eot-bench
+  - adaptduplex
   - dualdecoder
   - flashoffloading
   - llama-speed-bench
