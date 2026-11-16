@@ -1,0 +1,158 @@
+run: 68
+date: 2026-11-16
+repository: oncoursemail/Star-AI-Project
+base_branch: main
+work_branch: research/run66-generalist-gaming-streaming-20261116
+pull_request: 1212
+status: research_and_offline_evaluator_hardening
+summary: >
+  Add a bounded-input safety fix to the gameplay commentary evaluator and document
+  a source-linked integration plan for general assistant research, factuality,
+  cross-application work, generalist gaming, complete-game creation, natural
+  VTuber interaction, local inference, cache isolation, and continual learning.
+runtime_changes: false
+production_defaults_changed: false
+model_weights_changed: false
+third_party_code_installed: false
+datasets_downloaded: false
+media_or_credentials_committed: false
+gpu_benchmark_run: false
+live_stream_tested: false
+target_pc_acceptance_run: false
+files:
+  - path: star/gameplay_commentary_eval.py
+    kind: bounded_evaluator_hardening
+    purpose: >
+      Consume evaluation observations incrementally and reject over-limit input
+      before unbounded materialization; validate each row before retaining it.
+  - path: tests/test_gameplay_commentary_eval.py
+    kind: deterministic_regression_test
+    purpose: >
+      Prove an oversized generator is stopped after the first over-limit item
+      and its remaining tail is not consumed.
+  - path: docs/research/STAR_20261116_RUN68_GENERALIST_CAPABILITY_GATES_KNOWLEDGE_AND_REALTIME_RELIABILITY.md
+    kind: research_and_integration_plan
+sources:
+  - id: sima-2
+    url: https://deepmind.google/blog/sima-2-an-agent-that-plays-reasons-and-learns-with-you-in-virtual-3d-worlds/
+    type: research_system
+    use: strategic reasoning, visual interaction, cross-game skill transfer, self-directed play
+    limitation: research preview; no direct dependency or local capability claim
+  - id: nitrogen
+    url: https://nitrogen.minedojo.org/
+    type: research_system
+    use: fast vision-action policy candidate
+    limitation: released policy is latest-frame reactive control, not long-horizon planning or self-improvement
+  - id: voyager
+    url: https://arxiv.org/abs/2305.16291
+    type: research_paper
+    use: skill library, automatic curriculum, execution feedback, and self-verification
+    limitation: generated executable skills require isolated sandboxing and independent verification
+  - id: cegame-bench
+    url: https://arxiv.org/abs/2610.26098
+    type: research_benchmark
+    date: 2026-10-19
+    use: complete-game creation and real-input completion across five engines
+  - id: gaia
+    url: https://arxiv.org/abs/2311.12983
+    type: research_benchmark
+    use: general assistant reasoning, multimodal handling, browsing, and tool-use evaluation
+  - id: browsecomp
+    url: https://openai.com/index/browsecomp/
+    type: research_benchmark
+    date: 2025-04-10
+    use: persistent multi-hop browsing and evidence assembly
+    limitation: protect canaries and held-out answers from training/retrieval contamination
+  - id: facts-grounding
+    url: https://deepmind.google/blog/facts-grounding-a-new-benchmark-for-evaluating-the-factuality-of-large-language-models/
+    type: research_benchmark
+    use: separate answer eligibility from document-grounded factuality
+  - id: longfact-safe
+    url: https://deepmind.google/research/publications/85420/
+    type: research_method
+    use: claim decomposition and search-augmented long-form factuality evaluation
+  - id: osworld
+    url: https://os-world.github.io/
+    type: research_benchmark
+    use: reproducible execution-based evaluation in real computer environments
+  - id: windowsworld
+    url: https://arxiv.org/abs/2604.27776
+    type: research_benchmark
+    date: 2026-04-30
+    use: multi-application desktop workflows and intermediate checkpoints
+  - id: livekit-turns
+    url: https://docs.livekit.io/agents/logic/turns/
+    type: official_documentation
+    use: separate endpointing, interruption detection, adaptive backchannel handling, and preemptive generation
+    limitation: architecture reference only; no LiveKit dependency installed
+  - id: livekit-adaptive-interruption
+    url: https://docs.livekit.io/agents/logic/turns/adaptive-interruption-handling/
+    type: official_documentation
+    use: distinguish genuine barge-ins from short acknowledgements and recover false interruptions
+  - id: vtube-studio-api
+    url: https://github.com/DenchiSoft/VTubeStudio
+    type: official_documentation
+    use: local WebSocket avatar parameter/hotkey/event control with user authorization
+  - id: obs-websocket
+    url: https://github.com/obsproject/obs-websocket
+    type: official_documentation
+    use: authenticated local OBS control and telemetry
+  - id: llama-speculative
+    url: https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
+    type: official_documentation
+    use: verify actual speculative decoding initialization, implementation, and acceptance
+  - id: llama-cache-isolation-report
+    url: https://github.com/ggml-org/llama.cpp/issues/27148
+    type: upstream_issue_report
+    date: 2026-08-15
+    use: motivates cross-session prompt-cache isolation canaries
+    limitation: issue report, not proof every release is affected
+  - id: llama-cache-restore-report
+    url: https://github.com/ggml-org/llama.cpp/issues/30961
+    type: upstream_issue_report
+    date: 2026-10-22
+    use: motivates pinned-build cache restore and slot-pressure testing
+    limitation: issue report, not a general benchmark
+  - id: nvidia-pair
+    url: https://docs.nvidia.com/local-ai/nvpair
+    type: official_documentation
+    use: optional routing of independent inference requests across trusted nodes
+    limitation: no VRAM pooling, model sharding, or single-request acceleration
+architecture_decisions:
+  - one_existing_turn_session_authority
+  - one_audio_output_owner_and_one_playback_clock
+  - one_avatar_parameter_writer
+  - bounded_incremental_evaluator_input
+  - reuse_existing_skill_contract_and_memory_governance
+  - game_skill_requires_preconditions_postconditions_and_heldout_validation
+  - complete_game_requires_real_input_and_state_based_completion
+  - preserve_stable_prompt_prefix_and_volatile_context_order
+  - prompt_cache_isolation_is_a_correctness_boundary
+  - keep_current_one_resident_model_default_on_8gb_vram_class_target
+  - multi_node_routing_is_for_independent_requests_only
+  - all_external_research_results_are_not_star_measurements
+validation:
+  previous_run67_exact_head:
+    offline_python_checks: passed
+    react_ui_compile_and_tests: passed
+    pyright: passed
+    windows_build_and_package_smoke: passed
+    windows_offline_shards: passed
+    offline_workflow: https://github.com/oncoursemail/Star-AI-Project/actions/runs/43858126290
+    desktop_workflow: https://github.com/oncoursemail/Star-AI-Project/actions/runs/43858126388
+  run68_exact_head:
+    status: pending_after_commit
+    required:
+      - offline_python_regression
+      - pyright
+      - react_ui_compile_and_tests
+      - windows_package_and_offline_shards
+limitations:
+  - no_live_stream_policy_integration
+  - no_live_gameplay_adapter_or_mastery_claim
+  - no_general_knowledge_benchmark_dataset_run
+  - no_model_training_or_weight_updates
+  - no_rtx_4060_desktop_benchmark_or_speedup_claim
+  - no_prompt_cache_setting_changed
+  - no_nvidia_pair_installation_or_node_pairing
+  - draft_pull_request_requires_owner_review_and_exact_head_ci
