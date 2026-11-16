@@ -19,8 +19,8 @@ implementation:
       changes:
         - mean_p50_p95_p99_and_max_per_stage
         - per_metric_sample_counts
-        - p95_sample_readiness_at_20_samples
-        - p99_sample_readiness_at_100_samples
+        - p95_sample_readiness_at_100_samples
+        - p99_sample_readiness_at_1000_samples
         - acknowledgement_first_response_latency
         - first_sentence_to_audio_stage
         - valid_partial_stage_samples_for_incomplete_turns
