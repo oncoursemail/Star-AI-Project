@@ -106,6 +106,11 @@ def test_manifest_cannot_escape_reference_data_and_is_bounded(tmp_path, monkeypa
 
 
 def test_real_and_warmup_prefixes_include_the_same_bank(tmp_path, monkeypatch):
+    # This is a cold-start assertion. Other tests can leave a request shape in
+    # process-global turn_memory for the same project; isolate that unrelated
+    # prior-turn state so Windows test sharding/order cannot change the prompt.
+    monkeypatch.setattr(warmup.turn_memory, "last_shape", lambda _scope: None)
+    monkeypatch.setattr(warmup.turn_memory, "model_shapes", lambda _scope: [])
     monkeypatch.setenv(kb.ENV, "on")
     monkeypatch.setenv("APPDATA", str(tmp_path))
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
