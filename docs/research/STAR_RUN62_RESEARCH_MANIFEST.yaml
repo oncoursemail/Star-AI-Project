@@ -1,0 +1,68 @@
+run: 62
+date: 2026-11-15
+repository: oncoursemail/Star-AI-Project
+branch: research/run60-integration-gates-long-horizon-20261115-star-next
+base: star/next
+status: draft
+scope:
+  - research
+  - test-compatibility
+research_sources:
+  - id: duplexact
+    url: https://arxiv.org/abs/2610.17738
+    date: 2026-10-13
+    use: full-duplex interaction action timing and follow-through
+  - id: multiparty-turn-bench
+    url: https://arxiv.org/abs/2610.20172
+    date: 2026-10-14
+    use: multi-speaker floor control and selective interruption
+  - id: avtr-1
+    url: https://arxiv.org/abs/2609.22913
+    date: 2026-09-19
+    use: audio-video scheduling, interruption epochs, avatar synchronization
+    adoption: research-only
+    licensing_gate: component-specific licenses; renderer and streamer noncommercial terms
+    hardware_note: published RTX 4060 5-frame chunk latency 232ms vs 200ms at 25fps
+  - id: path-bench
+    url: https://arxiv.org/abs/2608.01149
+    date: 2026-08-02
+    use: path-dependent transfer, forgetting, selective experience use
+  - id: continual-autoresearch
+    url: https://arxiv.org/abs/2611.05108
+    date: 2026-11-03
+    use: matched persistent-vs-reset agent research efficiency and final quality
+  - id: gameworld
+    url: https://arxiv.org/abs/2604.07429
+    date: 2026-04-08
+    use: state-verifiable game outcomes and real-time evaluation
+  - id: llama-cpp-speculative
+    url: https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
+    use: capability-gated speculative decoding experiments
+implementation:
+  runtime_files_changed: false
+  test_files_changed:
+    - tests/test_voice_latency_summary.py
+  research_files:
+    - docs/research/STAR_20261115_RUN62_FULL_DUPLEX_AVATAR_CONTINUAL_LEARNING_AND_HARDWARE_ACCEPTANCE.md
+    - docs/research/STAR_RUN62_RESEARCH_MANIFEST.yaml
+test_repair:
+  failing_workflow_run: 43795859413
+  failing_commit: ca18c71474e26990cdcba7c8e09ae5e137bc986c
+  failed_tests:
+    - tests/test_voice_latency_summary.py::test_nearest_rank_percentiles_and_excluded_errors
+    - tests/test_voice_latency_summary.py::test_no_data_means_unknown_not_fast
+  cause: legacy exact-dictionary expectations did not include Run 61 aggregate fields
+  intended_fix: update expected result shape while preserving unknown-data and privacy assertions
+acceptance:
+  - exact-head offline Python regression suite
+  - Pyright
+  - React compile and tests
+  - Windows desktop/installer workflow when runner policy permits
+  - target-PC microphone, playback loopback, OBS, VTube Studio, and real gameplay
+non_claims:
+  - no model weights trained
+  - no GPU speedup measured
+  - no AVTR-1 integration or license grant
+  - no live stream acceptance
+  - no production defaults changed
+  - no merge to star/next
