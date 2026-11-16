@@ -90,18 +90,18 @@ def test_latency_summary_reports_p99_and_does_not_return_transcript_text():
             first_token_at=0.0005, first_sentence_at=0.00075,
             first_ack_at=0.0004, first_audio_at=(i + 1) / 1000,
         )
-        for i in range(100)
+        for i in range(1000)
     ]
     summary = latency_summary(turns)
     total = summary["latency"]["speech_end_to_audio_submitted"]
     assert total == {
-        "n": 100, "mean_ms": 50.5, "p50_ms": 50.0, "p95_ms": 95.0,
-        "p99_ms": 99.0, "max_ms": 100.0,
+        "n": 1000, "mean_ms": 500.5, "p50_ms": 500.0, "p95_ms": 950.0,
+        "p99_ms": 990.0, "max_ms": 1000.0,
         "p95_sample_ready": True, "p99_sample_ready": True,
     }
     perceived = summary["latency"]["speech_end_to_first_response_submitted"]
     assert perceived["p50_ms"] == 0.4
-    assert summary["sample_guidance"] == {"p95_min_samples": 20, "p99_min_samples": 100}
+    assert summary["sample_guidance"] == {"p95_min_samples": 100, "p99_min_samples": 1000}
     assert "private prompt" not in repr(summary)
     assert "private reply" not in repr(summary)
 
@@ -109,11 +109,11 @@ def test_latency_summary_reports_p99_and_does_not_return_transcript_text():
 def test_latency_summary_marks_small_tail_samples_as_descriptive_only():
     turns = [
         TurnMetrics(speech_end=0.0, first_audio_at=(i + 1) / 1000)
-        for i in range(20)
+        for i in range(100)
     ]
     total = latency_summary(turns)["latency"]["speech_end_to_audio_submitted"]
-    assert total["n"] == 20
-    assert total["p95_ms"] == 19.0
+    assert total["n"] == 100
+    assert total["p95_ms"] == 95.0
     assert total["p95_sample_ready"] is True
     assert total["p99_ms"] is None
     assert total["p99_sample_ready"] is False
