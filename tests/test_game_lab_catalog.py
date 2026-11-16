@@ -23,6 +23,9 @@ def test_statuses_do_not_exaggerate_capabilities():
 
 
 def test_search_category_and_bounded_results():
+    assert catalog()["total"] == len(SOURCES)
+    assert not catalog()["truncated"]
+    assert len(catalog()["sources"]) == len(SOURCES)
     assert catalog("Xbox")["total"] >= 3
     assert {s["category"] for s in catalog(category="recomp")["sources"]} == {"recomp"}
     assert catalog(limit=2)["truncated"]
