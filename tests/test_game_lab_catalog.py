@@ -66,3 +66,18 @@ def test_run64_research_sources_are_discoverable_and_caveated():
 def test_bad_filters_refused(kwargs):
     with pytest.raises(ValueError):
         catalog(**kwargs)
+
+
+def test_run65_sources_are_discoverable_and_scoped():
+    sources = {source.id: source for source in SOURCES}
+    expected = {"cegame-bench", "full-duplex-bench-v3", "windowsworld", "obs-websocket"}
+    assert expected <= set(sources)
+    assert all(sources[source_id].status == "research_only" for source_id in expected)
+    assert all(sources[source_id].url.startswith("https://") for source_id in expected)
+    assert catalog("CEGame-Bench")["total"] == 1
+    assert catalog(category="game_creation")["total"] == 1
+    assert "hidden real-input play evaluation" in sources["cegame-bench"].scope
+    assert "five disfluency classes" in sources["full-duplex-bench-v3"].scope
+    assert "intermediate process checkpoints" in sources["windowsworld"].scope
+    assert sources["obs-websocket"].kind == "local_api"
+    assert "password authentication" in sources["obs-websocket"].warning
