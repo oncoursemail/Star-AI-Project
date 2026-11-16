@@ -21,6 +21,8 @@ files:
       collaborative completions/corrections, genuine takeovers, and uncertain
       overlap; integrate with existing room, playback, memory, gaming, and
       creator authorities without duplicating them.
+  - path: docs/research/STAR_RUN63_RESEARCH_MANIFEST.yaml
+    purpose: Reproducibility and acceptance manifest for Run 63.
 
 primary_research:
   - id: duplex-cue
@@ -79,16 +81,8 @@ integration_targets:
     modify their files or claim they are production capabilities.
 
 proposed_policy:
-  listener_intents:
-    - BACKCHANNEL
-    - COLLABORATION
-    - TAKEOVER
-    - UNCERTAIN
-  response_actions:
-    - CONTINUE
-    - ADAPT
-    - YIELD
-    - HOLD
+  listener_intents: [BACKCHANNEL, COLLABORATION, TAKEOVER, UNCERTAIN]
+  response_actions: [CONTINUE, ADAPT, YIELD, HOLD]
   invariants:
     - Already-played speech is immutable.
     - Only uncommitted speech may be revised or cancelled.
@@ -98,11 +92,7 @@ proposed_policy:
     - Tool and game actions remain subject to existing gates.
 
 evaluation_plan:
-  splits:
-    - speaker_disjoint
-    - conversation_disjoint
-    - topic_holdout
-    - noise_condition_holdout
+  splits: [speaker_disjoint, conversation_disjoint, topic_holdout, noise_condition_holdout]
   slices:
     - backchannel
     - collaborative_completion
@@ -145,7 +135,7 @@ acceptance:
 
 run_status:
   research_document_committed: true
-  manifest_committed: false
+  manifest_committed: true
   runtime_implementation: not_started
   tests_executed: false
   ci: not_started
