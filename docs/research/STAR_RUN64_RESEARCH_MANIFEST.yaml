@@ -1,0 +1,124 @@
+schema_version: 1
+run_id: STAR-2026-11-16-RUN64
+title: Integrated runtime, long-horizon recovery, game learning, and mixed-load performance
+repository: oncoursemail/Star-AI-Project
+branch: research/run63-duplex-cue-in-turn-adaptation-20261115
+base_branch: main
+change_type: research_plus_read_only_catalog_and_tests
+runtime_policy_changed: false
+production_defaults_changed: false
+permissions_changed: false
+third_party_code_installed: false
+benchmark_datasets_downloaded: false
+raw_audio_committed: false
+model_weights_changed: false
+hardware_benchmarks_run: false
+live_device_acceptance_run: false
+
+files:
+  - path: docs/research/STAR_20261116_RUN64_INTEGRATED_RUNTIME_LONG_HORIZON_RECOVERY_GAME_LEARNING_AND_MIXED_LOAD.md
+    purpose: >
+      Source-linked architecture and research plan covering test-time learning,
+      recovery from policy-induced errors, Roblox and multimodal game evaluation,
+      natural voice interaction, real-time avatar delivery, inference performance,
+      general knowledge, feature backlog, and acceptance gates.
+  - path: docs/research/STAR_RUN64_RESEARCH_MANIFEST.yaml
+    purpose: Reproducibility, evidence boundaries, integration targets, and
+      validation requirements for Run 64.
+  - path: star/game_lab_catalog.py
+    purpose: >
+      Add current research-only sources to the existing read-only Game Lab
+      catalog and update its checked-on date.
+  - path: tests/test_game_lab_catalog.py
+    purpose: >
+      Verify new source IDs, category discovery, source-specific caveats,
+      HTTPS URLs, research-only status, and the catalog review date.
+
+primary_research:
+  - id: agentodyssey
+    url: https://agentodyssey.github.io/
+    date: 2026
+    venue: NeurIPS 2026
+    focus: Test-time continual learning in procedurally generated long-horizon worlds.
+    star_use: Evaluate exploration, world-knowledge acquisition, episodic memory, skill learning, planning, and cost.
+    limitation: Benchmark performance is not STAR performance; short-term memory results do not justify indiscriminate memory growth.
+  - id: cua-recovery
+    url: https://arxiv.org/abs/2610.27645
+    date: 2026-10-20
+    focus: Detecting and recovering from policy-induced errors in long-horizon desktop workflows.
+    star_use: Checkpoint lineage, error awareness, root-cause localization, and verified recovery.
+    limitation: Published fine-tuning gains are model- and benchmark-specific.
+  - id: opengameeval
+    url: https://arxiv.org/abs/2610.02563
+    date: 2026-10-01
+    focus: Stateful Roblox Studio exploration, editing, scene verification, and simulated play.
+    star_use: Inspect-before-edit traces and repeated executable task evaluation.
+    limitation: Reported success rates are not STAR scores or live Roblox acceptance.
+  - id: gameworld
+    url: https://arxiv.org/abs/2604.07429
+    date: 2026-04-08
+    focus: 34 games and 170 state-verifiable multimodal game tasks.
+    star_use: Separate progress, success, and real-time control tracks.
+    limitation: Paused benchmark results do not establish real-time performance.
+  - id: interactionbench
+    url: https://arxiv.org/abs/2611.02430
+    date: 2026-11-02
+    focus: Conversational timing, spoken task accuracy, paralinguistic behavior, and long-context grounding.
+    star_use: Measure client-heard delivery and task correctness separately.
+    limitation: Protocol differences constrain direct cross-system rankings.
+  - id: eot-bench
+    url: https://github.com/livekit/eot-bench
+    date: 2026
+    focus: Real human-to-agent turn endpoints across 14 languages.
+    star_use: Pause-aware endpointing and false-cutoff evaluation.
+    limitation: Benchmark is an evaluator, not a production voice engine.
+  - id: full-duplex-bench-v3
+    url: https://arxiv.org/abs/2604.04847
+    date: 2026-04-06
+    focus: Real-human disfluencies and chained spoken tool use.
+    star_use: Evaluate speech understanding, latency, turn-taking, and action correctness together.
+  - id: dualdecoder
+    url: https://arxiv.org/abs/2607.26475
+    date: 2026-07-29
+    focus: Predictive prefetch for sparse host-memory KV retrieval.
+    reported_result: Up to 2.62x decode throughput in the evaluated system.
+    limitation: Not evidence of compatibility or speedup on STAR's current backend or RTX 4060.
+  - id: flashoffloading
+    url: https://arxiv.org/abs/2611.07542
+    date: 2026-11-05
+    focus: Host-DRAM KV offload with compute/load overlap.
+    limitation: Reported results use Ascend 910C and are not transferable to STAR's NVIDIA GPU.
+
+catalog_additions:
+  - opengameeval
+  - gameworld
+  - agentodyssey
+  - cua-recovery
+  - interactionbench
+  - eot-bench
+  - dualdecoder
+  - flashoffloading
+  - llama-speed-bench
+  - gamedevbench
+  - vtube-studio-api
+
+architecture_decisions:
+  - Extend existing room, playback, avatar, game, computer-use, memory, and resource-admission authorities.
+  - Do not add a parallel scheduler, voice engine, avatar writer, memory database, or game controller.
+  - Keep real-time control separate from strategic reasoning and background learning.
+  - Use bounded queues, monotonic event IDs, cancellation epochs, and explicit freshness budgets.
+  - Treat retrieved memory and viewer chat as untrusted data, not permissions.
+  - Verify actual game state and delivered audio rather than relying only on generated text or queue timestamps.
+  - Evaluate positive transfer, negative interference, forgetting, recovery, and task cost independently.
+  - Require matched hardware baselines before claiming speedups.
+
+validation:
+  source_catalog_tests: required
+  exact_head_ci: required
+  windows_target_pc_acceptance: not_run
+  gpu_mixed_load_benchmark: not_run
+  microphone_loopback: not_run
+  obs_and_vtube_studio_acceptance: not_run
+  real_gameplay_acceptance: not_run
+  model_training: not_run
+  production_merge: not_authorized
