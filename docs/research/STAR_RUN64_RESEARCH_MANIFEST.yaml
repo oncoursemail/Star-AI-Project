@@ -101,6 +101,13 @@ primary_research:
     focus: Host-DRAM KV offload with compute/load overlap.
     limitation: Reported results use Ascend 910C and are not transferable to STAR's NVIDIA GPU.
 
+  - id: vtube-studio-api
+    url: https://github.com/DenchiSoft/VTubeStudio
+    date: 2026-11-16
+    focus: Local WebSocket API, explicit plugin authentication, event subscriptions, custom parameter injection, and parameter ownership.
+    star_use: One authorized avatar bridge with cached parameter schema, event-driven updates, and a single writer per parameter.
+    limitation: Full parameter-list polling at 60+ FPS may cause performance issues; tokens are revocable and must remain secret.
+
 catalog_additions:
   - opengameeval
   - gameworld
