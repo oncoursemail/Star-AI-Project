@@ -1,7 +1,7 @@
 import pytest
 
-from star.voice import endpointing_eval
-from star.endpointing_eval import Decision, evaluate
+import star.voice.endpointing_eval as endpointing_eval
+from star.voice.endpointing_eval import Decision, evaluate
 
 
 def decision(
