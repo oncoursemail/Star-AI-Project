@@ -78,6 +78,11 @@ def _distribution(values: list[float]) -> dict:
     }
 
 
+def _trigger_latency(row: Decision) -> float:
+    assert row.decision_latency_ms is not None
+    return float(row.decision_latency_ms)
+
+
 def _summary(rows: list[Decision]) -> dict:
     eot_rows = [row for row in rows if row.label == "eot"]
     hold_rows = [row for row in rows if row.label == "hold"]
@@ -86,13 +91,13 @@ def _summary(rows: list[Decision]) -> dict:
     false_cutoffs = [row for row in hold_rows if row.action == "trigger"]
 
     endpoint_delays = [
-        float(row.decision_latency_ms)
+        _trigger_latency(row)
         if row.action == "trigger"
         else float(row.timeout_ms)
         for row in eot_rows
     ]
     false_cutoff_delays = [
-        float(row.decision_latency_ms) for row in false_cutoffs
+        _trigger_latency(row) for row in false_cutoffs
     ]
     return {
         "decisions": len(rows),
@@ -103,7 +108,7 @@ def _summary(rows: list[Decision]) -> dict:
             "missed_rate": _rate(missed_eot, len(eot_rows)),
             "endpoint_delay_ms": _distribution(endpoint_delays),
             "triggered_delay_ms": _distribution([
-                float(row.decision_latency_ms) for row in triggered_eot
+                _trigger_latency(row) for row in triggered_eot
             ]),
         },
         "mid_turn_hold": {
@@ -182,10 +187,9 @@ def evaluate(decisions: Iterable[Decision]) -> dict:
 
     policy_ids = sorted(by_policy)
     union_samples = set(sample_metadata)
-    common_samples = (
-        set.intersection(*(policy_samples[key] for key in policy_ids))
-        if policy_ids else set()
-    )
+    common_samples = set(union_samples)
+    for policy_id in policy_ids:
+        common_samples.intersection_update(policy_samples[policy_id])
     complete = bool(policy_ids) and all(
         policy_samples[key] == union_samples for key in policy_ids
     )
@@ -217,7 +221,7 @@ def evaluate(decisions: Iterable[Decision]) -> dict:
             points[policy_id] = (false_rate, missed_rate, p95_delay)
 
     frontier: list[str] = []
-    if complete:
+    if complete and len(points) == len(policy_ids):
         for policy_id, point in points.items():
             if not any(
                 other_id != policy_id and _dominates(other, point)
