@@ -47,6 +47,10 @@ sources:
     url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
     kind: official_benchmark
     use: matched inference latency, throughput, and draft-acceptance tests
+  - id: llama-kv-fa-fallback
+    url: https://github.com/ggml-org/llama.cpp/issues/28455
+    kind: upstream_issue
+    use: guard against backend fallback when testing quantized KV and flash attention
 changes:
   - path: star/gameplay_commentary_eval.py
     kind: new_offline_evaluator
