@@ -77,6 +77,12 @@ primary_research:
     date: 2026-04-06
     focus: Real-human disfluencies and chained spoken tool use.
     star_use: Evaluate speech understanding, latency, turn-taking, and action correctness together.
+  - id: video-interactionbench
+    url: https://arxiv.org/abs/2610.05775
+    date: 2026-10-05
+    focus: Event-triggered streaming-video responses, timing, content accuracy, and silence compliance.
+    star_use: Evaluate whether game commentary is useful and timely without speaking on negative or near-miss visual events.
+    limitation: Offline video evaluation does not establish live capture, game-state, or stream latency.
   - id: adaptduplex
     url: https://arxiv.org/abs/2609.29217
     date: 2026-09-24
@@ -102,6 +108,7 @@ catalog_additions:
   - cua-recovery
   - interactionbench
   - eot-bench
+  - video-interactionbench
   - adaptduplex
   - dualdecoder
   - flashoffloading
