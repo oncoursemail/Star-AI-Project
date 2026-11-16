@@ -52,7 +52,8 @@ def test_run64_research_sources_are_discoverable_and_caveated():
     assert catalog("NeurIPS 2026")["total"] == 1
     assert "not a drop-in" in sources["dualdecoder"].warning
     assert "Ascend 910C" in sources["flashoffloading"].warning
-    assert "viewer chat" in sources["vtube-studio-api"].warning
+    assert "revocable secret token" in sources["vtube-studio-api"].warning
+    assert "one writer" in sources["vtube-studio-api"].warning
 
 
 @pytest.mark.parametrize("kwargs",[
