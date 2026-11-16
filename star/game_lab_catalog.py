@@ -147,8 +147,7 @@ SOURCES = (
     Source("vtube-studio-api","VTube Studio API",
            "https://github.com/DenchiSoft/VTubeStudio",
            "vtuber","Local WebSocket API for authorized parameter injection, expression/hotkey control and event subscriptions",
-           warning="Requires explicit user authorization and a revocable secret token; avoid 60+ FPS full-parameter polling and keep one writer per overridden parameter.")
-
+           warning="Requires explicit user authorization and a revocable secret token; avoid 60+ FPS full-parameter polling and keep one writer per overridden parameter."),
     Source("cegame-bench","CEGame-Bench — long-horizon complete-game creation",
            "https://arxiv.org/abs/2610.26098",
            "game_creation","Five production engines (Defold, Godot, Roblox Studio, Unity, Unreal); contract-driven builds and hidden real-input play evaluation; reports a major artifact-to-play gap",
