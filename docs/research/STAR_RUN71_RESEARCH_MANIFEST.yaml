@@ -1,0 +1,72 @@
+run: 71
+date: 2026-11-16
+title: Skill utility, continual learning, real-time avatar interaction, and capability economics
+status: research_and_offline_evaluation
+implementation:
+  added:
+    - star/skill_utility_eval.py
+    - tests/test_skill_utility_eval.py
+  local_validation:
+    command: pytest -q tests/test_skill_utility_eval.py
+    result: passed
+    tests: 20
+  runtime_integrations: none
+  model_weights_changed: false
+  defaults_changed: false
+  permissions_changed: false
+  auto_promotion: false
+research_sources:
+  - id: swe-skills-bench
+    url: https://arxiv.org/abs/2603.15401
+    date: 2026-03-16
+    focus: paired skill-on/off utility and token overhead
+  - id: memento-skills
+    url: https://arxiv.org/abs/2603.18743
+    date: 2026-03-19
+    focus: externalized procedural memory and reflective skill evolution
+  - id: skilllearnbench
+    url: https://arxiv.org/abs/2604.20087
+    date: 2026-04-22
+    focus: skill quality, execution trajectory, and task outcome
+  - id: after
+    url: https://arxiv.org/abs/2606.23127
+    date: 2026-06-22
+    focus: cross-task, cross-role, and cross-model skill transfer
+  - id: e2e-swe
+    url: https://arxiv.org/abs/2609.38335
+    date: 2026-09-29
+    focus: whole-repository generation with hidden tests
+  - id: avtr-1
+    url: https://arxiv.org/abs/2609.22913
+    date: 2026-09-19
+    focus: real-time audio/video avatar synchronization
+  - id: interactionbench
+    url: https://arxiv.org/abs/2611.02430
+    date: 2026-11-02
+    focus: timing, spoken-task accuracy, prosody, and long-turn grounding
+  - id: swe-atlas
+    url: https://labs.scale.com/leaderboard/swe-atlas
+    date: 2026-11
+    focus: codebase comprehension, test writing, and refactoring
+  - id: turboquant
+    url: https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/
+    date: 2026-03-24
+    focus: KV-cache compression research; target hardware validation required
+  - id: llama-cpp-speed-bench
+    url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+    focus: prompt/decode throughput, latency, and speculative acceptance
+  - id: llama-cpp-speculative
+    url: https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
+    focus: speculative decoding methods and tradeoffs
+  - id: vulkan-speculative-replay-issue
+    url: https://github.com/ggml-org/llama.cpp/issues/28060
+    date: 2026-08-31
+    focus: backend-specific livelock report; canary and watchdog requirement
+acceptance:
+  holdout_sealed: true
+  paired_provenance_required: true
+  unpaired_trials_excluded: true
+  mismatched_pairs_rejected: true
+  no_automatic_skill_promotion: true
+  client_heard_latency_required_for_stream_claims: true
+  exact_hardware_and_backend_required_for_speed_claims: true

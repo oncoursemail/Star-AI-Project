@@ -1,0 +1,137 @@
+run: 69
+date: 2026-11-16
+repository: oncoursemail/Star-AI-Project
+base_branch: main
+work_branch: research/run66-generalist-gaming-streaming-20261116
+pull_request: 1212
+status: offline_mixed_load_evaluator_and_research
+summary: >
+  Add a bounded, privacy-minimal evaluator for paired baseline/candidate
+  measurements across idle, game-only, stream-only, and mixed workloads,
+  plus research on generalist game agents, memory-hierarchy inference,
+  distributed independent-request routing, natural turn-taking, and PR
+  dependency consolidation.
+runtime_wired: false
+production_defaults_changed: false
+model_weights_changed: false
+inference_routes_changed: false
+resource_scheduler_changed: false
+voice_or_avatar_runtime_changed: false
+game_control_changed: false
+permissions_changed: false
+microphone_obs_or_vtube_studio_connected: false
+gpu_benchmark_run: false
+target_pc_acceptance_run: false
+live_gameplay_tested: false
+live_stream_tested: false
+datasets_downloaded: false
+third_party_code_installed: false
+credentials_or_media_committed: false
+code_changes:
+  - path: star/mixed_load_eval.py
+    kind: bounded_offline_evaluator
+    purpose: >
+      Summarize cold/warm and idle/game/stream/mixed measurements, TTFT, prompt
+      prefill/decode throughput, client-heard latency, deadlines, task success,
+      counters, and matched candidate-minus-baseline deltas
+      without a composite score or automatic promotion decision.
+  - path: tests/test_mixed_load_eval.py
+    kind: deterministic_regression_tests
+    purpose: >
+      Cover distribution summaries, pairing by case and replicate, unmatched
+      rows, missing values, deadlines, counters, invalid inputs, duplicates,
+      and bounded generator consumption.
+research:
+  - path: docs/research/STAR_20261116_RUN69_MIXED_LOAD_BENCHMARK_AND_INTEGRATION_DEPENDENCIES.md
+    kind: research_and_integration_plan
+sources:
+  - id: gamer-2026
+    url: https://arxiv.org/abs/2611.18397
+    date: 2026-11-13
+    type: research_paper
+    use: long-horizon generalist vision-language-action gameplay, memory, sparse-thinking, multi-turn RL
+    limitation: new paper; cloud-edge and training-scale results are not a local RTX 4060 deployment claim
+  - id: generalist-game-agent-survey
+    url: https://github.com/THUSI-Lab/Awesome-LFMs-Play-Games
+    date: 2026-10-21
+    type: research_survey_and_living_catalog
+    use: separate game-agent datasets, models, harnesses, and benchmarks
+    limitation: curated catalog; artifact availability and individual claims require source-level review
+  - id: strataflux
+    url: https://arxiv.org/abs/2611.08363
+    date: 2026-11-05
+    type: research_paper
+    use: selective precision refinement and overlapped host/storage-to-device delivery
+    limitation: RTX 5090 and unified-memory results are not transferable to STAR's GPU without measurement
+  - id: flashoffloading
+    url: https://arxiv.org/abs/2611.07542
+    date: 2026-11-05
+    type: research_paper
+    use: KV cache hotness, host-device overlap, and long-context memory pressure
+    limitation: reported deployment is Ascend 910C with vLLM-Ascend, not NVIDIA STAR hardware
+  - id: nvidia-pair
+    url: https://docs.nvidia.com/local-ai/nvpair
+    type: official_documentation
+    use: route independent inference requests to trusted paired nodes
+    limitation: no VRAM pooling, model sharding, or in-flight request migration
+  - id: llama-cpp-speed-bench
+    url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+    type: official_benchmark_documentation
+    use: matched baseline/speculative tests, per-category prefill/decode/latency/draft acceptance
+    limitation: concurrency should match server slots; target hardware and exact build still required
+  - id: llama-cpp-ngram-cache-issue
+    url: https://github.com/ggml-org/llama.cpp/issues/27852
+    type: upstream_issue_report
+    date: 2026-08-28
+    use: motivate exact-build speculative-state reset and cross-request cache-isolation canaries
+    limitation: issue is closed as not planned and does not establish that every build is affected
+  - id: livekit-turns
+    url: https://docs.livekit.io/agents/logic/turns/
+    type: official_documentation
+    use: separate endpointing, interruption, playback truncation, and turn ownership
+  - id: livekit-adaptive-interruption
+    url: https://docs.livekit.io/agents/logic/turns/adaptive-interruption-handling/
+    type: official_documentation
+    use: distinguish genuine barge-ins from conversational backchannels
+  - id: livekit-turn-tuning
+    url: https://docs.livekit.io/agents/logic/turns/tuning/
+    type: official_documentation
+    use: dynamic endpointing and preemptive-generation tradeoffs
+  - id: vtube-studio-api
+    url: https://github.com/DenchiSoft/VTubeStudio
+    type: official_api_documentation
+    use: authorized local WebSocket plugin, event subscriptions, model/parameter control
+    limitation: user approval required; token must remain secret
+  - id: obs-websocket
+    url: https://github.com/obsproject/obs-websocket
+    type: official_project_documentation
+    use: authenticated OBS control and stream event integration
+    limitation: local authenticated control preferred; remote control needs separate review
+architecture_decisions:
+  - reuse_existing_resource_admission_and_stream_pressure_authorities
+  - reuse_existing_voice_room_turn_and_playback_authorities
+  - reuse_existing_skill_contract_and_paired_promotion_gate
+  - route_only_independent_background_requests_across_nodes
+  - keep_interactive_voice_and_gameplay_on_measured_warm_local_path
+  - cache_isolation_is_a_correctness_boundary
+  - evaluate_client_heard_audio_separately_from_queue_submission
+  - keep_cold_warm_and_workload_scenarios_separate
+  - no_composite_human_likeness_or_performance_score
+validation:
+  run69_exact_head:
+    status: pending
+    required:
+      - python_compile_and_ruff
+      - pyright
+      - full_offline_python_regression
+      - react_ui_compile_and_tests
+      - windows_desktop_package_and_offline_shards
+limitations:
+  - evaluator_is_offline_and_not_connected_to_live_telemetry
+  - no_target_pc_rtx_4060_mixed_load_measurement
+  - no_measured_speedup_or_model_quality_gain
+  - no_model_training_or_weight_updates
+  - no_game_mastery_or_complete_game_creation_claim
+  - no_live_microphone_obs_vtube_studio_or_public_stream_test
+  - no_third_party_runtime_installed
+  - pull_request_is_draft_and_requires_owner_review
