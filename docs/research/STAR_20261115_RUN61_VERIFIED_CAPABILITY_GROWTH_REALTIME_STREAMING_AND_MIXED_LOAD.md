@@ -55,7 +55,7 @@ A mean or median can conceal the slowest and most disruptive voice turns. Live c
 The updated `latency_summary()` now:
 
 - Reports mean, p50, p95, p99, and maximum for each stage where samples exist.
-- Marks p95 sample readiness at 20 samples and p99 readiness at 100 samples. The flags are descriptive sample-volume guidance, not automatic release gates.
+- Marks p95 sample readiness at 100 samples and p99 readiness at 1,000 samples. The flags are conservative descriptive sample-volume guidance, not automatic release gates.
 - Reports the number of samples for every stage independently.
 - Separates first generated audio submission from the first response submission, which may be an acknowledgement clip.
 - Adds first-sentence/TTS handoff stage measurements.
@@ -70,8 +70,8 @@ The updated `latency_summary()` now:
 
 `tests/test_voice_metrics.py` now covers:
 
-- Nearest-rank p50/p95/p99 on a deterministic 100-turn sample.
-- p99 withheld until the 100-sample guidance threshold.
+- Nearest-rank p50/p95/p99 on a deterministic 1,000-turn sample.
+- p99 withheld until the 1,000-sample guidance threshold.
 - Acknowledgement-first perceived response.
 - Partial pipeline stages on an incomplete turn.
 - Non-finite clock rejection.
