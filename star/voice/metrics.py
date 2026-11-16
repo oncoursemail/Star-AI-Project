@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
+import math
 
 
 @dataclass
@@ -50,6 +51,71 @@ class TurnMetrics:
         data = asdict(self)
         data["stages"] = {k: (None if v is None else round(v, 3)) for k, v in self.stages().items()}
         return data
+
+
+def _nearest_rank(values: list[float], quantile: float) -> float | None:
+    """Nearest-rank percentile; stable, dependency-free, and explicit for small samples."""
+    if not values:
+        return None
+    ordered = sorted(values)
+    index = max(0, math.ceil(quantile * len(ordered)) - 1)
+    return round(ordered[index], 3)
+
+
+def latency_summary(turns: list[TurnMetrics]) -> dict:
+    """Summarize voice latency tails without hiding incomplete or interrupted turns.
+
+    Duration percentiles use seconds; generation-rate percentiles use tokens/second.
+    Nearest-rank p95/p99 are descriptive only: consumers should require at least
+    20/100 complete observations before using those tails as release gates.
+    """
+    if not isinstance(turns, list) or any(not isinstance(turn, TurnMetrics) for turn in turns):
+        raise TypeError("turns must be a list of TurnMetrics")
+    stage_names = (
+        "endpoint", "asr", "speech_end_to_transcript",
+        "transcript_to_first_token", "first_token_to_first_audio", "total",
+        "tokens_per_second",
+    )
+    samples: dict[str, list[float]] = {name: [] for name in stage_names}
+    complete = 0
+    interrupted = 0
+    errors = 0
+    for turn in turns:
+        stages = turn.stages()
+        if stages["total"] is not None:
+            complete += 1
+        interrupted += int(turn.interrupted)
+        errors += int(bool(turn.error))
+        for name in stage_names:
+            value = stages[name]
+            if value is not None:
+                samples[name].append(value)
+
+    percentiles = {
+        name: {
+            "count": len(values),
+            "p50": _nearest_rank(values, 0.50),
+            "p95": _nearest_rank(values, 0.95),
+            "p99": _nearest_rank(values, 0.99),
+        }
+        for name, values in samples.items()
+    }
+    count = len(turns)
+    return {
+        "turns": count,
+        "complete_turns": complete,
+        "interrupted_turns": interrupted,
+        "error_turns": errors,
+        "interruption_rate": round(interrupted / count, 4) if count else None,
+        "error_rate": round(errors / count, 4) if count else None,
+        "percentile_method": "nearest_rank",
+        "tail_guidance": {
+            "p95_min_samples": 20,
+            "p99_min_samples": 100,
+            "release_gate": False,
+        },
+        "stages": percentiles,
+    }
 
 
 def _cell(value: float | None, width: int, digits: int = 2) -> str:
