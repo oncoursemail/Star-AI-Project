@@ -103,7 +103,6 @@ def latency_summary(turns: list[TurnMetrics]) -> dict:
             invalid += 1
             continue
 
-        # A generated token cannot arrive after the first generated audio chunk.
         if (turn.speech_end is not None and turn.first_audio_at is not None
                 and turn.first_audio_at < turn.speech_end):
             invalid += 1
@@ -149,8 +148,8 @@ def latency_summary(turns: list[TurnMetrics]) -> dict:
         ordered = sorted(values)
         n = len(ordered)
         index = lambda percentile: ordered[ceil(percentile * n) - 1]
-        p95_ready = n >= 20
-        p99_ready = n >= 100
+        p95_ready = n >= 100
+        p99_ready = n >= 1000
         return {
             "n": n,
             "mean_ms": round(sum(ordered) / n, 1),
@@ -168,7 +167,7 @@ def latency_summary(turns: list[TurnMetrics]) -> dict:
         "incomplete_turns": incomplete,
         "invalid_clock_turns": invalid,
         "interrupted_turns": sum(t.interrupted for t in turns),
-        "sample_guidance": {"p95_min_samples": 20, "p99_min_samples": 100},
+        "sample_guidance": {"p95_min_samples": 100, "p99_min_samples": 1000},
         "latency": {key: quantiles(values) for key, values in samples.items()},
     }
 
