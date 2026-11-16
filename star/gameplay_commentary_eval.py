@@ -65,12 +65,15 @@ def evaluate(observations: Iterable[Observation]) -> dict:
     No composite human-likeness score is produced: strong answer accuracy
     must not hide false commentary, poor silence behaviour, or ungrounded speech.
     Missing timestamps and unreviewed grounding remain missing, never imputed.
+    Input is consumed incrementally and bounded before any unbounded materialization.
     """
-    rows = list(observations)
-    if len(rows) > MAX_OBSERVATIONS:
-        raise ValueError(f"At most {MAX_OBSERVATIONS} observations are allowed")
-    if any(not isinstance(row, Observation) for row in rows):
-        raise ValueError("Every row must be an Observation")
+    rows: list[Observation] = []
+    for row in observations:
+        if len(rows) >= MAX_OBSERVATIONS:
+            raise ValueError(f"At most {MAX_OBSERVATIONS} observations are allowed")
+        if not isinstance(row, Observation):
+            raise ValueError("Every row must be an Observation")
+        rows.append(row)
 
     ids: set[str] = set()
     confusion = {
