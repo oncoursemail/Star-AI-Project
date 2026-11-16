@@ -146,8 +146,8 @@ SOURCES = (
            warning="External benchmark results are not proof of STAR game quality or a successful project build."),
     Source("vtube-studio-api","VTube Studio API",
            "https://github.com/DenchiSoft/VTubeStudio",
-           "vtuber","Official WebSocket API reference for local parameter and expression control",
-           warning="Requires user-authorized API token and permissions; never expose tokens or accept viewer chat as authorization.")
+           "vtuber","Local WebSocket API for authorized parameter injection, expression/hotkey control and event subscriptions",
+           warning="Requires explicit user authorization and a revocable secret token; avoid 60+ FPS full-parameter polling and keep one writer per overridden parameter.")
 )
 
 
