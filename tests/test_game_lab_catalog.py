@@ -38,7 +38,7 @@ def test_run64_research_sources_are_discoverable_and_caveated():
     sources = {s.id: s for s in SOURCES}
     expected = {
         "opengameeval", "gameworld", "agentodyssey", "cua-recovery",
-        "interactionbench", "adaptduplex", "eot-bench", "dualdecoder", "flashoffloading",
+        "interactionbench", "adaptduplex", "video-interactionbench", "eot-bench", "dualdecoder", "flashoffloading",
         "llama-speed-bench", "gamedevbench", "vtube-studio-api",
     }
     assert expected <= set(sources)
@@ -47,6 +47,8 @@ def test_run64_research_sources_are_discoverable_and_caveated():
     assert catalog(category="gaming")["total"] >= 2
     assert catalog("CUA-Recovery")["total"] == 1
     assert catalog("AdaptDuplex")["total"] == 1
+    assert catalog("Video InteractionBench")["total"] == 1
+    assert "negative streams" in sources["video-interactionbench"].scope
     assert catalog("NeurIPS 2026")["total"] == 1
     assert "not a drop-in" in sources["dualdecoder"].warning
     assert "Ascend 910C" in sources["flashoffloading"].warning
