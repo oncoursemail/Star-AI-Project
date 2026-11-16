@@ -1,0 +1,72 @@
+schema: 1
+run: 66
+date: 2026-11-16
+repository: oncoursemail/Star-AI-Project
+base_branch: main
+branch: research/run66-generalist-gaming-streaming-20261116
+status: research_and_offline_eval
+summary: >
+  Audited STAR's current local-first architecture and open work; added an
+  offline gameplay-commentary evaluator and a source-linked plan for generalist
+  gaming, asynchronous streaming, Creator Brain, general knowledge, and local
+  inference performance.
+sources:
+  - id: sima2
+    url: https://deepmind.google/blog/sima-2-an-agent-that-plays-reasons-and-learns-with-you-in-virtual-3d-worlds/
+    kind: primary_research
+    use: goal reasoning, held-out game transfer, self-play, and limitations
+  - id: nitrogen-paper
+    url: https://arxiv.org/abs/2601.02427
+    kind: paper
+    use: fast visual-action policy candidate; not a complete long-horizon agent
+  - id: nitrogen-code
+    url: https://github.com/MineDojo/NitroGen
+    kind: official_code
+    use: Windows runner and explicit current-model limitations
+  - id: gameworld
+    url: https://arxiv.org/abs/2604.07429
+    kind: benchmark
+    use: state-verifiable game task outcomes and real-time interaction
+  - id: gamedevbench
+    url: https://github.com/waynchi/gamedevbench
+    kind: benchmark
+    use: engine-based game creation tasks
+  - id: cegamebench
+    url: https://arxiv.org/abs/2610.26098
+    kind: benchmark
+    use: complete-game creation and execution-based completion
+  - id: realtime-venus
+    url: https://arxiv.org/abs/2609.13814
+    kind: paper
+    use: two-loop full-duplex conversation and asynchronous delegation
+  - id: interactive-avatar
+    url: https://sqymu.github.io/InteractiveAvatar/
+    kind: research_project
+    use: intent-aware avatar reaction and long-short visual memory
+  - id: llama-speed-bench
+    url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+    kind: official_benchmark
+    use: matched inference latency, throughput, and draft-acceptance tests
+changes:
+  - path: star/gameplay_commentary_eval.py
+    kind: new_offline_evaluator
+    runtime_wired: false
+  - path: tests/test_gameplay_commentary_eval.py
+    kind: new_unit_tests
+validation:
+  local_reference_checks: passed
+  github_actions: pending
+  full_repository_suite: not_run
+  windows_device_acceptance: not_run
+  gpu_mixed_load_benchmark: not_run
+  live_stream_rehearsal: not_run
+  gameplay_acceptance: not_run
+safety:
+  model_weights_downloaded: false
+  third_party_code_installed: false
+  gameplay_datasets_downloaded: false
+  credentials_committed: false
+  permissions_changed: false
+  runtime_defaults_changed: false
+  production_merged: false
+  raw_media_or_transcripts_committed: false
