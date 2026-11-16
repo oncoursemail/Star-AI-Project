@@ -28,7 +28,25 @@ def test_search_category_and_bounded_results():
     assert catalog(limit=2)["truncated"]
     assert len(catalog(limit=2)["sources"]) == 2
     assert not catalog("THIS_DOES_NOT_EXIST")["sources"]
-    assert catalog("MiXeD")["checked_on"] == "2026-10-15"
+    assert catalog("MiXeD")["checked_on"] == "2026-11-16"
+
+
+def test_run64_research_sources_are_discoverable_and_caveated():
+    sources = {s.id: s for s in SOURCES}
+    expected = {
+        "opengameeval", "gameworld", "agentodyssey", "cua-recovery",
+        "interactionbench", "eot-bench", "dualdecoder", "flashoffloading",
+        "llama-speed-bench", "gamedevbench", "vtube-studio-api",
+    }
+    assert expected <= set(sources)
+    assert all(sources[source_id].status == "research_only" for source_id in expected)
+    assert all(sources[source_id].url.startswith("https://") for source_id in expected)
+    assert catalog(category="gaming")["total"] >= 2
+    assert catalog("CUA-Recovery")["total"] == 1
+    assert catalog("NeurIPS 2026")["total"] == 1
+    assert "not a drop-in" in sources["dualdecoder"].warning
+    assert "Ascend 910C" in sources["flashoffloading"].warning
+    assert "viewer chat" in sources["vtube-studio-api"].warning
 
 
 @pytest.mark.parametrize("kwargs",[
