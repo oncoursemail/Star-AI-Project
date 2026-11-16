@@ -141,7 +141,7 @@ def test_latency_and_deadline_metrics_do_not_change_action_accuracy():
     [Observation("a", "addressed_request", False, "respond", "respond", True)],
     [Observation("a", "addressed_request", False, "respond", "respond", 10, 9)],
     [Observation("a", "addressed_request", False, "respond", "respond", 1, deadline_ms=-1)],
-    [Observation("a", "addressed_request", False, "respond", "yield", 1, followed_through=True)],
+    [Observation("a", "addressed_request", False, "respond", "respond", 1, followed_through=True)],
     [Observation("a", "addressed_request", False, "respond", "respond", 1, expected_addressee=1)],
     [Observation("a", "addressed_request", False, "respond", "respond", 1, predicted_addressee=0)],
 ])
