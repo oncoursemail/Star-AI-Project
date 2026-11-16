@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import pytest
 
 from star.skill_utility_eval import Trial, evaluate
@@ -95,7 +97,6 @@ def test_duplicate_arm_for_a_replicate_is_rejected():
     {"replicate": -1},
     {"split": "validation-ish"},
     {"split": []},
-    {"arm": []},
 ])
 def test_invalid_trial_fields_are_rejected(changes):
     with pytest.raises(ValueError):
@@ -159,3 +160,8 @@ def test_oversized_generator_is_stopped_at_first_excess_row(monkeypatch):
     with pytest.raises(ValueError, match="At most 2"):
         module.evaluate(rows())
     assert consumed == [0, 1, 2]
+
+
+def test_unhashable_arm_is_rejected():
+    with pytest.raises(ValueError, match="arm must be off or on"):
+        evaluate([replace(trial("off"), arm=[])])
