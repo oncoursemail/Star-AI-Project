@@ -9,7 +9,7 @@ implementation:
   local_validation:
     command: pytest -q tests/test_skill_utility_eval.py
     result: passed
-    tests: 18
+    tests: 20
   runtime_integrations: none
   model_weights_changed: false
   defaults_changed: false
