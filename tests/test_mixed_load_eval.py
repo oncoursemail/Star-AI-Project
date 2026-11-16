@@ -58,14 +58,15 @@ def test_group_reports_distributions_deadlines_and_counters_separately():
 
 def test_matched_pairs_report_candidate_minus_baseline_without_composite_score():
     report = evaluate([
-        row("b1", "baseline", ttft_ms=120, decode_tokens_per_second=20, game_fps=55, task_success=False),
-        row("c1", "candidate", ttft_ms=90, decode_tokens_per_second=25, game_fps=58, task_success=True),
-        row("b2", "baseline", replicate_id="rep-2", ttft_ms=140, decode_tokens_per_second=18, game_fps=52, task_success=True),
-        row("c2", "candidate", replicate_id="rep-2", ttft_ms=100, decode_tokens_per_second=23, game_fps=54, task_success=True),
+        row("b1", "baseline", ttft_ms=120, prefill_tokens_per_second=800, decode_tokens_per_second=20, game_fps=55, task_success=False),
+        row("c1", "candidate", ttft_ms=90, prefill_tokens_per_second=900, decode_tokens_per_second=25, game_fps=58, task_success=True),
+        row("b2", "baseline", replicate_id="rep-2", ttft_ms=140, prefill_tokens_per_second=700, decode_tokens_per_second=18, game_fps=52, task_success=True),
+        row("c2", "candidate", replicate_id="rep-2", ttft_ms=100, prefill_tokens_per_second=850, decode_tokens_per_second=23, game_fps=54, task_success=True),
     ])
     paired = report["paired"]
     assert paired["matched_cases"] == 2
     assert paired["numeric_candidate_minus_baseline"]["ttft_ms"]["mean"] == -35.0
+    assert paired["numeric_candidate_minus_baseline"]["prefill_tokens_per_second"]["mean"] == 125.0
     assert paired["numeric_candidate_minus_baseline"]["decode_tokens_per_second"]["mean"] == 5.0
     assert paired["numeric_candidate_minus_baseline"]["game_fps"]["mean"] == 2.5
     assert paired["task_success"] == {
