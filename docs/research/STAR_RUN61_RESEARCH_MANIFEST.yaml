@@ -29,8 +29,8 @@ implementation:
       limitation: first_audio_at_is_speaker_queue_submission_not_acoustic_playback
     - path: tests/test_voice_metrics.py
       changes:
-        - deterministic_100_turn_percentile_test
-        - small_sample_readiness_test
+        - deterministic_1000_turn_percentile_test
+        - p95_ready_p99_not_ready_at_100_samples_test
         - acknowledgement_first_response_test
         - incomplete_partial_stage_test
         - nonfinite_clock_test
