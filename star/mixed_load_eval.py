@@ -23,6 +23,7 @@ _ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\Z")
 
 NUMERIC_FIELDS = (
     "ttft_ms",
+    "prefill_tokens_per_second",
     "client_heard_ms",
     "task_completion_ms",
     "decode_tokens_per_second",
@@ -60,6 +61,7 @@ class Sample:
     scenario: str
     phase: str
     ttft_ms: float | None = None
+    prefill_tokens_per_second: float | None = None
     client_heard_ms: float | None = None
     task_completion_ms: float | None = None
     decode_tokens_per_second: float | None = None
