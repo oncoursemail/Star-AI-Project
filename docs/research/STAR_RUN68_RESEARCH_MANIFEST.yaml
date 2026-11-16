@@ -141,12 +141,29 @@ validation:
     offline_workflow: https://github.com/oncoursemail/Star-AI-Project/actions/runs/43858126290
     desktop_workflow: https://github.com/oncoursemail/Star-AI-Project/actions/runs/43858126388
   run68_exact_head:
-    status: pending_after_commit
-    required:
-      - offline_python_regression
+    status: passed
+    offline_workflow: https://github.com/oncoursemail/Star-AI-Project/actions/runs/43864549081
+    desktop_workflow: https://github.com/oncoursemail/Star-AI-Project/actions/runs/43864549025
+    verified:
+      - python_compilation
+      - ruff
+      - research_catalog_validation
+      - full_offline_python_regression
       - pyright
       - react_ui_compile_and_tests
-      - windows_package_and_offline_shards
+      - windows_desktop_assets
+      - windows_package_and_setup_smoke
+      - windows_offline_shard_1
+      - windows_offline_shard_2
+    release_attestation_and_publication: skipped_for_draft_pr
+  run69_exact_head:
+    status: pending_after_commit
+    required:
+      - python_compile_and_ruff
+      - pyright
+      - full_offline_python_regression
+      - react_ui_compile_and_tests
+      - windows_desktop_package_and_offline_shards
 limitations:
   - no_live_stream_policy_integration
   - no_live_gameplay_adapter_or_mastery_claim
