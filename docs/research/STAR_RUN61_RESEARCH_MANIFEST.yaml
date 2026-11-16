@@ -81,6 +81,29 @@ sources:
     scope: controlled continual-learning task streams, positive transfer and interference
     star_application: paired skill-on/off, related-task transfer, unrelated-task regression
     limitation: requires STAR-specific task stream and holdout design
+  - id: facts_benchmark_suite
+    url: https://deepmind.google/blog/facts-benchmark-suite-systematically-evaluating-the-factuality-of-large-language-models/
+    scope: four separate factuality tracks: grounding, multimodal, parametric, and search
+    star_application: keep closed-book recall, source-grounded answers, search synthesis, and image factuality as separate metrics
+    limitation: external leaderboard scores are not STAR results; preserve private holdouts
+  - id: simpleqa_verified
+    url: https://arxiv.org/abs/2509.07968
+    published: 2025-09-09
+    scope: 1000 short-form factual prompts with deduplication, topic balancing, and source reconciliation
+    star_application: closed-book factuality and calibration evaluation
+    limitation: short factual QA does not measure full research or tool-use competence
+  - id: gaia
+    url: https://arxiv.org/abs/2311.12983
+    published: 2023-11-21
+    scope: general assistant tasks requiring reasoning, multimodal handling, browsing, and tool use
+    star_application: compositional general-assistant evaluation
+    limitation: benchmark coverage is not a complete measure of general intelligence
+  - id: browsecomp
+    url: https://openai.com/index/browsecomp/
+    published: 2025-04-10
+    scope: 1266 hard-to-find multi-hop browsing questions with short verifiable answers
+    star_application: persistent research, query reformulation, and evidence synthesis
+    limitation: protect benchmark examples and canaries from training and public leakage
   - id: llama_cpp_speed_bench
     url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
     scope: latency, throughput, speculative acceptance, concurrency against running llama-server
