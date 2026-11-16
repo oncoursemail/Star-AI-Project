@@ -231,6 +231,26 @@ STAR decisions:
 - Preserve sealed holdouts; do not train STAR on public examples and then claim an uncontaminated score on the same examples.
 - Use retrieval to improve access to current knowledge, but do not claim that retrieval has retrained or improved the model's parametric weights.
 
+### 3.9 Hardware-aware speed strategy for an 8 GB VRAM desktop
+
+The `star/next` architecture notes already describe a stable prompt-prefix layout: stable system rules first, append-only conversation blocks next, and per-turn retrieval/web/Studio context last. Preserve this layout so llama.cpp can reuse the same slot prefix instead of re-prefilling changing data on every turn.
+
+For the documented RTX 4060 8 GB target, the main constraint is shared VRAM and system responsiveness, not simply model token throughput.
+
+STAR decisions:
+
+- Keep the existing fast/slow model split. Voice acknowledgements, simple social turns, and immediate game reactions should not wait for a deep-reasoning model.
+- Keep the deterministic FastLoop/reflex path out of the LLM critical loop. Use the language model for goals, unfamiliar mechanics, and strategic replanning.
+- Do not load a second draft model by default on an 8 GB card. Start with the existing capability-gated context-local speculative modes in PR #1208; measure draft acceptance and end-to-end latency before enabling any mode.
+- Reserve measured VRAM headroom for the game, OBS, avatar/vision components, and driver/runtime allocations. Reject a candidate that improves tokens/s but causes game frame-time spikes, audio underruns, or OBS drops.
+- Keep VLM observation on a slower glance cadence; use small detectors, structured game APIs, or UI Automation for fast loops where appropriate.
+- Preserve stable prompt bytes and trim only whole conversation blocks. Keep volatile retrieved context out of the system prefix.
+- Treat KV-cache compression/quantization as a compatibility experiment: exact backend support, output quality, cache restore correctness, and mixed-load performance must all be checked.
+- Benchmark idle, voice-only, game-only, OBS-only, and simultaneous game+voice+avatar+OBS conditions. Report p50/p95/p99, queue age, prefill/decode, first audible response, FPS/frame-time, VRAM, and audio/video drops.
+- Prioritize useful completed tasks per second under quality and responsiveness constraints over raw tokens per second.
+
+The existing owner PC guard and night-school schedule remain authoritative: heavy practice and model experiments must yield while the owner is active.
+
 ## 4. Shared runtime integration design
 
 Use the existing authorities and add only the missing adapters/measurements.
