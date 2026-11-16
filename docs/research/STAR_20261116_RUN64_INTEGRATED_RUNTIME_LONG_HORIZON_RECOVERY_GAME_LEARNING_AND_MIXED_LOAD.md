@@ -107,7 +107,16 @@ EoT-Bench provides real human-to-agent turns in fourteen languages and annotates
 
 A PCM queue timestamp is not proof that a viewer heard the audio. Voice quality, floor-control correctness, answer correctness, and delivery latency must remain separate metrics.
 
-### 1.6 AdaptDuplex — adapt the thinking/speaking window to the moment
+### 1.6 Video InteractionBench — know when not to comment
+
+Primary paper: https://arxiv.org/abs/2610.05775  
+Posted: 2026-10-05
+
+This is a separate benchmark from the voice InteractionBench paper above. It evaluates a streaming-video assistant's decision to speak only when an event warrants a response and to remain silent otherwise. The benchmark covers 1,060 interactions over 812 videos, including negative streams and counted-event/near-miss pairs. It scores content accuracy, timing accuracy, and silence compliance on the video clock.
+
+**STAR application:** game commentary should be event-driven, not frame-driven. Add temporal confirmation for important events, near-miss negative examples, and a silence policy that suppresses low-value commentary. Evaluate false commentary on negative streams separately from missed important events. Do not use an offline video benchmark as evidence of live capture latency.
+
+### 1.7 AdaptDuplex — adapt the thinking/speaking window to the moment
 
 Primary paper: https://arxiv.org/abs/2609.29217  
 Posted: 2026-09-24
@@ -118,7 +127,7 @@ AdaptDuplex studies adaptive full-duplex dialogue rather than one fixed response
 
 The reported benchmark score is not a STAR score and does not establish that the paper's model or training recipe fits STAR's current local hardware.
 
-### 1.7 DualDecoder and FlashOffloading — useful memory research, not drop-in RTX 4060 optimizations
+### 1.8 DualDecoder and FlashOffloading — useful memory research, not drop-in RTX 4060 optimizations
 
 DualDecoder: https://arxiv.org/abs/2607.26475  
 FlashOffloading: https://arxiv.org/abs/2611.07542
@@ -219,6 +228,7 @@ Recommended behavior:
 - context-aware humor and callbacks;
 - quiet periods when there is nothing useful to add;
 - measure silence compliance separately from timing and answer accuracy;
+- use event-triggered commentary with near-miss negative streams so STAR does not narrate every visual change;
 - emotion/expression driven by the current interaction, not a fabricated claim of human experience.
 
 Avatar requirements:
@@ -414,7 +424,8 @@ No numeric release threshold should be invented before a baseline is collected o
 - OpenGameEval code: https://github.com/Roblox/open-game-eval
 - GameWorld: https://arxiv.org/abs/2604.07429
 - GameWorld project: https://gameworld-project.github.io/
-- InteractionBench: https://arxiv.org/abs/2611.02430
+- InteractionBench (voice): https://arxiv.org/abs/2611.02430
+- Video InteractionBench: https://arxiv.org/abs/2610.05775
 - EoT-Bench: https://github.com/livekit/eot-bench
 - Full-Duplex-Bench v3: https://arxiv.org/abs/2604.04847
 - AdaptDuplex: https://arxiv.org/abs/2609.29217
