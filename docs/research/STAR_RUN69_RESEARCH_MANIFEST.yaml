@@ -31,8 +31,9 @@ code_changes:
   - path: star/mixed_load_eval.py
     kind: bounded_offline_evaluator
     purpose: >
-      Summarize cold/warm and idle/game/stream/mixed measurements, deadlines,
-      task success, counters, and matched candidate-minus-baseline deltas
+      Summarize cold/warm and idle/game/stream/mixed measurements, TTFT, prompt
+      prefill/decode throughput, client-heard latency, deadlines, task success,
+      counters, and matched candidate-minus-baseline deltas
       without a composite score or automatic promotion decision.
   - path: tests/test_mixed_load_eval.py
     kind: deterministic_regression_tests
