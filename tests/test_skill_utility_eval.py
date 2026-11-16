@@ -94,6 +94,8 @@ def test_duplicate_arm_for_a_replicate_is_rejected():
     {"base_prompt_sha256": "not-a-hash"},
     {"replicate": -1},
     {"split": "validation-ish"},
+    {"split": []},
+    {"arm": []},
 ])
 def test_invalid_trial_fields_are_rejected(changes):
     with pytest.raises(ValueError):
