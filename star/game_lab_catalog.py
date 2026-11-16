@@ -148,6 +148,25 @@ SOURCES = (
            "https://github.com/DenchiSoft/VTubeStudio",
            "vtuber","Local WebSocket API for authorized parameter injection, expression/hotkey control and event subscriptions",
            warning="Requires explicit user authorization and a revocable secret token; avoid 60+ FPS full-parameter polling and keep one writer per overridden parameter.")
+
+    Source("cegame-bench","CEGame-Bench — long-horizon complete-game creation",
+           "https://arxiv.org/abs/2610.26098",
+           "game_creation","Five production engines (Defold, Godot, Roblox Studio, Unity, Unreal); contract-driven builds and hidden real-input play evaluation; reports a major artifact-to-play gap",
+           warning="Paper results are benchmark-specific, not STAR results. Review task assets, engine versions and license terms before reproducing; do not import its skill without code and safety review."),
+    Source("full-duplex-bench-v3","Full-Duplex-Bench v3",
+           "https://arxiv.org/abs/2604.04847",
+           "voice","Real human audio with five disfluency classes and chained mock-API tasks; evaluates task accuracy, latency, tool use and turn-taking",
+           warning="Published comparisons are configuration- and protocol-specific. Review dataset terms and consent before reuse; do not treat benchmark scores as STAR performance."),
+    Source("windowsworld","WindowsWorld cross-application computer-use benchmark",
+           "https://aclanthology.org/2026.findings-acl.750/",
+           "computer_use","181 tasks across 17 desktop applications with intermediate process checkpoints; most tasks require multiple apps",
+           warning="A benchmark environment is not proof of native Windows reliability. Reproduce only in disposable, resettable environments with explicit app and file scopes."),
+    Source("obs-websocket","OBS Studio obs-websocket 5.x protocol",
+           "https://github.com/obsproject/obs-websocket",
+           "streaming","Official local RPC and event protocol for scene, source and stream automation; supports request/response and event subscriptions",
+           kind="local_api",
+           warning="Require password authentication and loopback binding; keep credentials in the OS secret store, redact logs, and separately approve scene/recording/stream mutations.")
+
 )
 
 
