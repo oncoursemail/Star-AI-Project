@@ -1,0 +1,151 @@
+run: 67
+date: 2026-11-16
+repository: oncoursemail/Star-AI-Project
+base_branch: main
+work_branch: research/run66-generalist-gaming-streaming-20261116
+pull_request: 1212
+status: research_and_offline_evaluation
+summary: >
+  Add an offline intent-aware voice turn-policy evaluator and document evidence-based
+  integration plans for full-duplex VTuber interaction, game skill transfer,
+  complete-game acceptance, long-horizon recovery, and distributed local inference.
+runtime_changes: false
+production_defaults_changed: false
+model_weights_changed: false
+third_party_code_installed: false
+datasets_downloaded: false
+media_or_credentials_committed: false
+gpu_benchmark_run: false
+live_stream_tested: false
+target_pc_acceptance_run: false
+files:
+  - path: star/voice/turn_policy_eval.py
+    kind: new_offline_evaluator
+    purpose: >
+      Score respond, backchannel, yield, hold, and ignore decisions by intent,
+      playback state, interruption selectivity, addressee, follow-through, and timing.
+  - path: tests/test_turn_policy_eval.py
+    kind: deterministic_tests
+    purpose: >
+      Cover empty data, perfect policy, false and missed yields, addressee errors,
+      follow-through, missing timestamps, deadlines, invalid inputs, and generators.
+  - path: docs/research/STAR_20261116_RUN67_INTENT_CONDITIONED_TURN_CONTROL_AND_DISTRIBUTED_LOCAL_INFERENCE.md
+    kind: research_and_integration_plan
+  - path: docs/research/STAR_RUN67_RESEARCH_MANIFEST.yaml
+    kind: reproducibility_manifest
+sources:
+  - id: hithink-turn
+    url: https://arxiv.org/abs/2609.34096
+    type: research_paper
+    date: 2026-09-28
+    use: intent-conditioned turn state with playback-state awareness
+    limitation: 240 ms is an input chunk size, not end-to-end latency
+  - id: turnbench
+    url: https://arxiv.org/abs/2608.25218
+    type: research_paper
+    date: 2026-09-16
+    use: hand-labelled dyadic end-of-turn and interruption evaluation
+  - id: tact
+    url: https://arxiv.org/abs/2609.27372
+    type: research_paper
+    date: 2026-09-23
+    use: intent-conditioned timing evaluation and speaker-profile analysis
+  - id: speak-or-stay-silent
+    url: https://arxiv.org/abs/2603.11409
+    type: research_paper
+    date: 2026-03-12
+    use: multi-party pause interpretation and explicit silence decisions
+  - id: full-duplex-bench-v3
+    url: https://arxiv.org/abs/2604.04847
+    type: research_benchmark
+    date: 2026-04-06
+    use: natural disfluencies, chained tools, latency, and turn-taking trade-offs
+  - id: kira-ai-reference
+    url: https://github.com/JonathanDunkleberger/Kira_AI
+    type: comparative_architecture
+    use: single active-turn arbiter, priority lanes, TTL, playback-synced captions
+    limitation: AGPL-3.0; study architecture only, no code or assets copied
+  - id: sima-2
+    url: https://deepmind.google/blog/sima-2-an-agent-that-plays-reasons-and-learns-with-you-in-virtual-3d-worlds/
+    type: research_system
+    use: high-level goal reasoning, visual game interaction, and cross-game transfer
+    limitation: evaluate licensing, model availability, and target hardware before use
+  - id: nitrogen
+    url: https://nitrogen.minedojo.org/
+    type: research_system
+    use: fast vision-action policy candidate for a separate reflex layer
+    limitation: do not treat a single-frame policy as long-horizon planning or self-improvement
+  - id: gameasg-bench
+    url: https://arxiv.org/abs/2609.21293
+    type: research_benchmark
+    date: 2026-09-18
+    use: predeclared behavioral contracts and real-input game verification
+  - id: cegame-bench
+    url: https://arxiv.org/abs/2610.26098
+    type: research_benchmark
+    date: 2026-10-19
+    use: long-horizon complete-game creation across five engines
+  - id: path-bench
+    url: https://arxiv.org/abs/2608.01149
+    type: research_benchmark
+    date: 2026-08-02
+    use: positive transfer, negative interference, retention, and forgetting
+  - id: cua-recovery
+    url: https://arxiv.org/abs/2610.27645
+    type: research_benchmark
+    date: 2026-10-20
+    use: inherited-error detection and verified recovery trajectories
+  - id: minillama-infra
+    url: https://www.computer.org/csdl/proceedings-article/sc-w/2026/122100b191/2lkuESKUzJK
+    type: research_paper
+    date: 2026
+    use: kernel-layout and quantization A/B methodology on RTX 4060 Laptop and A100
+    limitation: narrow custom CUDA engine and 1B model; not transferable as a desktop STAR speedup
+  - id: nvidia-pair-docs
+    url: https://docs.nvidia.com/local-ai/nvpair
+    type: official_documentation
+    use: optional routing of independent inference requests across explicitly paired local nodes
+    limitation: no GPU memory pooling, model sharding, or acceleration of one in-flight request
+  - id: nvidia-pair-repository
+    url: https://github.com/NVIDIA/Personal-AI-Router
+    type: source_repository
+    use: verify supported engines, routing behavior, trust model, and current limitations
+  - id: llama-cpp-speculative
+    url: https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
+    type: official_documentation
+    use: verify actual speculative initialization and acceptance before claiming speedup
+  - id: llama-cpp-speculative-issue
+    url: https://github.com/ggml-org/llama.cpp/issues/25345
+    type: upstream_issue
+    use: example failure mode where a loaded draft did not result in active speculative decoding
+architecture_decisions:
+  - reuse_existing_voice_turn_detector_and_call_session
+  - one_playback_clock_and_one_avatar_parameter_authority
+  - realtime_capture_and_playback_must_not_block_on_reasoning
+  - keep_only_actually_played_output_in_conversation_history
+  - use_priority_and_ttl_for_stream_events_without_a_second_scheduler
+  - use_state_oracles_where_officially_supported_and_visual_fallback_elsewhere
+  - require_real_input_completion_and_save_reload_for_created_games
+  - use_existing_paired_learning_gate_and_memory_governance
+  - preserve_stable_llama_cpp_prompt_prefix_and_volatile_context_order
+  - consider_pair_only_for_independent_background_requests
+validation:
+  parent_run66_exact_head:
+    offline_python_checks: passed
+    react_ui_compile_and_tests: passed
+    pyright: passed
+    windows_desktop_build_and_package_smoke: passed
+    windows_offline_shards: passed
+    workflow_offline: https://github.com/oncoursemail/Star-AI-Project/actions/runs/43849699446
+    workflow_desktop: https://github.com/oncoursemail/Star-AI-Project/actions/runs/43849699459
+  run67_exact_head:
+    status: pending_after_commit
+    required: exact_head_offline_tests_pyright_react_and_windows_workflows
+limitations:
+  - evaluator_is_offline_only_and_not_connected_to_microphone_or_runtime
+  - no_live_intent_model_or_vtuber_streaming_feature_shipped
+  - no_gameplay_or_complete_game_acceptance_run
+  - no_rtx_4060_desktop_benchmark_or_speedup_claim
+  - no_nvidia_pair_installation_or_node_pairing
+  - no_model_training_or_weight_updates
+  - draft_pull_request_requires_owner_review_and_exact_head_ci
