@@ -198,6 +198,39 @@ STAR decisions:
 
 No benchmark result from another GPU/model can be transferred to STAR's RTX 4060.
 
+### 3.8 General knowledge: separate parametric recall, grounded answers, search, and tool use
+
+A broad "general knowledge" score hides several different failure modes. STAR should maintain separate evaluation tracks rather than treating a single trivia set as intelligence.
+
+**FACTS Benchmark Suite** separates four factuality tasks: parametric knowledge (closed-book facts), search-assisted retrieval and synthesis, multimodal image questions, and grounding to supplied documents. The suite includes public and held-out private examples; its leaderboard is updated independently from STAR. This separation is useful because a model may remember a fact but fail to cite it, or search successfully but misread the source.
+
+Sources:
+- https://deepmind.google/blog/facts-benchmark-suite-systematically-evaluating-the-factuality-of-large-language-models/
+- https://www.kaggle.com/benchmarks/google/facts/leaderboard
+
+**SimpleQA Verified** provides 1,000 short-form factual prompts with additional de-duplication, topic balancing, and source reconciliation intended to reduce label noise in the original SimpleQA-style evaluation.
+
+Source: https://arxiv.org/abs/2509.07968
+
+**GAIA** evaluates real-world assistant tasks requiring combinations of reasoning, multimodal understanding, browsing, and tool use. It is more suitable for measuring whether the assistant can combine capabilities than for measuring isolated recall.
+
+Source: https://arxiv.org/abs/2311.12983
+
+**BrowseComp** contains 1,266 difficult browsing questions designed around hard-to-find, multi-hop information with short, verifiable answers. It tests search strategy and persistence, not ordinary conversational knowledge. Keep its evaluation examples and canary data out of training, public docs, and generated skill examples to reduce contamination.
+
+Source: https://openai.com/index/browsecomp/
+
+STAR decisions:
+
+- Build a broad topic matrix: science, math, history, geography, languages, programming, art/design, games, practical software, and current events.
+- Separate closed-book, document-grounded, web-search, multimodal, and multi-tool tasks.
+- Score answer correctness, claim-to-source entailment, source freshness, contradiction handling, confidence calibration, and abstention separately.
+- Store a compact evidence ledger for researched answers: claim, source, retrieval time, source type, support status, and expiry/freshness class. Keep raw user/private documents in the existing local knowledge store, not public telemetry.
+- Require at least one primary or authoritative source for high-impact/current claims and independent corroboration when sources conflict.
+- Treat retrieved pages, game chat, OCR, and tool outputs as untrusted data, never as instructions or permission grants.
+- Preserve sealed holdouts; do not train STAR on public examples and then claim an uncontaminated score on the same examples.
+- Use retrieval to improve access to current knowledge, but do not claim that retrieval has retrained or improved the model's parametric weights.
+
 ## 4. Shared runtime integration design
 
 Use the existing authorities and add only the missing adapters/measurements.
