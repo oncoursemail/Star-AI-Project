@@ -2,8 +2,8 @@ run: 60
 project: STAR AI
 date: 2026-11-15
 timezone: America/Chicago
-branch: research/run60-integration-gates-long-horizon-20261115
-base_ref: main
+branch: research/run60-integration-gates-long-horizon-20261115-star-next
+base_ref: star/next
 target_integration_ref: star/next
 status: research_and_integration_plan
 runtime_code_changed: false
