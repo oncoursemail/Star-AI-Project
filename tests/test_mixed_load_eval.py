@@ -5,14 +5,14 @@ from star.mixed_load_eval import Sample, evaluate
 
 
 def row(sample_id, arm, *, case_id="door-obby", replicate_id="rep-1", **kwargs):
+    fields = {"scenario": "mixed", "phase": "warm"}
+    fields.update(kwargs)
     return Sample(
         sample_id=sample_id,
         case_id=case_id,
         replicate_id=replicate_id,
         arm=arm,
-        scenario="mixed",
-        phase="warm",
-        **kwargs,
+        **fields,
     )
 
 
@@ -107,8 +107,8 @@ def test_cold_warm_and_scenario_groups_are_kept_separate():
         row("b2", "baseline", scenario="mixed", phase="warm", ttft_ms=100),
     ])
     assert [(g["scenario"], g["phase"]) for g in report["groups"]] == [
-        ("baseline", "idle", "cold"),
-        ("baseline", "mixed", "warm"),
+        ("idle", "cold"),
+        ("mixed", "warm"),
     ]
 
 
