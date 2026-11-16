@@ -27,7 +27,7 @@ Posted: 2026-09-11
 
 Duplex Cue studies a behavior missing from simple continue-versus-stop evaluations. It distinguishes listener intent—backchannel, collaboration, or interruption—from the speaker's response—continue unchanged, adapt within the turn, or yield.
 
-The paper reports 300 human-confirmed cues from unscripted English conversations. After filtering for an ongoing speaker and a scorable response, it retains 208 pairs. On the 66 collaborative pairs, recorded human speakers adapt in 68.2% of cases, compared with 34.8% for PersonaPlex in the reported single-model case study.
+The paper describes an evidence-linked inventory of 2,591 cues across 20.32 hours of unscripted conversation. Its paired model case study uses 300 human-confirmed cues; after filtering for an ongoing speaker and a scorable response, it retains 208 pairs. On the 66 collaborative pairs, recorded human speakers adapt in 68.2% of cases, compared with 34.8% for PersonaPlex in the reported single-model case study. The paper also explicitly separates the *behavioral label* Adapted from whether the supplied correction was factually correct; STAR's evaluation must score uptake and correctness independently.
 
 **Interpretation:** this is evidence that in-turn adaptation is a measurable conversational gap, not proof that one model or architecture is universally better. The retained sample is small, English-only, and the PersonaPlex comparison is a case study. STAR should reproduce the task with its own consented evaluation set rather than copying or assuming the paper's scores transfer.
 
