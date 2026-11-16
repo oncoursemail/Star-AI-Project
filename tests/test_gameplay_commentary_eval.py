@@ -1,5 +1,6 @@
 import pytest
 
+from star import gameplay_commentary_eval
 from star.gameplay_commentary_eval import Observation, evaluate
 
 
@@ -61,6 +62,22 @@ def test_missing_timestamps_and_unreviewed_grounding_are_not_imputed():
     assert report["speech_timing"]["n"] == 0
     assert report["speech_grounding"]["reviewed"] == 0
     assert report["speech_grounding"]["rate"] is None
+
+
+def test_oversized_iterable_is_rejected_without_consuming_unbounded_tail(monkeypatch):
+    monkeypatch.setattr(gameplay_commentary_eval, "MAX_OBSERVATIONS", 3)
+    consumed = []
+
+    def observations():
+        for index in range(100):
+            consumed.append(index)
+            yield Observation(str(index), "silence", "silence", float(index))
+
+    with pytest.raises(ValueError, match="At most 3 observations"):
+        evaluate(observations())
+
+    # One extra item proves the limit was exceeded; the remaining generator is untouched.
+    assert consumed == [0, 1, 2, 3]
 
 
 @pytest.mark.parametrize("rows", [
