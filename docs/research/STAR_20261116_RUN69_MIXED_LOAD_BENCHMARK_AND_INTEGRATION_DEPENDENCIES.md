@@ -151,7 +151,7 @@ Each row is aggregate numeric metadata for one fixed case and repetition:
 - phase: cold or warm;
 - case_id and replicate_id: pair identical work across arms;
 - TTFT, client-heard latency, task completion latency, decode tokens/sec, game FPS;
-- CPU percent, RAM MiB, VRAM MiB;
+- normalized whole-host CPU percent, RAM MiB, VRAM MiB;
 - audio underruns, OBS dropped frames, avatar dropped frames;
 - task success and optional client-heard/task deadlines.
 
