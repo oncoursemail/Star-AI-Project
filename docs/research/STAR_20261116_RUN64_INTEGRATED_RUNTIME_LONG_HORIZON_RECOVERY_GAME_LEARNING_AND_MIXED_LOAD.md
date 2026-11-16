@@ -238,7 +238,12 @@ Avatar requirements:
 - bounded animation/audio queues;
 - drop stale animation frames rather than accumulate latency;
 - never let independent plugins write conflicting mouth/eye/expression parameters;
-- test the actual Live2D/VTube Studio path on the target PC.
+- test the actual Live2D/VTube Studio path on the target PC;
+- use VTube Studio's local WebSocket API only after its explicit plugin-authorization prompt; keep the revocable token in the OS credential store, never logs or chat;
+- subscribe to supported VTube Studio events instead of repeatedly polling large parameter lists;
+- do not poll the full parameter list at 60+ FPS; cache the model parameter schema and request it only on model/schema changes;
+- preserve one authoritative writer per overridden parameter; VTube Studio rejects competing plugin writers in set mode;
+- if the API injects a parameter value, refresh it at least once per second while control is required, and release/restore ownership cleanly on stop or disconnect.
 
 ## 4. Gamer Brain: learn, practice, and prove competence
 
