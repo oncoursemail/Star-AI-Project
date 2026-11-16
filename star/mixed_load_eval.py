@@ -18,7 +18,7 @@ SCENARIOS = ("idle", "game_only", "stream_only", "mixed")
 PHASES = ("cold", "warm")
 MAX_SAMPLES = 20_000
 _MAX_COUNTER = 1_000_000_000
-_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\\Z")
+_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\Z")
 
 NUMERIC_FIELDS = (
     "ttft_ms",
@@ -54,6 +54,7 @@ class Sample:
 
     sample_id: str
     case_id: str
+    replicate_id: str
     arm: str
     scenario: str
     phase: str
@@ -101,6 +102,7 @@ def _counter(value: object, field: str) -> int | None:
 def _validate(sample: Sample) -> None:
     _opaque_id(sample.sample_id, "sample_id")
     _opaque_id(sample.case_id, "case_id")
+    _opaque_id(sample.replicate_id, "replicate_id")
     if sample.arm not in ARMS:
         raise ValueError("arm must be baseline or candidate")
     if sample.scenario not in SCENARIOS:
@@ -205,8 +207,7 @@ def _group_summary(rows: list[Sample]) -> dict:
 
 
 def _paired_summary(
-    rows: list[Sample],
-    index: dict[tuple[str, str, str], dict[str, Sample]],
+    index: dict[tuple[str, str, str, str], dict[str, Sample]],
 ) -> dict:
     keys = set(index)
     matched = sorted(
@@ -270,17 +271,17 @@ def evaluate(samples: Iterable[Sample]) -> dict:
         rows.append(sample)
 
     sample_ids: set[str] = set()
-    index: dict[tuple[str, str, str], dict[str, Sample]] = {}
+    index: dict[tuple[str, str, str, str], dict[str, Sample]] = {}
     groups: dict[tuple[str, str, str], list[Sample]] = {}
     for row in rows:
         if row.sample_id in sample_ids:
             raise ValueError("sample_id values must be unique")
         sample_ids.add(row.sample_id)
 
-        key = (row.case_id, row.scenario, row.phase)
+        key = (row.case_id, row.replicate_id, row.scenario, row.phase)
         arms = index.setdefault(key, {})
         if row.arm in arms:
-            raise ValueError("A case/scenario/phase may appear once per arm")
+            raise ValueError("A case/replicate/scenario/phase may appear once per arm")
         arms[row.arm] = row
         groups.setdefault((row.arm, row.scenario, row.phase), []).append(row)
 
@@ -298,7 +299,7 @@ def evaluate(samples: Iterable[Sample]) -> dict:
         "schema": 1,
         "samples": len(rows),
         "groups": group_reports,
-        "paired": _paired_summary(rows, index),
+        "paired": _paired_summary(index),
         "note": (
             "Offline aggregate evaluator only. No composite score or promotion "
             "decision is produced; compare identical cases and retain target-PC "
