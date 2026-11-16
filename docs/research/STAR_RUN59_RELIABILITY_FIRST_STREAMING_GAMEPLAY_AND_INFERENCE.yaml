@@ -61,6 +61,14 @@ research:
       - "https://arxiv.org/abs/2605.15051"
       - "https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench"
     star_decision: "Paired load-aware speculation tests; accept only if end-to-end tails and task accuracy improve."
+  general_knowledge:
+    sources:
+      - "https://openai.com/index/introducing-simpleqa/"
+      - "https://arxiv.org/abs/2509.07968"
+      - "https://arxiv.org/abs/2311.12983"
+      - "https://openai.com/index/browsecomp/"
+      - "https://www.kaggle.com/benchmarks/google/facts"
+    star_decision: "Separate parametric recall, retrieval-grounded factuality, multi-hop browsing, freshness, calibration, citation entailment, and abstention."
 architecture_reuse:
   - "star/voice/turn.py"
   - "star/voice/call.py"
