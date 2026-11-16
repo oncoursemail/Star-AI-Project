@@ -278,6 +278,7 @@ This is an offline evaluation primitive only. It is not wired to voice, OBS, VTu
 - [Realtime-Venus project](https://realtime-venus.github.io/)
 - [InteractiveAvatar — ECCV 2026](https://sqymu.github.io/InteractiveAvatar/)
 - [llama.cpp SPEED-Bench server harness](https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench)
+- [llama.cpp issue #28455](https://github.com/ggml-org/llama.cpp/issues/28455): quantized KV + flash-attention can fall back to a CPU path on some builds; verify the actual backend path before comparing speed or quality
 
 ## Verification record
 
