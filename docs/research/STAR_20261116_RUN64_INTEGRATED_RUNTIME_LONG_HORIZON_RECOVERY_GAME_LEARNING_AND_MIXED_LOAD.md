@@ -107,7 +107,18 @@ EoT-Bench provides real human-to-agent turns in fourteen languages and annotates
 
 A PCM queue timestamp is not proof that a viewer heard the audio. Voice quality, floor-control correctness, answer correctness, and delivery latency must remain separate metrics.
 
-### 1.6 DualDecoder and FlashOffloading — useful memory research, not drop-in RTX 4060 optimizations
+### 1.6 AdaptDuplex — adapt the thinking/speaking window to the moment
+
+Primary paper: https://arxiv.org/abs/2609.29217  
+Posted: 2026-09-24
+
+AdaptDuplex studies adaptive full-duplex dialogue rather than one fixed response policy. Its design includes a compact token-level protocol, bounded text lead over speech, explicit behavioral decision tokens, dynamically selected window durations, and non-blocking cognitive consolidation / external reasoning. The paper reports results on Full-Duplex-Bench and HumDial-FDBench, including a 72.9 Final score on the latter for its evaluated configuration.
+
+**STAR application:** do not run a large reasoning pass on every audio frame. Let the existing room/voice path choose short or longer response windows based on cue confidence, urgency, current floor ownership, and available latency budget. Deep reasoning and memory consolidation should run asynchronously and must not block capture, playback, or immediate game control. Compare the adaptive policy against a fixed-window baseline on the same speaker-disjoint test set.
+
+The reported benchmark score is not a STAR score and does not establish that the paper's model or training recipe fits STAR's current local hardware.
+
+### 1.7 DualDecoder and FlashOffloading — useful memory research, not drop-in RTX 4060 optimizations
 
 DualDecoder: https://arxiv.org/abs/2607.26475  
 FlashOffloading: https://arxiv.org/abs/2611.07542
@@ -131,6 +142,7 @@ Requirements:
 - monotonic timestamps and sequence IDs;
 - cancellation epochs so stale audio or actions cannot be delivered after an interruption;
 - no slow research, model loading, or bulk memory retrieval on the audio callback path;
+- allow adaptive response-window duration, but keep the audio capture/playback cadence independent of model reasoning;
 - local playback measurement through loopback, with remote client timing reported separately;
 - one authoritative playback clock and one avatar parameter authority.
 
@@ -206,6 +218,7 @@ Recommended behavior:
 - recovery of unanswered questions after gameplay;
 - context-aware humor and callbacks;
 - quiet periods when there is nothing useful to add;
+- measure silence compliance separately from timing and answer accuracy;
 - emotion/expression driven by the current interaction, not a fabricated claim of human experience.
 
 Avatar requirements:
@@ -324,6 +337,8 @@ Optimization order:
 7. schedule background learning around interactive headroom;
 8. retain only changes that improve useful task goodput without harming voice, game, avatar, or OBS quality.
 
+For the official llama.cpp SPEED-Bench client, keep the server running separately, match client concurrency to the llama-server slot count, and keep the benchmark split, category, output length, and sample limit identical between baseline and candidate. Preserve the raw JSON and compare per-category prompt throughput, decode throughput, client latency, and draft acceptance. Do not compare runs with different prompts or server-slot settings.
+
 Do not infer a STAR speedup from a paper's different GPU, accelerator, model, batch size, or server.
 
 ## 8. Additional feature backlog
@@ -402,6 +417,7 @@ No numeric release threshold should be invented before a baseline is collected o
 - InteractionBench: https://arxiv.org/abs/2611.02430
 - EoT-Bench: https://github.com/livekit/eot-bench
 - Full-Duplex-Bench v3: https://arxiv.org/abs/2604.04847
+- AdaptDuplex: https://arxiv.org/abs/2609.29217
 - DualDecoder: https://arxiv.org/abs/2607.26475
 - FlashOffloading: https://arxiv.org/abs/2611.07542
 - llama.cpp: https://github.com/ggml-org/llama.cpp
