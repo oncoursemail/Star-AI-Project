@@ -20,7 +20,7 @@ MAX_EPISODES = 5_000
 MAX_EVENTS = 100_000
 MAX_EVENTS_PER_EPISODE = 10_000
 _MAX_INDEX = 1_000_000_000
-_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\\Z")
+_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}\Z")
 
 
 @dataclass(frozen=True, slots=True)
