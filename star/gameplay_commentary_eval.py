@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 from math import ceil, isfinite
+from typing import cast
 
 ACTIONS = ("comment", "acknowledge", "silence", "yield")
 SPEECH_ACTIONS = frozenset(("comment", "acknowledge"))
@@ -39,9 +40,12 @@ class Observation:
 def _number(value: object, field: str, *, optional: bool = False) -> float | None:
     if value is None and optional:
         return None
-    if type(value) not in (int, float) or not isfinite(value) or value < 0:
+    if type(value) not in (int, float):
         raise ValueError(f"{field} must be a finite non-negative number")
-    return float(value)
+    number = cast(int | float, value)
+    if not isfinite(number) or number < 0:
+        raise ValueError(f"{field} must be a finite non-negative number")
+    return float(number)
 
 
 def _rate(numerator: float, denominator: int) -> float | None:
@@ -87,6 +91,7 @@ def evaluate(observations: Iterable[Observation]) -> dict:
             raise ValueError("Unknown expected or predicted action")
 
         event_ms = _number(row.event_ms, "event_ms")
+        assert event_ms is not None
         decision_ms = _number(row.decision_ms, "decision_ms", optional=True)
         _number(row.deadline_ms, "deadline_ms", optional=True)
 
@@ -140,6 +145,7 @@ def evaluate(observations: Iterable[Observation]) -> dict:
             "f1": f1,
         }
         if support:
+            assert recall is not None and f1 is not None
             recalls.append(recall)
             f1s.append(f1)
 
