@@ -31,10 +31,19 @@ primary_research:
     role: >
       Distinguishes listener intent from speaker response and measures
       in-turn adaptation on collaborative cues.
+    reported_case_study:
+      inventory_cues: 2591
+      inventory_hours: 20.32
+      human_confirmed_cues: 300
+      retained_pairs: 208
+      collaborative_pairs: 66
+      human_adaptation_rate_percent: 68.2
+      personaplex_adaptation_rate_percent: 34.8
     limitations:
-      - Small retained collaborative subset (66 pairs).
+      - The paired model case study is based on a small retained collaborative subset (66 pairs).
       - English-only case study.
       - PersonaPlex result is not a general leaderboard comparison.
+      - Adapted is an interaction-behavior label, not a correctness judgment.
   - id: interactionbench
     url: https://arxiv.org/abs/2611.02430
     date: 2026-11-02
