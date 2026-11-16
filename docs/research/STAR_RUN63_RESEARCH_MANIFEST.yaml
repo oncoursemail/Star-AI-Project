@@ -1,0 +1,153 @@
+schema_version: 1
+run_id: STAR-2026-11-15-RUN63
+title: In-turn adaptation, collaborative speech, and cross-task transfer
+repository: oncoursemail/Star-AI-Project
+branch: research/run63-duplex-cue-in-turn-adaptation-20261115
+base_branch: main
+change_type: research_and_integration_specification
+runtime_code_changed: false
+production_defaults_changed: false
+permissions_changed: false
+datasets_downloaded: false
+raw_audio_committed: false
+model_weights_changed: false
+hardware_benchmarks_run: false
+live_device_acceptance_run: false
+
+files:
+  - path: docs/research/STAR_20261115_RUN63_IN_TURN_ADAPTATION_COLLABORATIVE_STREAMING_AND_AGENT_TRANSFER.md
+    purpose: >
+      Research and implementation specification for classifying backchannels,
+      collaborative completions/corrections, genuine takeovers, and uncertain
+      overlap; integrate with existing room, playback, memory, gaming, and
+      creator authorities without duplicating them.
+  - path: docs/research/STAR_RUN63_RESEARCH_MANIFEST.yaml
+    purpose: Reproducibility and acceptance manifest for Run 63.
+
+primary_research:
+  - id: duplex-cue
+    url: https://arxiv.org/abs/2609.13117
+    date: 2026-09-11
+    role: >
+      Distinguishes listener intent from speaker response and measures
+      in-turn adaptation on collaborative cues.
+    reported_case_study:
+      inventory_cues: 2591
+      inventory_hours: 20.32
+      human_confirmed_cues: 300
+      retained_pairs: 208
+      collaborative_pairs: 66
+      human_adaptation_rate_percent: 68.2
+      personaplex_adaptation_rate_percent: 34.8
+    limitations:
+      - The paired model case study is based on a small retained collaborative subset (66 pairs).
+      - English-only case study.
+      - PersonaPlex result is not a general leaderboard comparison.
+      - Adapted is an interaction-behavior label, not a correctness judgment.
+  - id: interactionbench
+    url: https://arxiv.org/abs/2611.02430
+    date: 2026-11-02
+    role: >
+      Separates conversational timing, spoken-task accuracy, whisper/volume,
+      and long-conversation groundedness; motivates client-heard timing.
+    limitations:
+      - Protocol/instruction differences across some systems constrain direct comparisons.
+      - Client/network timing must be reported separately from server timing.
+  - id: full-duplex-bench-v3
+    url: https://arxiv.org/abs/2604.04847
+    role: Real-human disfluency and chained spoken tool-use evaluation.
+  - id: agentcl
+    url: https://arxiv.org/abs/2606.02461
+    role: Controlled task streams for transfer, reuse, and memory interference.
+  - id: flashoffloading
+    url: https://arxiv.org/abs/2611.07542
+    date: 2026-11-05
+    role: KV offload research context only.
+    applicability: >
+      Reported Ascend 910C results are not transferable to STAR's RTX 4060 8 GB.
+      No implementation or speedup claim is made.
+
+integration_targets:
+  existing_open_prs:
+    - number: 1178
+      capability: natural streamer persona and resolved-reply stopping
+    - number: 1185
+      capability: bounded session-local conversation context
+    - number: 1186
+      capability: multiparty room replay evaluation
+    - number: 1187
+      capability: EoT-Bench adapter
+    - number: 1151
+      capability: playback clock and callback isolation
+    - number: 1202
+      capability: hour-scale stream continuity
+    - number: 1207
+      capability: OBS telemetry
+    - number: 1210
+      capability: aggregate voice latency diagnostics
+  note: >
+    These are separate unmerged development candidates. Run 63 does not
+    modify their files or claim they are production capabilities.
+
+proposed_policy:
+  listener_intents: [BACKCHANNEL, COLLABORATION, TAKEOVER, UNCERTAIN]
+  response_actions: [CONTINUE, ADAPT, YIELD, HOLD]
+  invariants:
+    - Already-played speech is immutable.
+    - Only uncommitted speech may be revised or cancelled.
+    - Floor ownership, speaker identity, and addressee are distinct.
+    - Ambiguous overlap does not trigger an irreversible floor change.
+    - Persistent memories require existing governance and provenance.
+    - Tool and game actions remain subject to existing gates.
+
+evaluation_plan:
+  splits: [speaker_disjoint, conversation_disjoint, topic_holdout, noise_condition_holdout]
+  slices:
+    - backchannel
+    - collaborative_completion
+    - clarification
+    - correction
+    - genuine_takeover
+    - viewer_to_viewer_overlap
+    - non_speech_overlap
+    - game_callout
+    - creator_correction
+    - tool_use_correction
+  metrics:
+    - per_class_precision_recall_macro_f1
+    - intent_calibration
+    - false_yield_rate
+    - missed_takeover_rate
+    - unnecessary_interruption_rate
+    - correct_adaptation_rate
+    - correction_retention
+    - topic_recovery
+    - speaker_addressee_accuracy
+    - client_heard_latency_p50_p95_p99
+    - tool_outcome_correctness
+  constraints:
+    - No future audio may be used at prediction time.
+    - No raw audio or full transcripts in public Git.
+    - Deterministic graders for floor labels and tool/game state where possible.
+    - Human review for naturalness is blinded and reported separately.
+    - Baseline and candidate use matched input, configuration, and seeds.
+
+acceptance:
+  - Candidate improves collaborative adaptation on sealed holdouts.
+  - Backchannel false-yield and takeover recall do not materially regress.
+  - Stale audio after interruption does not increase.
+  - Tool/game correctness remains non-inferior.
+  - Mixed-load deadlines and stream health remain within measured budgets.
+  - Privacy and owner-approval boundaries remain intact.
+  - Hardware-free regression tests and private Windows acceptance pass.
+  - No numerical target is asserted until a baseline is measured.
+
+run_status:
+  research_document_committed: true
+  manifest_committed: true
+  runtime_implementation: not_started
+  tests_executed: false
+  ci: not_started
+  windows_hardware_validation: not_run
+  gpu_performance_validation: not_run
+  live_stream_validation: not_run

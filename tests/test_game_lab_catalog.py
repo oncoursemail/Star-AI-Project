@@ -23,12 +23,37 @@ def test_statuses_do_not_exaggerate_capabilities():
 
 
 def test_search_category_and_bounded_results():
+    assert catalog()["total"] == len(SOURCES)
+    assert not catalog()["truncated"]
+    assert len(catalog()["sources"]) == len(SOURCES)
     assert catalog("Xbox")["total"] >= 3
     assert {s["category"] for s in catalog(category="recomp")["sources"]} == {"recomp"}
     assert catalog(limit=2)["truncated"]
     assert len(catalog(limit=2)["sources"]) == 2
     assert not catalog("THIS_DOES_NOT_EXIST")["sources"]
-    assert catalog("MiXeD")["checked_on"] == "2026-10-15"
+    assert catalog("MiXeD")["checked_on"] == "2026-11-16"
+
+
+def test_run64_research_sources_are_discoverable_and_caveated():
+    sources = {s.id: s for s in SOURCES}
+    expected = {
+        "opengameeval", "gameworld", "agentodyssey", "cua-recovery",
+        "interactionbench", "adaptduplex", "video-interactionbench", "eot-bench", "dualdecoder", "flashoffloading",
+        "llama-speed-bench", "gamedevbench", "vtube-studio-api",
+    }
+    assert expected <= set(sources)
+    assert all(sources[source_id].status == "research_only" for source_id in expected)
+    assert all(sources[source_id].url.startswith("https://") for source_id in expected)
+    assert catalog(category="gaming")["total"] >= 2
+    assert catalog("CUA-Recovery")["total"] == 1
+    assert catalog("AdaptDuplex")["total"] == 1
+    assert catalog("Video InteractionBench")["total"] == 1
+    assert "negative streams" in sources["video-interactionbench"].scope
+    assert catalog("NeurIPS 2026")["total"] == 1
+    assert "not a drop-in" in sources["dualdecoder"].warning
+    assert "Ascend 910C" in sources["flashoffloading"].warning
+    assert "revocable secret token" in sources["vtube-studio-api"].warning
+    assert "one writer" in sources["vtube-studio-api"].warning
 
 
 @pytest.mark.parametrize("kwargs",[
@@ -41,3 +66,18 @@ def test_search_category_and_bounded_results():
 def test_bad_filters_refused(kwargs):
     with pytest.raises(ValueError):
         catalog(**kwargs)
+
+
+def test_run65_sources_are_discoverable_and_scoped():
+    sources = {source.id: source for source in SOURCES}
+    expected = {"cegame-bench", "full-duplex-bench-v3", "windowsworld", "obs-websocket"}
+    assert expected <= set(sources)
+    assert all(sources[source_id].status == "research_only" for source_id in expected)
+    assert all(sources[source_id].url.startswith("https://") for source_id in expected)
+    assert catalog("CEGame-Bench")["total"] == 1
+    assert catalog(category="game_creation")["total"] == 1
+    assert "hidden real-input play evaluation" in sources["cegame-bench"].scope
+    assert "five disfluency classes" in sources["full-duplex-bench-v3"].scope
+    assert "intermediate process checkpoints" in sources["windowsworld"].scope
+    assert sources["obs-websocket"].kind == "local_api"
+    assert "password authentication" in sources["obs-websocket"].warning
