@@ -28,7 +28,11 @@ def test_nearest_rank_percentiles_and_excluded_errors():
     assert summary["invalid_clock_turns"] == 1
     assert summary["interrupted_turns"] == 1
     output = summary["latency"]["speech_end_to_audio_submitted"]
-    assert output == {"n": 20, "p50_ms": 1000.0, "p95_ms": 1900.0, "max_ms": 2000.0}
+    assert output == {
+        "n": 20, "mean_ms": 1050.0, "p50_ms": 1000.0, "p95_ms": 1900.0,
+        "p99_ms": None, "max_ms": 2000.0,
+        "p95_sample_ready": False, "p99_sample_ready": False,
+    }
     assert summary["latency"]["brain_first_token"]["n"] == 20
     assert "PRIVATE DO NOT EXPORT" not in str(summary)
     assert "SENSITIVE" not in str(summary)
@@ -38,7 +42,9 @@ def test_no_data_means_unknown_not_fast():
     empty = latency_summary([])
     assert empty["total_turns"] == 0
     assert empty["latency"]["speech_end_to_audio_submitted"] == {
-        "n": 0, "p50_ms": None, "p95_ms": None, "max_ms": None,
+        "n": 0, "mean_ms": None, "p50_ms": None, "p95_ms": None,
+        "p99_ms": None, "max_ms": None,
+        "p95_sample_ready": False, "p99_sample_ready": False,
     }
     incomplete = latency_summary([TurnMetrics(turn=1, interrupted=True)])
     assert incomplete["incomplete_turns"] == 1

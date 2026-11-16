@@ -1,7 +1,7 @@
 """Latency arithmetic and report formatting independently of live voice calls."""
 import pytest
 
-from star.voice.metrics import TurnMetrics, latency_table
+from star.voice.metrics import TurnMetrics, latency_summary, latency_table
 
 
 def test_empty_turn_has_unknown_stage_latencies_and_empty_table():
@@ -80,3 +80,59 @@ def test_latency_table_only_averages_complete_turns_and_reports_failure_reasons(
 def test_latencies_do_not_silently_accept_non_numeric_timestamps():
     with pytest.raises(TypeError):
         TurnMetrics(speech_end=0.0, first_audio_at="invalid").stages()
+
+
+def test_latency_summary_reports_p99_and_does_not_return_transcript_text():
+    turns = [
+        TurnMetrics(
+            turn=i + 1, user_text="private prompt", reply_text="private reply",
+            speech_end=0.0, turn_end=0.0002, transcript_at=0.0003,
+            first_token_at=0.0005, first_sentence_at=0.00075,
+            first_ack_at=0.0004, first_audio_at=(i + 1) / 1000,
+        )
+        for i in range(1000)
+    ]
+    summary = latency_summary(turns)
+    total = summary["latency"]["speech_end_to_audio_submitted"]
+    assert total == {
+        "n": 1000, "mean_ms": 500.5, "p50_ms": 500.0, "p95_ms": 950.0,
+        "p99_ms": 990.0, "max_ms": 1000.0,
+        "p95_sample_ready": True, "p99_sample_ready": True,
+    }
+    perceived = summary["latency"]["speech_end_to_first_response_submitted"]
+    assert perceived["p50_ms"] == 0.4
+    assert summary["sample_guidance"] == {"p95_min_samples": 100, "p99_min_samples": 1000}
+    assert "private prompt" not in repr(summary)
+    assert "private reply" not in repr(summary)
+
+
+def test_latency_summary_marks_small_tail_samples_as_descriptive_only():
+    turns = [
+        TurnMetrics(speech_end=0.0, first_audio_at=(i + 1) / 1000)
+        for i in range(100)
+    ]
+    total = latency_summary(turns)["latency"]["speech_end_to_audio_submitted"]
+    assert total["n"] == 100
+    assert total["p95_ms"] == 95.0
+    assert total["p95_sample_ready"] is True
+    assert total["p99_ms"] is None
+    assert total["p99_sample_ready"] is False
+
+
+def test_latency_summary_keeps_partial_stage_samples_and_counts_incomplete_turns():
+    turn = TurnMetrics(
+        speech_end=0.0, turn_end=0.1, transcript_at=0.2,
+        first_ack_at=0.15,
+    )
+    summary = latency_summary([turn])
+    assert summary["incomplete_turns"] == 1
+    assert summary["latency"]["endpointer"]["n"] == 1
+    assert summary["latency"]["speech_end_to_first_response_submitted"]["p50_ms"] == 150.0
+    assert summary["latency"]["speech_end_to_audio_submitted"]["n"] == 0
+
+
+def test_latency_summary_rejects_nonfinite_clock_values():
+    turn = TurnMetrics(speech_end=0.0, first_audio_at=float("nan"))
+    summary = latency_summary([turn])
+    assert summary["invalid_clock_turns"] == 1
+    assert summary["latency"]["speech_end_to_audio_submitted"]["n"] == 0

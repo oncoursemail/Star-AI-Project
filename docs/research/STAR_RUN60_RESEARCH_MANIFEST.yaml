@@ -1,0 +1,196 @@
+run: 60
+project: STAR AI
+date: 2026-11-15
+timezone: America/Chicago
+branch: research/run60-integration-gates-long-horizon-20261115-star-next
+base_ref: star/next
+target_integration_ref: star/next
+status: research_and_integration_plan
+runtime_code_changed: false
+production_changed: false
+pr_draft: true
+
+objective:
+  - consolidate the current open capability work into a dependency-aware integration sequence
+  - update voice, Roblox, cross-application, memory, long-horizon, and inference evaluation references
+  - define one system-level acceptance matrix for real-time streaming and autonomous work
+  - prevent duplicate schedulers, ledgers, memory stores, voice engines, avatar writers, and action authorities
+
+audited_repository:
+  repository: oncoursemail/Star-AI-Project
+  baseline_release: STAR v1.0.0
+  baseline_document: README.md
+  open_prs_reviewed:
+    - 1140
+    - 1142
+    - 1151
+    - 1152
+    - 1153
+    - 1175
+    - 1176
+    - 1177
+    - 1178
+    - 1180
+    - 1182
+    - 1187
+    - 1192
+    - 1199
+    - 1200
+    - 1201
+    - 1202
+    - 1205
+    - 1207
+    - 1208
+    - 1209
+  caveat: PR search establishes open candidates; each head, changed-file set, dependencies, and exact-head CI must be rechecked before integration.
+
+sources:
+  - id: eot_bench_v1_1
+    url: https://github.com/livekit/eot-bench
+    updated: 2026-11-13
+    scope: 7342 human-agent turns, 14 languages, causal pause labels, false-cutoff versus endpoint-delay evaluation
+    star_use: re-evaluate the existing EoT adapter against the pinned v1.1 release
+    caveat: endpointing delay is not model inference latency; short-turn/right-censored cases must remain correctly labelled
+  - id: opengameeval_2026
+    url: https://arxiv.org/abs/2610.02563
+    published: 2026-10-01
+    scope: 84 stateful Roblox Studio tasks, 13 models, 16 attempts per task, scene and simulated play checks
+    star_use: pin benchmark version and preserve EDIT/PLAY evidence
+    caveat: published scores are not STAR results
+  - id: windowsworld_2026
+    url: https://aclanthology.org/2026.findings-acl.750/
+    published: 2026-07
+    scope: 181 cross-application tasks, 17 desktop apps, average five subgoals
+    star_use: add multi-application desktop acceptance with checkpoint grading
+    caveat: benchmark agents and simulated environment differ from STAR's Windows host
+  - id: agent_memory_leaderboard
+    url: https://agentmemories.ai/docs
+    published: 2026-08-12
+    scope: textual, multimodal, coding memory; recall, temporal reasoning, governance, personalization, execution, safety/privacy
+    star_use: external memory evaluation dimensions
+    caveat: do not upload private histories, transcripts, viewer data, prompts, or credentials
+  - id: reliability_science
+    url: https://arxiv.org/abs/2603.29231
+    published: 2026-03-31
+    scope: reliability decay, variance amplification, graceful degradation, meltdown onset across long horizons
+    star_use: repeated-run, success-by-horizon and recovery scorecard
+    caveat: paper metrics need a STAR-specific operational definition before release gates
+  - id: agent_long_horizon_degradation
+    url: https://arxiv.org/abs/2609.01660
+    published: 2026-08-31
+    scope: long-horizon degradation across models, task families, and context regimes
+    star_use: test step-count sensitivity and checkpoint recovery
+    caveat: results are paper-specific and not a direct prediction of STAR
+  - id: llama_cpp_speculative
+    url: https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
+    scope: upstream speculative-decoding modes
+    star_use: exact-binary capability detection before canary configuration
+    caveat: moving master documentation must be pinned; supported flags vary by build
+  - id: llama_cpp_speed_bench
+    url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+    scope: throughput, latency, draft acceptance, concurrency
+    star_use: matched baseline/candidate benchmark with concurrency aligned to server slots
+    caveat: benchmark numbers are not transferable to another host/model
+  - id: turboquant
+    url: https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/
+    published: 2026-03-24
+    scope: KV-cache/vector quantization research
+    star_use: research watch; evaluate only if supported by a pinned runtime/backend
+    caveat: not assumed to be directly supported by STAR's current llama.cpp path
+
+integration_decisions:
+  - reuse_one_resource_admission_authority
+  - reuse_existing_task_and_delivery_ledger
+  - reuse_existing_memory_stores_and_governance
+  - reuse_existing_room_director_and_voice_bridge
+  - reuse_one_avatar_parameter_arbiter
+  - reuse_existing_obs_telemetry_path
+  - reuse_existing_game_control_gate
+  - preserve_independent_evaluators_and_sealed_holdouts
+  - do_not_enable_unverified_models_or_speculative_modes
+  - do_not_claim_speed_or_intelligence_gains_without_paired_measurements
+
+acceptance_dimensions:
+  voice:
+    - false_cutoffs
+    - endpointing_delay
+    - asr_latency
+    - model_ttft
+    - first_audio_latency
+    - interruption_to_silence
+    - avatar_lipsync_drift
+  gaming:
+    - state_verified_objective_rate
+    - win_rate
+    - invalid_action_rate
+    - reaction_latency
+    - held_out_map_transfer
+  creator:
+    - scene_checks
+    - play_checks
+    - multiplayer_checks
+    - visual_spec_match
+    - performance_regressions
+  knowledge:
+    - factual_correctness
+    - claim_evidence_entailment
+    - freshness
+    - contradiction_handling
+    - calibration
+    - abstention_quality
+  memory:
+    - recall
+    - temporal_consistency
+    - action_argument_accuracy
+    - irrelevant_memory_injection
+    - scope_and_retention_governance
+  reliability:
+    - success_by_horizon
+    - repeated_run_consistency
+    - recovery_rate
+    - duplicate_work_rate
+    - false_completion_rate
+  inference:
+    - ttft
+    - inter_token_latency
+    - output_tokens_per_second
+    - p50_p95_p99
+    - speculative_acceptance
+    - mixed_load_goodput
+  mixed_load:
+    - game_fps_p10
+    - audio_underruns
+    - obs_dropped_frames
+    - gpu_memory_headroom
+    - cpu_memory_pressure
+    - interactive_queue_age
+
+privacy_and_safety:
+  - no_credentials_or_private_keys_in_repository
+  - no_raw_viewer_audio_or_video_in_default_telemetry
+  - no_private_viewer_transcripts_or_profiles_in_public_benchmarks
+  - no_model_generated_permission_grants
+  - no_unverified_game_input
+  - no_self_editing_of_graders_or_sealed_holdouts
+  - owner_approval_for_irreversible_external_actions
+  - no_automatic_merge_or_release
+
+validation:
+  documentation_only: true
+  markdown_lint: not_run
+  yaml_parse: not_run
+  python_tests: not_applicable
+  windows_hardware: not_run
+  gpu_benchmark: not_run
+  microphone_obs_vts: not_run
+  roblox_studio_gameplay: not_run
+  public_stream: not_run
+
+next_actions:
+  - recheck exact PR heads and file overlap
+  - verify dependency chain and exact-head CI
+  - integrate trusted telemetry and task/voice/game authorities
+  - run EoT-Bench v1.1 and pinned OpenGameEval
+  - execute long-horizon repeated-run experiments
+  - run paired inference and mixed-load tests on the target Windows host
+  - perform owner-observed private stream rehearsal

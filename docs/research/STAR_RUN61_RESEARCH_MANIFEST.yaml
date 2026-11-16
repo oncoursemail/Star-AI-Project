@@ -1,0 +1,198 @@
+run: 61
+project: STAR AI
+research_date: 2026-11-15
+repository: oncoursemail/Star-AI-Project
+branch: research/run60-integration-gates-long-horizon-20261115-star-next
+base_ref: star/next
+status: implementation_and_research_draft
+pr_draft: true
+
+objective:
+  - improve voice tail-latency observability without storing transcript content
+  - evaluate the existing voice, gaming, creator, desktop, memory, and VTuber systems as one product
+  - map current research benchmarks to STAR-specific acceptance tests
+  - avoid duplicate schedulers, memory stores, voice engines, game controllers, and avatar writers
+
+implementation:
+  changed:
+    - path: star/voice/metrics.py
+      changes:
+        - mean_p50_p95_p99_and_max_per_stage
+        - per_metric_sample_counts
+        - p95_sample_readiness_at_100_samples
+        - p99_sample_readiness_at_1000_samples
+        - acknowledgement_first_response_latency
+        - first_sentence_to_audio_stage
+        - valid_partial_stage_samples_for_incomplete_turns
+        - reject_nonfinite_and_impossible_primary_timestamps
+        - aggregate_only_output_without_transcript_text
+      limitation: first_audio_at_is_speaker_queue_submission_not_acoustic_playback
+    - path: tests/test_voice_metrics.py
+      changes:
+        - deterministic_1000_turn_percentile_test
+        - p95_ready_p99_not_ready_at_100_samples_test
+        - acknowledgement_first_response_test
+        - incomplete_partial_stage_test
+        - nonfinite_clock_test
+        - transcript_privacy_test
+  unchanged:
+    - model_weights
+    - provider_and_model_routing
+    - vad_and_turn_detection_thresholds
+    - tts_engine_and_voice_settings
+    - microphone_and_audio_device_settings
+    - obs_and_vtuber_configuration
+    - game_controller_and_tool_permissions
+    - scheduler_and_memory_store
+    - production_defaults
+
+sources:
+  - id: livekit_eot_bench
+    url: https://github.com/livekit/eot-bench
+    scope: 14-language human-agent turn benchmark; labelled hesitation and true end-of-turn pauses
+    star_application: separate false-cutoff rate from endpointing delay and inference latency
+    limitation: not a complete multiparty social benchmark
+  - id: opengameeval
+    url: https://arxiv.org/abs/2610.02563
+    published: 2026-10-01
+    scope: 84 stateful Roblox Studio tasks, repeated attempts, observation/edit separation, scene and play checks
+    star_application: pin benchmark artifacts; preserve observation coverage and EDIT/PLAY evidence
+    limitation: published results are not STAR results
+  - id: gameworld
+    url: https://gameworld-project.github.io/
+    scope: 34 games, 170 tasks, serialized state verification, separate real-time track
+    star_application: distinguish progress from success; evaluate real-time control separately
+    limitation: not a Roblox Studio benchmark
+  - id: gamedevbench
+    url: https://proceedings.mlr.press/v306/chi26a.html
+    published: 2026-icml
+    scope: 333 Godot game-development tasks across 2D, 3D, UI, and gameplay
+    star_application: visual feedback, build/play/inspect acceptance
+    limitation: Godot results do not establish Roblox performance
+  - id: windowsworld
+    url: https://aclanthology.org/2026.findings-acl.750/
+    published: 2026-07
+    scope: 181 tasks, 17 desktop applications, five subgoals on average, 78-percent multi-app
+    star_application: cross-application workflows with intermediate checkpoints
+    limitation: benchmark environment differs from STAR's actual Windows installation
+  - id: agentcl
+    url: https://arxiv.org/abs/2606.02461
+    published: 2026-06-01
+    scope: controlled continual-learning task streams, positive transfer and interference
+    star_application: paired skill-on/off, related-task transfer, unrelated-task regression
+    limitation: requires STAR-specific task stream and holdout design
+  - id: facts_benchmark_suite
+    url: https://deepmind.google/blog/facts-benchmark-suite-systematically-evaluating-the-factuality-of-large-language-models/
+    scope: four separate factuality tracks: grounding, multimodal, parametric, and search
+    star_application: keep closed-book recall, source-grounded answers, search synthesis, and image factuality as separate metrics
+    limitation: external leaderboard scores are not STAR results; preserve private holdouts
+  - id: simpleqa_verified
+    url: https://arxiv.org/abs/2509.07968
+    published: 2025-09-09
+    scope: 1000 short-form factual prompts with deduplication, topic balancing, and source reconciliation
+    star_application: closed-book factuality and calibration evaluation
+    limitation: short factual QA does not measure full research or tool-use competence
+  - id: gaia
+    url: https://arxiv.org/abs/2311.12983
+    published: 2023-11-21
+    scope: general assistant tasks requiring reasoning, multimodal handling, browsing, and tool use
+    star_application: compositional general-assistant evaluation
+    limitation: benchmark coverage is not a complete measure of general intelligence
+  - id: browsecomp
+    url: https://openai.com/index/browsecomp/
+    published: 2025-04-10
+    scope: 1266 hard-to-find multi-hop browsing questions with short verifiable answers
+    star_application: persistent research, query reformulation, and evidence synthesis
+    limitation: protect benchmark examples and canaries from training and public leakage
+  - id: llama_cpp_speed_bench
+    url: https://github.com/ggml-org/llama.cpp/tree/master/tools/server/bench/speed-bench
+    scope: latency, throughput, speculative acceptance, concurrency against running llama-server
+    star_application: matched baseline/candidate runs with concurrency aligned to server slots
+    limitation: results are host/model/build-specific
+
+architecture_decisions:
+  - reuse_existing_room_director_and_voice_bridge
+  - reuse_existing_fastloop_slowloop_game_controller
+  - reuse_existing_recorded_play_learning_and_promotion_gate
+  - reuse_existing_vtuber_rig_and_audible_time_lipsync_timeline
+  - reuse_existing_human_evaluation_suite
+  - reuse_existing_memory_governance
+  - reuse_existing_task_and_action_ledgers
+  - add_no_second_scheduler_or_memory_database
+  - background_learning_must_yield_to_interactive_deadlines
+
+acceptance:
+  voice:
+    - endpointing_false_cutoffs_and_delay
+    - asr_ttft_tts_and_playback_start_separately
+    - acknowledgement_first_response
+    - interruption_recovery
+    - real_device_loopback
+  vtuber:
+    - avatar_audio_clock_drift
+    - stale_frame_drop
+    - discord_camera_enumeration
+    - obs_virtual_camera_acceptance
+    - private_rehearsal
+  gaming:
+    - state_verified_success
+    - progress_separate_from_success
+    - action_validity
+    - real_time_latency
+    - held_out_map_transfer
+  creator:
+    - scene_checks
+    - play_session_checks
+    - visual_specification
+    - asset_and_animation_checks
+    - performance_and_multiplayer
+  desktop:
+    - multi_application_checkpoints
+    - final_artifact_verification
+    - recovery_after_restart
+    - correct_abstention_when_blocked
+  learning:
+    - paired_skill_on_off
+    - positive_transfer
+    - negative_transfer
+    - repeated_run_consistency
+    - sealed_holdout_integrity
+  inference:
+    - prefill_and_decode
+    - ttft_and_inter_token_latency
+    - p50_p95_p99
+    - mixed_load_goodput
+    - game_fps_audio_underruns_obs_drops
+
+safety_and_privacy:
+  - no_raw_viewer_audio_or_video_in_default_metrics
+  - no_transcript_text_in_latency_summary
+  - no_model_generated_permission_grants
+  - no_generated_code_execution_outside_approved_sandbox
+  - no_public_competitive_game_cheating_or_anticheat_bypass
+  - no_self_editing_of_graders_or_sealed_holdouts
+  - preserve_truthful_ai_disclosure_and_existing_social_safety_rules
+  - owner_approval_for_irreversible_external_actions
+  - no_automatic_merge_or_release
+
+validation:
+  code_written_to_github: true
+  local_project_tests_executed: false
+  github_exact_head_ci: pending_after_commit
+  markdown_lint: not_run
+  yaml_parse: not_run
+  windows_hardware: not_run
+  gpu_speed_benchmark: not_run
+  microphone_and_speaker_loopback: not_run
+  obs_and_vtuber_camera: not_run
+  roblox_or_minecraft_live_play: not_run
+  public_stream: not_run
+
+next_actions:
+  - inspect_exact_head_workflow_runs
+  - fix_any_failing_voice_metrics_regressions
+  - integrate_aggregate_voice_metrics_into_existing_local_diagnostics
+  - complete_target_pc_voice_and_avatar_acceptance
+  - run_paired_gameworld_and_opengameeval_adapters
+  - benchmark_llama_server_baseline_and_candidate_under_mixed_load
+  - update_pr_body_with_final_exact_head_validation
