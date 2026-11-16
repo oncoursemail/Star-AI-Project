@@ -61,7 +61,7 @@ def _number(value: object, field: str, *, optional: bool = False) -> float | Non
     return float(number)
 
 
-def _rate(numerator: int, denominator: int) -> float | None:
+def _rate(numerator: int | float, denominator: int) -> float | None:
     return None if denominator == 0 else round(numerator / denominator, 6)
 
 
@@ -233,18 +233,16 @@ def evaluate(observations: Iterable[Observation]) -> dict:
         for row in addressee_rows
     )
 
-    latencies = [
-        float(row.decision_ms) - float(row.event_ms)
-        for row in rows if row.decision_ms is not None
-    ]
-    deadline_rows = [
-        row for row in rows
-        if row.decision_ms is not None and row.deadline_ms is not None
-    ]
-    on_time = sum(
-        float(row.decision_ms) - float(row.event_ms) <= float(row.deadline_ms)
-        for row in deadline_rows
-    )
+    latencies: list[float] = []
+    deadline_latencies: list[tuple[float, float]] = []
+    for row in rows:
+        if row.decision_ms is None:
+            continue
+        latency = float(row.decision_ms) - float(row.event_ms)
+        latencies.append(latency)
+        if row.deadline_ms is not None:
+            deadline_latencies.append((latency, float(row.deadline_ms)))
+    on_time = sum(latency <= deadline for latency, deadline in deadline_latencies)
 
     return {
         "schema": 1,
@@ -288,10 +286,10 @@ def evaluate(observations: Iterable[Observation]) -> dict:
             "p50_ms": _percentile(latencies, 0.50),
             "p95_ms": _percentile(latencies, 0.95),
             "max_ms": round(max(latencies), 3) if latencies else None,
-            "deadline_n": len(deadline_rows),
+            "deadline_n": len(deadline_latencies),
             "on_time": on_time,
-            "late": len(deadline_rows) - on_time,
-            "on_time_rate": _rate(on_time, len(deadline_rows)),
+            "late": len(deadline_latencies) - on_time,
+            "on_time_rate": _rate(on_time, len(deadline_latencies)),
         },
         "note": (
             "Offline aggregate evaluator only. No audio, video, transcript, speaker ID, "
