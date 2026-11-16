@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 from math import ceil, isfinite
+from statistics import median
 import re
 from typing import cast
 
@@ -130,6 +131,8 @@ def _validate(sample: Sample) -> None:
 def _percentile(values: list[float], percentile: float) -> float | None:
     if not values:
         return None
+    if percentile == 0.50:
+        return round(median(values), 3)
     ordered = sorted(values)
     return round(ordered[ceil(percentile * len(ordered)) - 1], 3)
 
