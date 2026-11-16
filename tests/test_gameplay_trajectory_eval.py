@@ -132,7 +132,7 @@ def test_holdout_and_training_results_are_not_combined():
         event(0, "verify", 0),
         event(0, "observe", float("nan"), target_id="x"),
         event(0, "observe", 0, target_id="../escape"),
-        event(1, "observe", 0, target_id="x"),
+        event(-1, "observe", 0, target_id="x"),
     ],
 )
 def test_invalid_events_are_rejected(bad_event):
