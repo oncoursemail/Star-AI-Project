@@ -19,7 +19,7 @@ pyperclip                          # needed by mouseinfo
 comtypes>=1.4
 mss>=10
 dxcam>=0.3
-opencv-python-headless>=5          # dxcam converts frames to RGB with OpenCV (star/play/capture.py asks for RGB)
+opencv-python-headless>=5.1.0.95          # dxcam converts frames to RGB with OpenCV (star/play/capture.py asks for RGB)
 winsdk==1.0.0b10                   # Windows toast notifications (star/home/notifications.py); its last release is a beta
 defusedxml>=0.7.1,<1               # imported by star.rbx_xml, which star.home reaches
 httpx>=0.28.1,<1                   # model downloads (star/voice/setup_models.py)
